@@ -31,6 +31,19 @@ function Board() {
             isSelected ? "selected" : ""
           }`}
           onClick={() => {
+            const move = game.possibleMoves.find(
+              (m) => m.to.row === row && m.to.col === col
+            );
+
+            if (move) {
+
+              game.makeMove(move);
+
+              setRefresh((v) => v + 1);
+
+              return;
+            }
+
             if (!piece) return;
 
             game.selectSquare(row, col);

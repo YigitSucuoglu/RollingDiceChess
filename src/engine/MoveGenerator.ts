@@ -45,7 +45,12 @@ export default class MoveGenerator {
         ) {
             moves.push({
                 from: { row, col },
-                to: { row: nextRow, col }
+                to: { row: nextRow, col },
+
+                isCapture: false,
+                isCastle: false,
+                isPromotion: false,
+                isEnPassant: false
             });
         }
 

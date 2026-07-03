@@ -28,4 +28,16 @@ export default class Game {
       col
     );
   }
+
+  public makeMove(move: Move): void {
+    const piece = this.board.squares[move.from.row][move.from.col];
+
+    if (!piece) return;
+
+    this.board.squares[move.to.row][move.to.col] = piece;
+    this.board.squares[move.from.row][move.from.col] = null;
+
+    this.selectedSquare = null;
+    this.possibleMoves = [];
+  }
 }

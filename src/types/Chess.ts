@@ -22,4 +22,9 @@ export interface Position {
 export interface Move {
   from: Position;
   to: Position;
+
+  isCapture: boolean;
+  isCastle: boolean;
+  isPromotion: boolean;
+  isEnPassant: boolean;
 }
