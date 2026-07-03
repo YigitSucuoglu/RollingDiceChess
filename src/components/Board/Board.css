@@ -36,3 +36,10 @@
 
     user-select:none;
 }
+
+.selected{
+
+    outline:4px solid #ffd54f;
+
+    outline-offset:-4px;
+}
