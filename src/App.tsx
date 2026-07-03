@@ -1,18 +1,20 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import HomePage from "./pages/HomePage";
+import GamePage from "./pages/GamePage";
+import SettingsPage from "./pages/SettingsPage";
+import ProfilePage from "./pages/ProfilePage";
+
 function App() {
   return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "#1a1a1a",
-        color: "white",
-        fontFamily: "Arial"
-      }}
-    >
-      <h1>🎲 RollingDiceChess</h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/game" element={<GamePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
