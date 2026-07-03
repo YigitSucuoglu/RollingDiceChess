@@ -9,10 +9,12 @@ export type PieceType =
   | "pawn";
 
 export interface Piece {
-
   id: string;
-
   type: PieceType;
-
   color: PieceColor;
+}
+
+export interface Position {
+  row: number;
+  col: number;
 }

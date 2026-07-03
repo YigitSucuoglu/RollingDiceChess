@@ -16,17 +16,44 @@ export default class ChessBoard {
 
   private initialize() {
 
-    this.squares[0][0] = {
-      id: crypto.randomUUID(),
-      type: "rook",
-      color: "black"
-    };
+    const backRank = [
+        "rook",
+        "knight",
+        "bishop",
+        "queen",
+        "king",
+        "bishop",
+        "knight",
+        "rook"
+    ] as const;
 
-    this.squares[0][7] = {
-      id: crypto.randomUUID(),
-      type: "rook",
-      color: "black"
-    };
+    for (let col = 0; col < 8; col++) {
+
+        this.squares[0][col] = {
+            id: crypto.randomUUID(),
+            type: backRank[col],
+            color: "black"
+        };
+
+        this.squares[1][col] = {
+            id: crypto.randomUUID(),
+            type: "pawn",
+            color: "black"
+        };
+
+        this.squares[6][col] = {
+            id: crypto.randomUUID(),
+            type: "pawn",
+            color: "white"
+        };
+
+        this.squares[7][col] = {
+            id: crypto.randomUUID(),
+            type: backRank[col],
+            color: "white"
+        };
+
+      }
 
   }
 
