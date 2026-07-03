@@ -1,0 +1,10 @@
+.piece{
+
+    font-size:58px;
+
+    line-height:1;
+
+    user-select:none;
+
+    pointer-events:none;
+}
