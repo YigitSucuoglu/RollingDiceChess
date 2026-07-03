@@ -13,12 +13,15 @@
 }
 
 .square{
+
     width:100%;
     height:100%;
 
     display:flex;
     justify-content:center;
     align-items:center;
+
+    position:relative;
 }
 
 .light{
@@ -42,4 +45,17 @@
     outline:4px solid #ffd54f;
 
     outline-offset:-4px;
+}
+
+.move-dot{
+
+    width:18px;
+
+    height:18px;
+
+    border-radius:50%;
+
+    background:rgba(40,40,40,.45);
+
+    position:absolute;
 }

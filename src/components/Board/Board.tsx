@@ -3,8 +3,6 @@ import gameManager from "../../engine/GameManager";
 import Piece from "../Piece/Piece";
 import { useState } from "react";
 
-
-
 function Board() {
   const game = gameManager.getGame();
 
@@ -15,27 +13,34 @@ function Board() {
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
       const piece = game.board.squares[row][col];
+
       const isSelected =
-      game.selectedSquare?.row === row &&
-      game.selectedSquare?.col === col;
+        game.selectedSquare?.row === row &&
+        game.selectedSquare?.col === col;
+
+      const isPossibleMove = game.possibleMoves.some(
+        (move) => move.to.row === row && move.to.col === col
+      );
 
       const isLight = (row + col) % 2 === 0;
 
       squares.push(
         <div
-            key={`${row}-${col}`}
-            className={`square ${isLight ? "light" : "dark"} ${
-              isSelected ? "selected" : ""
-            }`}
-            onClick={() => {
-              if (!piece) return;
+          key={`${row}-${col}`}
+          className={`square ${isLight ? "light" : "dark"} ${
+            isSelected ? "selected" : ""
+          }`}
+          onClick={() => {
+            if (!piece) return;
 
-              game.selectedSquare = { row, col };
+            game.selectSquare(row, col);
 
-              setRefresh((v) => v + 1);
-            }}
-          >
+            setRefresh((v) => v + 1);
+          }}
+        >
           {piece && <Piece piece={piece} />}
+
+          {isPossibleMove && <div className="move-dot" />}
         </div>
       );
     }
