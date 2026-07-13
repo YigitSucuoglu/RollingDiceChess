@@ -5,7 +5,8 @@ export default class MoveGenerator {
   public static generateMoves(
     board: ChessBoard,
     row: number,
-    col: number
+    col: number,
+    lastMove: Move | null
   ): Move[] {
     const piece = board.squares[row][col];
 
@@ -14,7 +15,13 @@ export default class MoveGenerator {
     switch (piece.type) {
       
       case "pawn":
-        return this.generatePawnMoves(board, piece, row, col);
+        return this.generatePawnMoves(
+          board,
+          piece,
+          row,
+          col,
+          lastMove
+        );
       
       case "knight":
         return this.generateKnightMoves(board, piece, row, col);
@@ -76,7 +83,8 @@ export default class MoveGenerator {
     board: ChessBoard,
     piece: Piece,
     row: number,
-    col: number
+    col: number,
+    lastMove: Move | null
   ): Move[] {
     const moves: Move[] = [];
 
@@ -168,6 +176,15 @@ export default class MoveGenerator {
         });
       }
     }
+
+    this.generateEnPassantMoves(
+        board,
+        piece,
+        row,
+        col,
+        moves,
+        lastMove
+    );    
 
     return moves;
   }
@@ -450,4 +467,75 @@ export default class MoveGenerator {
 
     }
 
+    private static generateEnPassantMoves(
+      board: ChessBoard,
+      piece: Piece,
+      row: number,
+      col: number,
+      moves: Move[],
+      lastMove: Move | null
+    ): void {
+      if (!lastMove) return;
+
+      const direction = piece.color === "white" ? -1 : 1;
+
+      // ---------- Right ----------
+      const rightPiece = board.squares[row][col + 1];
+
+      if (
+        rightPiece &&
+        rightPiece.type === "pawn" &&
+        rightPiece.color !== piece.color &&
+        lastMove.pieceId === rightPiece.id &&
+        Math.abs(lastMove.from.row - lastMove.to.row) === 2 &&
+        lastMove.to.row === row &&
+        lastMove.to.col === col + 1 &&
+        !board.squares[row + direction][col + 1]
+      ) {
+        moves.push({
+          from: { row, col },
+          to: {
+            row: row + direction,
+            col: col + 1,
+          },
+
+          isCapture: true,
+          isCastle: false,
+          isPromotion: false,
+          isEnPassant: true,
+
+          pieceId: piece.id,
+        });
+      }
+
+      // ---------- Left ----------
+      const leftPiece = board.squares[row][col - 1];
+
+      if (
+        leftPiece &&
+        leftPiece.type === "pawn" &&
+        leftPiece.color !== piece.color &&
+        lastMove.pieceId === leftPiece.id &&
+        Math.abs(lastMove.from.row - lastMove.to.row) === 2 &&
+        lastMove.to.row === row &&
+        lastMove.to.col === col - 1 &&
+        !board.squares[row + direction][col - 1]
+      ) {
+        moves.push({
+          from: { row, col },
+          to: {
+            row: row + direction,
+            col: col - 1,
+          },
+
+          isCapture: true,
+          isCastle: false,
+          isPromotion: false,
+          isEnPassant: true,
+
+          pieceId: piece.id,
+        });
+      }
+    }
+  
 }

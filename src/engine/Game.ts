@@ -33,7 +33,8 @@ export default class Game {
     this.possibleMoves = MoveGenerator.generateMoves(
       this.board,
       row,
-      col
+      col,
+      this.lastMove
     );
   }
   
@@ -48,6 +49,15 @@ export default class Game {
     this.board.squares[move.from.row][move.from.col] = null;
 
     piece.hasMoved = true;
+
+    if (move.isEnPassant) {
+      const capturedRow =
+        piece.color === "white"
+          ? move.to.row + 1
+          : move.to.row - 1;
+
+      this.board.squares[capturedRow][move.to.col] = null;
+    }
 
     if (move.isCastle) {
 
