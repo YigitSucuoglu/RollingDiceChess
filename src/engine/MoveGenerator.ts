@@ -375,8 +375,67 @@ export default class MoveGenerator {
         }
 
       }
+      if (!piece.hasMoved) {
+        this.generateCastlingMoves(board, piece, row, col, moves);
+      }
 
       return moves;
 
     }
+
+    private static generateCastlingMoves(
+      board: ChessBoard,
+      king: Piece,
+      row: number,
+      col: number,
+      moves: Move[]
+    ): void {
+
+      // King side
+      const kingSideRook = board.squares[row][7];
+
+      if (
+        kingSideRook &&
+        kingSideRook.type === "rook" &&
+        kingSideRook.color === king.color &&
+        !kingSideRook.hasMoved &&
+        !board.squares[row][5] &&
+        !board.squares[row][6]
+      ) {
+        moves.push({
+          from: { row, col },
+          to: { row, col: 6 },
+
+          isCapture: false,
+          isCastle: true,
+          isPromotion: false,
+          isEnPassant: false,
+        });
+      }
+
+      // Queen side
+      const queenSideRook = board.squares[row][0];
+
+      if (
+        queenSideRook &&
+        queenSideRook.type === "rook" &&
+        queenSideRook.color === king.color &&
+        !queenSideRook.hasMoved &&
+        !board.squares[row][1] &&
+        !board.squares[row][2] &&
+        !board.squares[row][3]
+      ) {
+        moves.push({
+          from: { row, col },
+          to: { row, col: 2 },
+
+          isCapture: false,
+          isCastle: true,
+          isPromotion: false,
+          isEnPassant: false,
+        });
+      }
+
+    }
+
 }
