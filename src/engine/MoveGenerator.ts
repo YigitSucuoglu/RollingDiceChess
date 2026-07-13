@@ -18,6 +18,19 @@ export default class MoveGenerator {
         return this.generateKnightMoves(board, piece, row, col);
       default:
         return [];
+      case "bishop":
+      return this.generateSlidingMoves(
+          board,
+          piece,
+          row,
+          col,
+          [
+              [-1, -1],
+              [-1, 1],
+              [1, -1],
+              [1, 1]
+          ]
+      );
     }
   }
 
@@ -185,6 +198,76 @@ export default class MoveGenerator {
     }
 
     return moves;
+  }
 
+    private static generateSlidingMoves(
+      board: ChessBoard,
+      piece: Piece,
+      row: number,
+      col: number,
+      directions: number[][]
+  ): Move[] {
+
+      const moves: Move[] = [];
+
+      for (const [rowDir, colDir] of directions) {
+
+          let currentRow = row + rowDir;
+          let currentCol = col + colDir;
+
+          while (
+              currentRow >= 0 &&
+              currentRow < 8 &&
+              currentCol >= 0 &&
+              currentCol < 8
+          ) {
+
+              const target = board.squares[currentRow][currentCol];
+
+              if (target === null) {
+
+                  moves.push({
+                      from: { row, col },
+                      to: {
+                          row: currentRow,
+                          col: currentCol
+                      },
+
+                      isCapture: false,
+                      isCastle: false,
+                      isPromotion: false,
+                      isEnPassant: false
+                  });
+
+              } else {
+
+                  if (target.color !== piece.color) {
+
+                      moves.push({
+                          from: { row, col },
+                          to: {
+                              row: currentRow,
+                              col: currentCol
+                          },
+
+                          isCapture: true,
+                          isCastle: false,
+                          isPromotion: false,
+                          isEnPassant: false
+                      });
+
+                  }
+
+                  break;
+              }
+
+              currentRow += rowDir;
+              currentCol += colDir;
+
+          }
+
+      }
+
+      return moves;
   }
 }
