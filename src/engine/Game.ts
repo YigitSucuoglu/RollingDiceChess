@@ -10,10 +10,13 @@ export default class Game {
 
   public possibleMoves: Move[];
 
+  public lastMove: Move | null;
+
   constructor() {
     this.board = new ChessBoard();
     this.selectedSquare = null;
     this.possibleMoves = [];
+    this.lastMove = null;
   }
 
   public selectSquare(row: number, col: number): void {
@@ -88,6 +91,8 @@ export default class Game {
 
     this.selectedSquare = null;
     this.possibleMoves = [];
+
+    this.lastMove = move;
 
     this.currentTurn =
       this.currentTurn === "white"

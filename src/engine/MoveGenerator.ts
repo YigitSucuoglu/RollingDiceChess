@@ -97,6 +97,7 @@ export default class MoveGenerator {
         isCastle: false,
         isPromotion: false,
         isEnPassant: false,
+        pieceId: piece.id,
       });
 
       // İlk hamlede 2 kare
@@ -115,6 +116,7 @@ export default class MoveGenerator {
           isCastle: false,
           isPromotion: false,
           isEnPassant: false,
+          pieceId: piece.id,
         });
       }
     }
@@ -138,6 +140,7 @@ export default class MoveGenerator {
           isCastle: false,
           isPromotion: false,
           isEnPassant: false,
+          pieceId: piece.id,
         });
       }
     }
@@ -161,6 +164,7 @@ export default class MoveGenerator {
           isCastle: false,
           isPromotion: false,
           isEnPassant: false,
+          pieceId: piece.id,
         });
       }
     }
@@ -214,6 +218,7 @@ export default class MoveGenerator {
           isCastle: false,
           isPromotion: false,
           isEnPassant: false,
+          pieceId: piece.id,
         });
 
         continue;
@@ -229,6 +234,7 @@ export default class MoveGenerator {
           isCastle: false,
           isPromotion: false,
           isEnPassant: false,
+          pieceId: piece.id,
         });
 
       }
@@ -274,7 +280,8 @@ export default class MoveGenerator {
                       isCapture: false,
                       isCastle: false,
                       isPromotion: false,
-                      isEnPassant: false
+                      isEnPassant: false,
+                      pieceId: piece.id,
                   });
 
               } else {
@@ -291,7 +298,8 @@ export default class MoveGenerator {
                           isCapture: true,
                           isCastle: false,
                           isPromotion: false,
-                          isEnPassant: false
+                          isEnPassant: false,
+                          pieceId: piece.id,
                       });
 
                   }
@@ -355,6 +363,7 @@ export default class MoveGenerator {
             isCastle: false,
             isPromotion: false,
             isEnPassant: false,
+            pieceId: piece.id,
           });
 
           continue;
@@ -370,6 +379,7 @@ export default class MoveGenerator {
             isCastle: false,
             isPromotion: false,
             isEnPassant: false,
+            pieceId: piece.id,
           });
 
         }
@@ -410,6 +420,7 @@ export default class MoveGenerator {
           isCastle: true,
           isPromotion: false,
           isEnPassant: false,
+          pieceId: king.id,
         });
       }
 
@@ -433,6 +444,7 @@ export default class MoveGenerator {
           isCastle: true,
           isPromotion: false,
           isEnPassant: false,
+          pieceId: king.id,
         });
       }
 

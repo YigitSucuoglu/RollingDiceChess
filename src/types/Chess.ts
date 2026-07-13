@@ -28,4 +28,6 @@ export interface Move {
   isCastle: boolean;
   isPromotion: boolean;
   isEnPassant: boolean;
+  
+  pieceId: string;
 }
