@@ -14,7 +14,8 @@ export default class MoveGenerator {
     switch (piece.type) {
       case "pawn":
         return this.generatePawnMoves(board, piece, row, col);
-
+      case "knight":
+        return this.generateKnightMoves(board, piece, row, col);
       default:
         return [];
     }
@@ -114,5 +115,76 @@ export default class MoveGenerator {
     }
 
     return moves;
+  }
+
+  private static generateKnightMoves(
+    board: ChessBoard,
+    piece: Piece,
+    row: number,
+    col: number
+  ): Move[] {
+
+    const moves: Move[] = [];
+
+    const offsets = [
+      [-2, -1],
+      [-2, 1],
+      [-1, -2],
+      [-1, 2],
+      [1, -2],
+      [1, 2],
+      [2, -1],
+      [2, 1],
+    ];
+
+    for (const [rowOffset, colOffset] of offsets) {
+
+      const newRow = row + rowOffset;
+      const newCol = col + colOffset;
+
+      if (
+        newRow < 0 ||
+        newRow >= 8 ||
+        newCol < 0 ||
+        newCol >= 8
+      ) {
+        continue;
+      }
+
+      const target = board.squares[newRow][newCol];
+
+      if (target === null) {
+
+        moves.push({
+          from: { row, col },
+          to: { row: newRow, col: newCol },
+
+          isCapture: false,
+          isCastle: false,
+          isPromotion: false,
+          isEnPassant: false,
+        });
+
+        continue;
+      }
+
+      if (target.color !== piece.color) {
+
+        moves.push({
+          from: { row, col },
+          to: { row: newRow, col: newCol },
+
+          isCapture: true,
+          isCastle: false,
+          isPromotion: false,
+          isEnPassant: false,
+        });
+
+      }
+
+    }
+
+    return moves;
+
   }
 }
