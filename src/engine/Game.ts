@@ -1,6 +1,7 @@
 import type { Move, Position } from "../types/Chess";
 import ChessBoard from "./ChessBoard";
 import MoveGenerator from "./MoveGenerator";
+import type { PieceColor } from "../types/Chess";
 
 export default class Game {
   public board: ChessBoard;
@@ -20,6 +21,10 @@ export default class Game {
 
     if (!piece) return;
 
+    if (piece.color !== this.currentTurn) {
+      return;
+    }
+
     this.selectedSquare = { row, col };
 
     this.possibleMoves = MoveGenerator.generateMoves(
@@ -28,7 +33,9 @@ export default class Game {
       col
     );
   }
-
+  
+  public currentTurn: PieceColor = "white";
+  
   public makeMove(move: Move): void {
     const piece = this.board.squares[move.from.row][move.from.col];
 
@@ -39,5 +46,10 @@ export default class Game {
 
     this.selectedSquare = null;
     this.possibleMoves = [];
+
+    this.currentTurn =
+      this.currentTurn === "white"
+        ? "black"
+        : "white";
   }
 }
