@@ -76,6 +76,16 @@ export default class Game {
 
     }
 
+    if (
+      piece.type === "pawn" &&
+      (
+        (piece.color === "white" && move.to.row === 0) ||
+        (piece.color === "black" && move.to.row === 7)
+      )
+    ) {
+      piece.type = "queen";
+    }    
+
     this.selectedSquare = null;
     this.possibleMoves = [];
 
