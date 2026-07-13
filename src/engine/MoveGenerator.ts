@@ -34,7 +34,7 @@ export default class MoveGenerator {
                 [1, 1]
             ]
         );
-        
+
       case "rook":
         return this.generateSlidingMoves(
           board,
@@ -48,6 +48,24 @@ export default class MoveGenerator {
             [0, 1],
           ]
         );
+      
+      case "queen":
+        return this.generateSlidingMoves(
+          board,
+          piece,
+          row,
+          col,
+          [
+            [-1, 0],
+            [1, 0],
+            [0, -1],
+            [0, 1],
+            [-1, -1],
+            [-1, 1],
+            [1, -1],
+            [1, 1],
+          ]
+        );  
     }
   }
 
