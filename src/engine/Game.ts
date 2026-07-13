@@ -46,6 +46,36 @@ export default class Game {
 
     piece.hasMoved = true;
 
+    if (move.isCastle) {
+
+      // Kısa rok
+      if (move.to.col === 6) {
+
+        const rook = this.board.squares[move.from.row][7];
+
+        if (rook) {
+          this.board.squares[move.from.row][5] = rook;
+          this.board.squares[move.from.row][7] = null;
+          rook.hasMoved = true;
+        }
+
+      }
+
+      // Uzun rok
+      else if (move.to.col === 2) {
+
+        const rook = this.board.squares[move.from.row][0];
+
+        if (rook) {
+          this.board.squares[move.from.row][3] = rook;
+          this.board.squares[move.from.row][0] = null;
+          rook.hasMoved = true;
+        }
+
+      }
+
+    }
+
     this.selectedSquare = null;
     this.possibleMoves = [];
 
