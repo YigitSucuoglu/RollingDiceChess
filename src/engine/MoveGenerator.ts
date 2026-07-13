@@ -12,25 +12,42 @@ export default class MoveGenerator {
     if (!piece) return [];
 
     switch (piece.type) {
+      
       case "pawn":
         return this.generatePawnMoves(board, piece, row, col);
+      
       case "knight":
         return this.generateKnightMoves(board, piece, row, col);
       default:
         return [];
+
       case "bishop":
-      return this.generateSlidingMoves(
+        return this.generateSlidingMoves(
+            board,
+            piece,
+            row,
+            col,
+            [
+                [-1, -1],
+                [-1, 1],
+                [1, -1],
+                [1, 1]
+            ]
+        );
+        
+      case "rook":
+        return this.generateSlidingMoves(
           board,
           piece,
           row,
           col,
           [
-              [-1, -1],
-              [-1, 1],
-              [1, -1],
-              [1, 1]
+            [-1, 0],
+            [1, 0],
+            [0, -1],
+            [0, 1],
           ]
-      );
+        );
     }
   }
 
