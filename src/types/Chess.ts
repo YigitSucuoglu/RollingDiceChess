@@ -12,6 +12,7 @@ export interface Piece {
   id: string;
   type: PieceType;
   color: PieceColor;
+  hasMoved: boolean;
 }
 
 export interface Position {

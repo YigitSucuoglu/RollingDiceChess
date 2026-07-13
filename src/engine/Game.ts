@@ -44,6 +44,8 @@ export default class Game {
     this.board.squares[move.to.row][move.to.col] = piece;
     this.board.squares[move.from.row][move.from.col] = null;
 
+    piece.hasMoved = true;
+
     this.selectedSquare = null;
     this.possibleMoves = [];
 

@@ -13,6 +13,19 @@ export default class ChessBoard {
 
     this.initialize();
   }
+  
+  private createPiece(
+    type: Piece["type"],
+    color: Piece["color"]
+  ): Piece {
+    return {
+      id: crypto.randomUUID(),
+      type,
+      color,
+      hasMoved: false,
+    };
+  }
+
 
   private initialize() {
 
@@ -29,29 +42,17 @@ export default class ChessBoard {
 
     for (let col = 0; col < 8; col++) {
 
-        this.squares[0][col] = {
-            id: crypto.randomUUID(),
-            type: backRank[col],
-            color: "black"
-        };
+        this.squares[0][col] =
+          this.createPiece(backRank[col], "black");
 
-        this.squares[1][col] = {
-            id: crypto.randomUUID(),
-            type: "pawn",
-            color: "black"
-        };
+        this.squares[1][col] =
+          this.createPiece("pawn", "black");
 
-        this.squares[6][col] = {
-            id: crypto.randomUUID(),
-            type: "pawn",
-            color: "white"
-        };
+        this.squares[6][col] =
+            this.createPiece("pawn", "white");
 
-        this.squares[7][col] = {
-            id: crypto.randomUUID(),
-            type: backRank[col],
-            color: "white"
-        };
+        this.squares[7][col] =
+            this.createPiece(backRank[col], "white");
 
       }
 
