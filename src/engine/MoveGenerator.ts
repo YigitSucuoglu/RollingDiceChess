@@ -66,6 +66,9 @@ export default class MoveGenerator {
             [1, 1],
           ]
         );  
+      
+      case "king":
+        return this.generateKingMoves(board, piece, row, col);     
     }
   }
 
@@ -241,7 +244,7 @@ export default class MoveGenerator {
       row: number,
       col: number,
       directions: number[][]
-  ): Move[] {
+    ): Move[] {
 
       const moves: Move[] = [];
 
@@ -305,4 +308,75 @@ export default class MoveGenerator {
 
       return moves;
   }
+
+    private static generateKingMoves(
+      board: ChessBoard,
+      piece: Piece,
+      row: number,
+      col: number
+    ): Move[] {
+
+      const moves: Move[] = [];
+
+      const offsets = [
+        [-1, -1],
+        [-1, 0],
+        [-1, 1],
+        [0, -1],
+        [0, 1],
+        [1, -1],
+        [1, 0],
+        [1, 1],
+      ];
+
+      for (const [rowOffset, colOffset] of offsets) {
+
+        const newRow = row + rowOffset;
+        const newCol = col + colOffset;
+
+        if (
+          newRow < 0 ||
+          newRow >= 8 ||
+          newCol < 0 ||
+          newCol >= 8
+        ) {
+          continue;
+        }
+
+        const target = board.squares[newRow][newCol];
+
+        if (target === null) {
+
+          moves.push({
+            from: { row, col },
+            to: { row: newRow, col: newCol },
+
+            isCapture: false,
+            isCastle: false,
+            isPromotion: false,
+            isEnPassant: false,
+          });
+
+          continue;
+        }
+
+        if (target.color !== piece.color) {
+
+          moves.push({
+            from: { row, col },
+            to: { row: newRow, col: newCol },
+
+            isCapture: true,
+            isCastle: false,
+            isPromotion: false,
+            isEnPassant: false,
+          });
+
+        }
+
+      }
+
+      return moves;
+
+    }
 }
