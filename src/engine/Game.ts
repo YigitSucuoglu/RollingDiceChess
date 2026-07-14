@@ -2,6 +2,7 @@ import type { Move, Position } from "../types/Chess";
 import ChessBoard from "./ChessBoard";
 import MoveGenerator from "./MoveGenerator";
 import type { PieceColor } from "../types/Chess";
+import TurnRights from "./TurnRights";
 
 export default class Game {
   public board: ChessBoard;
@@ -14,6 +15,8 @@ export default class Game {
 
   public winner: PieceColor | null;
 
+  public turnRights!: TurnRights;
+
 
   constructor() {
     this.board = new ChessBoard();
@@ -21,6 +24,7 @@ export default class Game {
     this.possibleMoves = [];
     this.lastMove = null;
     this.winner = null;
+    this.initializeTurnRights();
   }
 
   public selectSquare(row: number, col: number): void {
@@ -35,6 +39,10 @@ export default class Game {
 
     if (piece.color !== this.currentTurn) {
       return;
+    }
+    
+    if (!this.turnRights.has(piece.type)) {
+        return;
     }
 
     this.selectedSquare = { row, col };
@@ -59,6 +67,8 @@ export default class Game {
     this.board.squares[move.from.row][move.from.col] = null;
 
     piece.hasMoved = true;
+
+    this.turnRights.consume(piece.type);
 
     if (move.isEnPassant) {
       const capturedRow =
@@ -124,10 +134,23 @@ export default class Game {
       return;
     }
 
-    this.currentTurn =
-      this.currentTurn === "white"
-        ? "black"
-        : "white";    
+    if (!this.turnRights.hasAnyRights()) {
+
+      this.currentTurn =
+        this.currentTurn === "white"
+          ? "black"
+          : "white";
+      this.initializeTurnRights();
+    }   
+  }
+
+  private initializeTurnRights(): void {
+
+    this.turnRights = new TurnRights();
+
+    this.turnRights.set("pawn", 2);
+    this.turnRights.set("knight", 1);
+
   }
 
 }
