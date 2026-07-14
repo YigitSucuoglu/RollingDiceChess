@@ -12,14 +12,23 @@ export default class Game {
 
   public lastMove: Move | null;
 
+  public winner: PieceColor | null;
+
+
   constructor() {
     this.board = new ChessBoard();
     this.selectedSquare = null;
     this.possibleMoves = [];
     this.lastMove = null;
+    this.winner = null;
   }
 
   public selectSquare(row: number, col: number): void {
+    
+    if (this.winner) {
+        return;
+    }
+    
     const piece = this.board.squares[row][col];
 
     if (!piece) return;
@@ -42,6 +51,7 @@ export default class Game {
   
   public makeMove(move: Move): void {
     const piece = this.board.squares[move.from.row][move.from.col];
+    const capturedPiece = this.board.squares[move.to.row][move.to.col];
 
     if (!piece) return;
 
@@ -99,14 +109,25 @@ export default class Game {
       piece.type = "queen";
     }    
 
+
+
+    this.lastMove = move;
+
+    if (capturedPiece?.type === "king") {
+      this.winner = piece.color;
+    }
+
     this.selectedSquare = null;
     this.possibleMoves = [];
 
-    this.lastMove = move;
+    if (this.winner) {
+      return;
+    }
 
     this.currentTurn =
       this.currentTurn === "white"
         ? "black"
-        : "white";
+        : "white";    
   }
+
 }
