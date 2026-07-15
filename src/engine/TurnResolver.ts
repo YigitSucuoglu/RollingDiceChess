@@ -9,7 +9,8 @@ export interface TurnResolution {
 
 export default class TurnResolver {
   public resolve(state: SimulationState): TurnResolution {
-    const maxConsumableRights = this.calculateMaximumConsumable(state);
+    const cache = new Map<string, number>();
+    const maxConsumableRights = this.calculateMaximumConsumable(state, cache);
     const candidateMoves = this.enumerateCandidateMoves(state);
     const selectableMoves = candidateMoves.filter((move) => {
       const childState = this.createChildState(state, move);
@@ -18,7 +19,7 @@ export default class TurnResolver {
         return true;
       }
 
-      const score = 1 + this.calculateMaximumConsumable(childState);
+      const score = 1 + this.calculateMaximumConsumable(childState, cache);
 
       return score === maxConsumableRights;
     });
@@ -84,10 +85,21 @@ export default class TurnResolver {
     return childState;
   }
 
-  private calculateMaximumConsumable(state: SimulationState): number {
+  private calculateMaximumConsumable(
+    state: SimulationState,
+    cache: Map<string, number>
+  ): number {
+    const stateKey = this.createStateKey(state);
+    const cachedResult = cache.get(stateKey);
+
+    if (cachedResult !== undefined) {
+      return cachedResult;
+    }
+
     const candidateMoves = this.enumerateCandidateMoves(state);
 
     if (candidateMoves.length === 0) {
+      cache.set(stateKey, 0);
       return 0;
     }
 
@@ -110,11 +122,51 @@ export default class TurnResolver {
 
       const score = childState.winner !== null
         ? 1
-        : 1 + this.calculateMaximumConsumable(childState);
+        : 1 + this.calculateMaximumConsumable(childState, cache);
 
       maximumConsumable = Math.max(maximumConsumable, score);
     }
 
+    cache.set(stateKey, maximumConsumable);
+
     return maximumConsumable;
+  }
+
+  private createStateKey(state: SimulationState): string {
+    const rights = state.rights.getSnapshot();
+    const rightsKey = [
+      rights.pawn,
+      rights.knight,
+      rights.bishop,
+      rights.rook,
+      rights.queen,
+      rights.king,
+    ];
+    const boardKey = state.board.squares.flatMap((row) =>
+      row.map((piece) => piece
+        ? [piece.id, piece.type, piece.color, piece.hasMoved]
+        : null)
+    );
+    const lastMoveKey = state.lastMove
+      ? [
+          state.lastMove.pieceId,
+          state.lastMove.from.row,
+          state.lastMove.from.col,
+          state.lastMove.to.row,
+          state.lastMove.to.col,
+          state.lastMove.isCapture,
+          state.lastMove.isCastle,
+          state.lastMove.isPromotion,
+          state.lastMove.isEnPassant,
+        ]
+      : null;
+
+    return JSON.stringify([
+      state.currentTurn,
+      state.winner,
+      rightsKey,
+      boardKey,
+      lastMoveKey,
+    ]);
   }
 }
