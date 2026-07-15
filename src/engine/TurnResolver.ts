@@ -12,6 +12,7 @@ export default class TurnResolver {
     void state;
     void this.enumerateCandidateMoves;
     void this.createChildState;
+    void this.calculateMaximumConsumable;
     throw new Error("TurnResolver has not been implemented yet.");
   }
 
@@ -68,5 +69,37 @@ export default class TurnResolver {
     childState.rights.consume(movingPiece.type);
 
     return childState;
+  }
+
+  private calculateMaximumConsumable(state: SimulationState): number {
+    const candidateMoves = this.enumerateCandidateMoves(state);
+
+    if (candidateMoves.length === 0) {
+      return 0;
+    }
+
+    const parentRightCount = Object.values(
+      state.rights.getSnapshot()
+    ).reduce((total, count) => total + count, 0);
+    let maximumConsumable = 0;
+
+    for (const move of candidateMoves) {
+      const childState = this.createChildState(state, move);
+      const childRightCount = Object.values(
+        childState.rights.getSnapshot()
+      ).reduce((total, count) => total + count, 0);
+
+      if (childRightCount !== parentRightCount - 1) {
+        throw new Error(
+          "Cannot calculate maximum consumable rights: child state must consume exactly one right."
+        );
+      }
+
+      const score = 1 + this.calculateMaximumConsumable(childState);
+
+      maximumConsumable = Math.max(maximumConsumable, score);
+    }
+
+    return maximumConsumable;
   }
 }
