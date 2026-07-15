@@ -1,4 +1,4 @@
-import type { Move, PieceColor } from "../types/Chess";
+import type { Move, Piece, PieceColor } from "../types/Chess";
 import type ChessBoard from "./ChessBoard";
 import type Game from "./Game";
 import type TurnRights from "./TurnRights";
@@ -44,6 +44,7 @@ export function applySimulatedMove(
   };
 
   const movedPiece = nextState.board.squares[move.from.row][move.from.col];
+  const capturedPiece = nextState.board.squares[move.to.row][move.to.col];
 
   if (movedPiece) {
     nextState.board.squares[move.to.row][move.to.col] = movedPiece;
@@ -55,7 +56,7 @@ export function applySimulatedMove(
   const enPassantState = handleEnPassant(promotedState, move, state.lastMove);
   const castledState = handleCastling(enPassantState, move);
 
-  return handleWinner(castledState, move);
+  return handleWinner(castledState, move, capturedPiece);
 }
 
 function handlePromotion(state: SimulationState, move: Move): SimulationState {
@@ -180,7 +181,28 @@ function handleCastling(state: SimulationState, move: Move): SimulationState {
   return state;
 }
 
-function handleWinner(state: SimulationState, move: Move): SimulationState {
-  void move;
+function handleWinner(
+  state: SimulationState,
+  move: Move,
+  capturedPiece: Piece | null
+): SimulationState {
+  if (
+    move.isEnPassant ||
+    move.isCastle ||
+    capturedPiece?.type !== "king"
+  ) {
+    return state;
+  }
+
+  const movedPiece = state.board.squares[move.to.row]?.[move.to.col];
+
+  if (!movedPiece || movedPiece.id !== move.pieceId) {
+    throw new Error(
+      "Cannot determine winner: moving piece does not match the move."
+    );
+  }
+
+  state.winner = movedPiece.color;
+
   return state;
 }
