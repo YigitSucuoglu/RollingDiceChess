@@ -59,7 +59,22 @@ export function applySimulatedMove(
 }
 
 function handlePromotion(state: SimulationState, move: Move): SimulationState {
-  void move;
+  const movedPiece = state.board.squares[move.to.row][move.to.col];
+
+  if (
+    !movedPiece ||
+    movedPiece.id !== move.pieceId ||
+    movedPiece.type !== "pawn"
+  ) {
+    return state;
+  }
+
+  const promotionRow = movedPiece.color === "white" ? 0 : 7;
+
+  if (move.to.row === promotionRow) {
+    movedPiece.type = "queen";
+  }
+
   return state;
 }
 
