@@ -1,6 +1,6 @@
 import type { Move } from "../types/Chess";
 import MoveGenerator from "./MoveGenerator";
-import type { SimulationState } from "./Simulation";
+import { applySimulatedMove, type SimulationState } from "./Simulation";
 
 export interface TurnResolution {
   maxConsumableRights: number;
@@ -11,6 +11,7 @@ export default class TurnResolver {
   public resolve(state: SimulationState): TurnResolution {
     void state;
     void this.enumerateCandidateMoves;
+    void this.createChildState;
     throw new Error("TurnResolver has not been implemented yet.");
   }
 
@@ -42,5 +43,12 @@ export default class TurnResolver {
     }
 
     return moves;
+  }
+
+  private createChildState(
+    state: SimulationState,
+    move: Move
+  ): SimulationState {
+    return applySimulatedMove(state, move);
   }
 }
