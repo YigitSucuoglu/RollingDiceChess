@@ -1,6 +1,5 @@
 import type { Move, Position } from "../types/Chess";
 import ChessBoard from "./ChessBoard";
-import MoveGenerator from "./MoveGenerator";
 import type { PieceColor } from "../types/Chess";
 import TurnRights from "./TurnRights";
 import { createSimulationState } from "./Simulation";
@@ -30,7 +29,6 @@ export default class Game {
     this.winner = null;
     this.turnResolver = new TurnResolver();
     this.initializeTurnRights();
-    void this.getTurnResolution;
   }
 
   public selectSquare(row: number, col: number): void {
@@ -51,14 +49,22 @@ export default class Game {
         return;
     }
 
-    this.selectedSquare = { row, col };
-
-    this.possibleMoves = MoveGenerator.generateMoves(
-      this.board,
-      row,
-      col,
-      this.lastMove
+    const resolution = this.getTurnResolution();
+    const approvedMoves = resolution.selectableMoves.filter(
+      (move) =>
+        move.from.row === row &&
+        move.from.col === col &&
+        move.pieceId === piece.id
     );
+
+    if (approvedMoves.length === 0) {
+      this.selectedSquare = null;
+      this.possibleMoves = [];
+      return;
+    }
+
+    this.selectedSquare = { row, col };
+    this.possibleMoves = approvedMoves;
   }
   
   public currentTurn: PieceColor = "white";
