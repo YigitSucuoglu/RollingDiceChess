@@ -3,6 +3,8 @@ import ChessBoard from "./ChessBoard";
 import MoveGenerator from "./MoveGenerator";
 import type { PieceColor } from "../types/Chess";
 import TurnRights from "./TurnRights";
+import { createSimulationState } from "./Simulation";
+import TurnResolver, { type TurnResolution } from "./TurnResolver";
 
 export default class Game {
   public board: ChessBoard;
@@ -17,6 +19,8 @@ export default class Game {
 
   public turnRights!: TurnRights;
 
+  private turnResolver: TurnResolver;
+
 
   constructor() {
     this.board = new ChessBoard();
@@ -24,7 +28,9 @@ export default class Game {
     this.possibleMoves = [];
     this.lastMove = null;
     this.winner = null;
+    this.turnResolver = new TurnResolver();
     this.initializeTurnRights();
+    void this.getTurnResolution;
   }
 
   public selectSquare(row: number, col: number): void {
@@ -151,6 +157,12 @@ export default class Game {
     this.turnRights.set("pawn", 2);
     this.turnRights.set("knight", 1);
 
+  }
+
+  private getTurnResolution(): TurnResolution {
+    const state = createSimulationState(this);
+
+    return this.turnResolver.resolve(state);
   }
 
 }
