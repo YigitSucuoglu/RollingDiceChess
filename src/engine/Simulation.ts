@@ -126,7 +126,57 @@ function handleEnPassant(
 }
 
 function handleCastling(state: SimulationState, move: Move): SimulationState {
-  void move;
+  if (!move.isCastle) {
+    return state;
+  }
+
+  const king = state.board.squares[move.to.row]?.[move.to.col];
+
+  if (!king || king.id !== move.pieceId || king.type !== "king") {
+    throw new Error(
+      "Cannot apply castling: moving piece must be the matching king."
+    );
+  }
+
+  if (
+    move.from.row !== move.to.row ||
+    move.from.col !== 4 ||
+    (move.to.col !== 6 && move.to.col !== 2)
+  ) {
+    throw new Error("Cannot apply castling: invalid king move.");
+  }
+
+  const originalRow = king.color === "white" ? 7 : 0;
+
+  if (move.from.row !== originalRow) {
+    throw new Error("Cannot apply castling: king is not on its original row.");
+  }
+
+  const isKingside = move.to.col === 6;
+  const rookFromCol = isKingside ? 7 : 0;
+  const rookToCol = isKingside ? 5 : 3;
+  const rook = state.board.squares[move.to.row][rookFromCol];
+
+  if (!rook) {
+    throw new Error("Cannot apply castling: rook is missing.");
+  }
+
+  if (rook.type !== "rook") {
+    throw new Error("Cannot apply castling: castling piece is not a rook.");
+  }
+
+  if (rook.color !== king.color) {
+    throw new Error("Cannot apply castling: rook has wrong color.");
+  }
+
+  if (state.board.squares[move.to.row][rookToCol]) {
+    throw new Error("Cannot apply castling: rook target square is occupied.");
+  }
+
+  state.board.squares[move.to.row][rookToCol] = rook;
+  state.board.squares[move.to.row][rookFromCol] = null;
+  rook.hasMoved = true;
+
   return state;
 }
 
