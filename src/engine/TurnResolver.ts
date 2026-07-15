@@ -13,6 +13,11 @@ export default class TurnResolver {
     const candidateMoves = this.enumerateCandidateMoves(state);
     const selectableMoves = candidateMoves.filter((move) => {
       const childState = this.createChildState(state, move);
+
+      if (childState.winner !== null) {
+        return true;
+      }
+
       const score = 1 + this.calculateMaximumConsumable(childState);
 
       return score === maxConsumableRights;
@@ -103,7 +108,9 @@ export default class TurnResolver {
         );
       }
 
-      const score = 1 + this.calculateMaximumConsumable(childState);
+      const score = childState.winner !== null
+        ? 1
+        : 1 + this.calculateMaximumConsumable(childState);
 
       maximumConsumable = Math.max(maximumConsumable, score);
     }
