@@ -70,6 +70,24 @@ export default class Game {
   public currentTurn: PieceColor = "white";
   
   public makeMove(move: Move): void {
+    const resolution = this.getTurnResolution();
+    const isApproved = resolution.selectableMoves.some(
+      (approvedMove) =>
+        approvedMove.pieceId === move.pieceId &&
+        approvedMove.from.row === move.from.row &&
+        approvedMove.from.col === move.from.col &&
+        approvedMove.to.row === move.to.row &&
+        approvedMove.to.col === move.to.col &&
+        approvedMove.isCapture === move.isCapture &&
+        approvedMove.isCastle === move.isCastle &&
+        approvedMove.isPromotion === move.isPromotion &&
+        approvedMove.isEnPassant === move.isEnPassant
+    );
+
+    if (!isApproved) {
+      return;
+    }
+
     const piece = this.board.squares[move.from.row][move.from.col];
     const capturedPiece = this.board.squares[move.to.row][move.to.col];
 
