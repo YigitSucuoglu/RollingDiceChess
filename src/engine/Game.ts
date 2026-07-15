@@ -33,6 +33,7 @@ export default class Game {
     this.turnResolver = new TurnResolver();
     this.diceEngine = new DiceEngine();
     this.initializeTurnRights();
+    this.ensurePlayableTurn();
   }
 
   public selectSquare(row: number, col: number): void {
@@ -168,13 +169,15 @@ export default class Game {
       return;
     }
 
-    if (!this.turnRights.hasAnyRights()) {
+    const nextResolution = this.getTurnResolution();
 
+    if (nextResolution.maxConsumableRights === 0) {
       this.currentTurn =
         this.currentTurn === "white"
           ? "black"
           : "white";
       this.initializeTurnRights();
+      this.ensurePlayableTurn();
     }   
   }
 
@@ -187,6 +190,26 @@ export default class Game {
     const state = createSimulationState(this);
 
     return this.turnResolver.resolve(state);
+  }
+
+  private ensurePlayableTurn(): void {
+    const maximumAutomaticPasses = 100;
+    let automaticPasses = 0;
+
+    while (this.getTurnResolution().maxConsumableRights === 0) {
+      if (automaticPasses >= maximumAutomaticPasses) {
+        throw new Error(
+          "Unable to start a playable turn after 100 automatic passes."
+        );
+      }
+
+      this.currentTurn =
+        this.currentTurn === "white"
+          ? "black"
+          : "white";
+      this.initializeTurnRights();
+      automaticPasses++;
+    }
   }
 
 }
