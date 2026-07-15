@@ -9,11 +9,19 @@ export interface TurnResolution {
 
 export default class TurnResolver {
   public resolve(state: SimulationState): TurnResolution {
-    void state;
-    void this.enumerateCandidateMoves;
-    void this.createChildState;
-    void this.calculateMaximumConsumable;
-    throw new Error("TurnResolver has not been implemented yet.");
+    const maxConsumableRights = this.calculateMaximumConsumable(state);
+    const candidateMoves = this.enumerateCandidateMoves(state);
+    const selectableMoves = candidateMoves.filter((move) => {
+      const childState = this.createChildState(state, move);
+      const score = 1 + this.calculateMaximumConsumable(childState);
+
+      return score === maxConsumableRights;
+    });
+
+    return {
+      maxConsumableRights,
+      selectableMoves,
+    };
   }
 
   private enumerateCandidateMoves(state: SimulationState): Move[] {
