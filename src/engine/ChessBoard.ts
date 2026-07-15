@@ -13,6 +13,16 @@ export default class ChessBoard {
 
     this.initialize();
   }
+
+  public clone(): ChessBoard {
+    const clonedBoard = Object.create(ChessBoard.prototype) as ChessBoard;
+
+    clonedBoard.squares = this.squares.map((row) =>
+      row.map((piece) => piece ? { ...piece } : null)
+    );
+
+    return clonedBoard;
+  }
   
   private createPiece(
     type: Piece["type"],
