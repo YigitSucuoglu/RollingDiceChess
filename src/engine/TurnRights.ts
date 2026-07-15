@@ -23,6 +23,10 @@ export default class TurnRights {
     return clonedRights;
   }
 
+  public getSnapshot(): Readonly<Record<PieceType, number>> {
+    return { ...this.rights };
+  }
+
   public set(piece: PieceType, count: number): void {
     this.rights[piece] = count;
   }
