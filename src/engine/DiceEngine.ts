@@ -1,4 +1,5 @@
 import type { PieceType } from "../types/Chess";
+import TurnRights from "./TurnRights";
 
 const PIECE_TYPES: readonly PieceType[] = [
   "pawn",
@@ -22,6 +23,16 @@ export default class DiceEngine {
       this.rollPieceType(),
       this.rollPieceType(),
     ];
+  }
+
+  public rollRights(): TurnRights {
+    const rights = new TurnRights();
+
+    for (const pieceType of this.roll()) {
+      rights.set(pieceType, rights.get(pieceType) + 1);
+    }
+
+    return rights;
   }
 
   private rollPieceType(): PieceType {
