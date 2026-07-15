@@ -26,3 +26,54 @@ export function createSimulationState(game: Game): SimulationState {
     winner: game.winner,
   };
 }
+
+export function applySimulatedMove(
+  state: SimulationState,
+  move: Move
+): SimulationState {
+  const nextState: SimulationState = {
+    board: state.board.clone(),
+    rights: state.rights.clone(),
+    currentTurn: state.currentTurn,
+    lastMove: {
+      ...move,
+      from: { ...move.from },
+      to: { ...move.to },
+    },
+    winner: state.winner,
+  };
+
+  const movedPiece = nextState.board.squares[move.from.row][move.from.col];
+
+  if (movedPiece) {
+    nextState.board.squares[move.to.row][move.to.col] = movedPiece;
+    nextState.board.squares[move.from.row][move.from.col] = null;
+    movedPiece.hasMoved = true;
+  }
+
+  const promotedState = handlePromotion(nextState, move);
+  const enPassantState = handleEnPassant(promotedState, move);
+  const castledState = handleCastling(enPassantState, move);
+
+  return handleWinner(castledState, move);
+}
+
+function handlePromotion(state: SimulationState, move: Move): SimulationState {
+  void move;
+  return state;
+}
+
+function handleEnPassant(state: SimulationState, move: Move): SimulationState {
+  void move;
+  return state;
+}
+
+function handleCastling(state: SimulationState, move: Move): SimulationState {
+  void move;
+  return state;
+}
+
+function handleWinner(state: SimulationState, move: Move): SimulationState {
+  void move;
+  return state;
+}
