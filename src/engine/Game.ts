@@ -1,9 +1,10 @@
 import type { Move, Position } from "../types/Chess";
 import ChessBoard from "./ChessBoard";
 import type { PieceColor } from "../types/Chess";
-import TurnRights from "./TurnRights";
+import type TurnRights from "./TurnRights";
 import { createSimulationState } from "./Simulation";
 import TurnResolver, { type TurnResolution } from "./TurnResolver";
+import DiceEngine from "./DiceEngine";
 
 export default class Game {
   public board: ChessBoard;
@@ -20,6 +21,8 @@ export default class Game {
 
   private turnResolver: TurnResolver;
 
+  private diceEngine: DiceEngine;
+
 
   constructor() {
     this.board = new ChessBoard();
@@ -28,6 +31,7 @@ export default class Game {
     this.lastMove = null;
     this.winner = null;
     this.turnResolver = new TurnResolver();
+    this.diceEngine = new DiceEngine();
     this.initializeTurnRights();
   }
 
@@ -175,11 +179,7 @@ export default class Game {
   }
 
   private initializeTurnRights(): void {
-
-    this.turnRights = new TurnRights();
-
-    this.turnRights.set("pawn", 2);
-    this.turnRights.set("knight", 1);
+    this.turnRights = this.diceEngine.rollRights();
 
   }
 
