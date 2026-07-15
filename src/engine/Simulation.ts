@@ -52,7 +52,7 @@ export function applySimulatedMove(
   }
 
   const promotedState = handlePromotion(nextState, move);
-  const enPassantState = handleEnPassant(promotedState, move);
+  const enPassantState = handleEnPassant(promotedState, move, state.lastMove);
   const castledState = handleCastling(enPassantState, move);
 
   return handleWinner(castledState, move);
@@ -78,8 +78,50 @@ function handlePromotion(state: SimulationState, move: Move): SimulationState {
   return state;
 }
 
-function handleEnPassant(state: SimulationState, move: Move): SimulationState {
-  void move;
+function handleEnPassant(
+  state: SimulationState,
+  move: Move,
+  previousLastMove: Move | null
+): SimulationState {
+  if (!move.isEnPassant) {
+    return state;
+  }
+
+  const movedPiece = state.board.squares[move.to.row]?.[move.to.col];
+
+  if (
+    !movedPiece ||
+    movedPiece.id !== move.pieceId ||
+    movedPiece.type !== "pawn"
+  ) {
+    throw new Error(
+      "Cannot apply en passant: moving piece must be the matching pawn."
+    );
+  }
+
+  const capturedRow = movedPiece.color === "white"
+    ? move.to.row + 1
+    : move.to.row - 1;
+  const capturedPiece = state.board.squares[capturedRow]?.[move.to.col];
+
+  if (!capturedPiece) {
+    throw new Error("Cannot apply en passant: captured square is empty.");
+  }
+
+  if (capturedPiece.type !== "pawn") {
+    throw new Error("Cannot apply en passant: captured piece is not a pawn.");
+  }
+
+  if (capturedPiece.color === movedPiece.color) {
+    throw new Error("Cannot apply en passant: captured pawn has wrong color.");
+  }
+
+  if (!previousLastMove || previousLastMove.pieceId !== capturedPiece.id) {
+    throw new Error("Cannot apply en passant: lastMove does not match.");
+  }
+
+  state.board.squares[capturedRow][move.to.col] = null;
+
   return state;
 }
 
