@@ -15,6 +15,14 @@ export default class TurnRights {
     };
   }
 
+  public clone(): TurnRights {
+    const clonedRights = new TurnRights();
+
+    clonedRights.rights = { ...this.rights };
+
+    return clonedRights;
+  }
+
   public set(piece: PieceType, count: number): void {
     this.rights[piece] = count;
   }
