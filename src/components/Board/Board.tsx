@@ -2,11 +2,25 @@ import "./Board.css";
 import gameManager from "../../engine/GameManager";
 import Piece from "../Piece/Piece";
 import { useState } from "react";
+import type { PieceType } from "../../types/Chess";
+
+const RIGHT_LABELS: readonly [PieceType, string][] = [
+  ["pawn", "Pawn"],
+  ["knight", "Knight"],
+  ["bishop", "Bishop"],
+  ["rook", "Rook"],
+  ["queen", "Queen"],
+  ["king", "King"],
+];
 
 function Board() {
   const game = gameManager.getGame();
 
   const [, setRefresh] = useState(0);
+  const rights = game.turnRights.getSnapshot();
+  const activeRights = RIGHT_LABELS.filter(
+    ([pieceType]) => rights[pieceType] > 0
+  );
 
   const squares = [];
 
@@ -59,7 +73,33 @@ function Board() {
     }
   }
 
-  return <div className="board">{squares}</div>;
+  return (
+    <div className="game-layout">
+      <div className="turn-panel" aria-live="polite">
+        {game.winner ? (
+          <div className="winner-text">
+            {game.winner === "white" ? "White" : "Black"} wins
+          </div>
+        ) : (
+          <>
+            <div className="turn-text">
+              {game.currentTurn === "white" ? "White" : "Black"} turn
+            </div>
+
+            <div className="rights-list">
+              {activeRights.map(([pieceType, label]) => (
+                <span className="right-item" key={pieceType}>
+                  {label} ×{rights[pieceType]}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="board">{squares}</div>
+    </div>
+  );
 }
 
 export default Board;
