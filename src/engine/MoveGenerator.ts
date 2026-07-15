@@ -90,6 +90,8 @@ export default class MoveGenerator {
 
     const direction = piece.color === "white" ? -1 : 1;
     const nextRow = row + direction;
+    const promotionRow = piece.color === "white" ? 0 : 7;
+    const isPromotion = nextRow === promotionRow;
 
     // 1 kare ileri
     if (
@@ -103,7 +105,7 @@ export default class MoveGenerator {
 
         isCapture: false,
         isCastle: false,
-        isPromotion: false,
+        isPromotion,
         isEnPassant: false,
         pieceId: piece.id,
       });
@@ -146,7 +148,7 @@ export default class MoveGenerator {
 
           isCapture: true,
           isCastle: false,
-          isPromotion: false,
+          isPromotion,
           isEnPassant: false,
           pieceId: piece.id,
         });
@@ -170,7 +172,7 @@ export default class MoveGenerator {
 
           isCapture: true,
           isCastle: false,
-          isPromotion: false,
+          isPromotion,
           isEnPassant: false,
           pieceId: piece.id,
         });
