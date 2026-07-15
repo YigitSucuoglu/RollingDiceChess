@@ -49,6 +49,24 @@ export default class TurnResolver {
     state: SimulationState,
     move: Move
   ): SimulationState {
-    return applySimulatedMove(state, move);
+    const movingPiece = state.board.squares[move.from.row]?.[move.from.col];
+
+    if (!movingPiece) {
+      throw new Error("Cannot create child state: source square is empty.");
+    }
+
+    if (movingPiece.id !== move.pieceId) {
+      throw new Error("Cannot create child state: pieceId does not match.");
+    }
+
+    if (!state.rights.has(movingPiece.type)) {
+      throw new Error("Cannot create child state: matching right is missing.");
+    }
+
+    const childState = applySimulatedMove(state, move);
+
+    childState.rights.consume(movingPiece.type);
+
+    return childState;
   }
 }
