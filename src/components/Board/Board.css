@@ -28,6 +28,43 @@
     font-weight:700;
 }
 
+.roll-section{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.panel-label{
+    color:rgba(255,255,255,.72);
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+}
+
+.roll-slots{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+}
+
+.roll-slot{
+    min-height:42px;
+    padding:8px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:8px;
+
+    background:rgba(255,255,255,.08);
+    font-size:14px;
+    font-weight:700;
+    text-align:center;
+}
+
 .rights-list{
     display:flex;
     flex-wrap:wrap;
@@ -103,4 +140,20 @@
     background:rgba(40,40,40,.45);
 
     position:absolute;
+}
+
+@media (max-width:480px){
+    .turn-panel{
+        padding:10px;
+    }
+
+    .roll-slots{
+        gap:6px;
+    }
+
+    .roll-slot{
+        min-height:38px;
+        padding:6px 4px;
+        font-size:12px;
+    }
 }

@@ -84,6 +84,24 @@ function Board() {
               {game.currentTurn === "white" ? "White" : "Black"} turn
             </div>
 
+            <div className="roll-section">
+              <div className="panel-label">Current roll</div>
+
+              <div className="roll-slots">
+                {game.currentRoll.map((pieceType, index) => (
+                  <div
+                    className="roll-slot"
+                    data-piece-type={pieceType}
+                    key={`${index}-${pieceType}`}
+                  >
+                    {RIGHT_LABELS.find(([type]) => type === pieceType)?.[1]}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="panel-label">Remaining rights</div>
+
             <div className="rights-list">
               {activeRights.map(([pieceType, label]) => (
                 <span className="right-item" key={pieceType}>
