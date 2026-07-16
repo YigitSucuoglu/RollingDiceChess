@@ -44,14 +44,22 @@ export default class Game {
     
     const piece = this.board.squares[row][col];
 
-    if (!piece) return;
+    if (!piece) {
+      this.selectedSquare = null;
+      this.possibleMoves = [];
+      return;
+    }
 
     if (piece.color !== this.currentTurn) {
+      this.selectedSquare = null;
+      this.possibleMoves = [];
       return;
     }
     
     if (!this.turnRights.has(piece.type)) {
-        return;
+      this.selectedSquare = null;
+      this.possibleMoves = [];
+      return;
     }
 
     const resolution = this.getTurnResolution();

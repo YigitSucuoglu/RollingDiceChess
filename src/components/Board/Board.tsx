@@ -58,8 +58,6 @@ function Board() {
               return;
             }
 
-            if (!piece) return;
-
             game.selectSquare(row, col);
 
             setRefresh((v) => v + 1);
