@@ -1,7 +1,7 @@
-import type { Move, Position } from "../types/Chess";
+import type { Move, PieceType, Position } from "../types/Chess";
 import ChessBoard from "./ChessBoard";
 import type { PieceColor } from "../types/Chess";
-import type TurnRights from "./TurnRights";
+import TurnRights from "./TurnRights";
 import { createSimulationState } from "./Simulation";
 import TurnResolver, { type TurnResolution } from "./TurnResolver";
 import DiceEngine from "./DiceEngine";
@@ -18,6 +18,8 @@ export default class Game {
   public winner: PieceColor | null;
 
   public turnRights!: TurnRights;
+
+  public currentRoll!: readonly [PieceType, PieceType, PieceType];
 
   private turnResolver: TurnResolver;
 
@@ -190,8 +192,15 @@ export default class Game {
   }
 
   private initializeTurnRights(): void {
-    this.turnRights = this.diceEngine.rollRights();
+    const roll = this.diceEngine.roll();
+    const rights = new TurnRights();
 
+    for (const pieceType of roll) {
+      rights.set(pieceType, rights.get(pieceType) + 1);
+    }
+
+    this.currentRoll = roll;
+    this.turnRights = rights;
   }
 
   private getTurnResolution(): TurnResolution {
