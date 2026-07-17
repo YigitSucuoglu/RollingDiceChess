@@ -65,6 +65,40 @@
     text-align:center;
 }
 
+.rolling-slot{
+    opacity:.7;
+}
+
+.rolling-dot{
+    width:10px;
+    height:10px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.85);
+    animation:rolling-pulse .7s ease-in-out infinite alternate;
+}
+
+.rolling-slot:nth-child(2) .rolling-dot{
+    animation-delay:.15s;
+}
+
+.rolling-slot:nth-child(3) .rolling-dot{
+    animation-delay:.3s;
+}
+
+@keyframes rolling-pulse{
+    from{
+        opacity:.35;
+        transform:scale(.7);
+    }
+
+    to{
+        opacity:1;
+        transform:scale(1.15);
+    }
+}
+
 .rights-list{
     display:flex;
     flex-wrap:wrap;

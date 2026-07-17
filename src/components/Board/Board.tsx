@@ -1,7 +1,7 @@
 import "./Board.css";
 import gameManager from "../../engine/GameManager";
 import Piece from "../Piece/Piece";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { PieceType } from "../../types/Chess";
 
 const RIGHT_LABELS: readonly [PieceType, string][] = [
@@ -13,10 +13,44 @@ const RIGHT_LABELS: readonly [PieceType, string][] = [
   ["king", "King"],
 ];
 
+const ROLLING_DURATION_MS = 1000;
+
+interface RollAnimationState {
+  turn: "white" | "black";
+  isRolling: boolean;
+}
+
 function Board() {
   const game = gameManager.getGame();
 
   const [, setRefresh] = useState(0);
+  const [rollAnimation, setRollAnimation] = useState<RollAnimationState>({
+    turn: game.currentTurn,
+    isRolling: true,
+  });
+
+  if (rollAnimation.turn !== game.currentTurn) {
+    setRollAnimation({
+      turn: game.currentTurn,
+      isRolling: true,
+    });
+  }
+
+  const isRolling =
+    rollAnimation.turn !== game.currentTurn || rollAnimation.isRolling;
+
+  useEffect(() => {
+    if (!rollAnimation.isRolling) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setRollAnimation((state) => ({ ...state, isRolling: false }));
+    }, ROLLING_DURATION_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [rollAnimation.turn, rollAnimation.isRolling]);
+
   const rights = game.turnRights.getSnapshot();
   const activeRights = RIGHT_LABELS.filter(
     ([pieceType]) => rights[pieceType] > 0
@@ -45,6 +79,10 @@ function Board() {
             isSelected ? "selected" : ""
           }`}
           onClick={() => {
+            if (isRolling) {
+              return;
+            }
+
             const move = game.possibleMoves.find(
               (m) => m.to.row === row && m.to.col === col
             );
@@ -87,16 +125,25 @@ function Board() {
             <div className="roll-section">
               <div className="panel-label">Current roll</div>
 
-              <div className="roll-slots">
-                {game.currentRoll.map((pieceType, index) => (
-                  <div
-                    className="roll-slot"
-                    data-piece-type={pieceType}
-                    key={`${index}-${pieceType}`}
-                  >
-                    {RIGHT_LABELS.find(([type]) => type === pieceType)?.[1]}
-                  </div>
-                ))}
+              <div
+                className={`roll-slots ${isRolling ? "rolling" : ""}`}
+                aria-busy={isRolling}
+              >
+                {isRolling
+                  ? [0, 1, 2].map((slot) => (
+                      <div className="roll-slot rolling-slot" key={slot}>
+                        <span className="rolling-dot" />
+                      </div>
+                    ))
+                  : game.currentRoll.map((pieceType, index) => (
+                      <div
+                        className="roll-slot"
+                        data-piece-type={pieceType}
+                        key={`${index}-${pieceType}`}
+                      >
+                        {RIGHT_LABELS.find(([type]) => type === pieceType)?.[1]}
+                      </div>
+                    ))}
               </div>
             </div>
 
