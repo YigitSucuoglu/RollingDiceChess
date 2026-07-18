@@ -56,7 +56,9 @@ interface SlotReelProps {
 }
 
 type ReelStyle = CSSProperties & {
+  "--reel-accent-delay": string;
   "--reel-duration": string;
+  "--reel-landing-overshoot": string;
   "--reel-symbol-count": number;
   "--reel-target-offset": string;
   "--reel-track-height": string;
@@ -74,7 +76,9 @@ function SlotReel({ reelIndex, targetPiece, stopAfterMs }: SlotReelProps) {
     (REEL_REPEAT_COUNT - 1) * REEL_SYMBOLS.length + targetSymbolIndex;
   const trackSymbolCount = trackSymbols.length;
   const reelStyle: ReelStyle = {
+    "--reel-accent-delay": `${Math.max(0, stopAfterMs - 150)}ms`,
     "--reel-duration": `${stopAfterMs}ms`,
+    "--reel-landing-overshoot": `${-8 / trackSymbolCount}%`,
     "--reel-symbol-count": trackSymbolCount,
     "--reel-target-offset": `${
       -(targetTrackIndex / trackSymbolCount) * 100
@@ -91,7 +95,9 @@ function SlotReel({ reelIndex, targetPiece, stopAfterMs }: SlotReelProps) {
       <div aria-hidden="true" className="reel-track" style={reelStyle}>
         {trackSymbols.map((symbol, trackIndex) => (
           <div
-            className="reel-symbol"
+            className={`reel-symbol ${
+              trackIndex === targetTrackIndex ? "is-target" : ""
+            }`}
             data-piece-type={symbol.type}
             key={`${trackIndex}-${symbol.type}`}
           >

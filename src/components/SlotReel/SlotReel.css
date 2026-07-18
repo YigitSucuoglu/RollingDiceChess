@@ -25,7 +25,7 @@
         minmax(0,1fr)
     );
 
-    animation:reel-spin var(--reel-duration) linear forwards;
+    animation:reel-spin var(--reel-duration) both;
     will-change:transform;
 }
 
@@ -76,11 +76,53 @@
     display:inline;
 }
 
+.reel-symbol.is-target .roll-piece-image,
+.reel-symbol.is-target .roll-piece-fallback{
+    animation:reel-stop-accent 150ms ease-out var(--reel-accent-delay) both;
+}
+
 @keyframes reel-spin{
     from{
         transform:translateY(0);
+        animation-timing-function:cubic-bezier(.12,.72,.24,1);
     }
 
+    92%{
+        transform:translateY(
+            calc(var(--reel-target-offset) + var(--reel-landing-overshoot))
+        );
+        animation-timing-function:cubic-bezier(.22,.61,.36,1);
+    }
+
+    to{
+        transform:translateY(var(--reel-target-offset));
+    }
+}
+
+@keyframes reel-stop-accent{
+    0%,100%{
+        filter:contrast(1);
+        scale:1;
+    }
+
+    50%{
+        filter:contrast(1.12) brightness(1.06);
+        scale:1.04;
+    }
+}
+
+@media (prefers-reduced-motion:reduce){
+    .reel-track{
+        animation:reel-reduced-motion 1ms linear forwards;
+    }
+
+    .reel-symbol.is-target .roll-piece-image,
+    .reel-symbol.is-target .roll-piece-fallback{
+        animation:none;
+    }
+}
+
+@keyframes reel-reduced-motion{
     to{
         transform:translateY(var(--reel-target-offset));
     }
