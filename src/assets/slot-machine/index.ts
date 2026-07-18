@@ -1,12 +1,7 @@
-import chessPieceSheetUrl from "./source/chess-piece-sheet.png";
-import slotMachineSheetUrl from "./source/slot-machine-sheet.png";
+import slotMachineFrameUrl from "./generated/slot-machine-frame.png";
 
 export const SLOT_MACHINE_ASSETS = {
-  sourceSheets: {
-    machine: slotMachineSheetUrl,
-    chessPieces: chessPieceSheetUrl,
+  generated: {
+    frame: slotMachineFrameUrl,
   },
 } as const;
-
-export type SlotMachineSourceSheet =
-  keyof typeof SLOT_MACHINE_ASSETS.sourceSheets;

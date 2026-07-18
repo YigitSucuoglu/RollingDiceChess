@@ -43,7 +43,7 @@ Türetilmiş dosyalar kaynak sheet'lerin üzerine yazılmadan ayrı alt klasörl
 
 ## Kod import yapısı
 
-`index.ts`, iki resmî source sheet'i `SLOT_MACHINE_ASSETS.sourceSheets` üzerinden merkezi ve tip güvenli biçimde dışa aktarır. UI entegrasyonu başladığında bileşenler doğrudan `source/` yollarına bağlanmak yerine bu giriş noktasını kullanacaktır.
+`index.ts`, UI tarafından kullanılacak türetilmiş asset'leri merkezi ve tip güvenli biçimde dışa aktarır. Büyük source sheet'ler production bundle'a eklenmez; yalnızca asset üretimi için resmî kaynak olarak saklanır.
 
 ## Entegrasyon sırası
 
@@ -54,3 +54,7 @@ Türetilmiş dosyalar kaynak sheet'lerin üzerine yazılmadan ayrı alt klasörl
 5. Responsive görünümü ve final `currentRoll` eşleşmesini doğrula.
 
 Bu aşamada sprite kırpma, CSS `background-position`, reel animasyonu veya oyun görünümü değiştirilmemiştir.
+
+## Üretilen frame
+
+`generated/slot-machine-frame.png`, `slot-machine-sheet.png` içindeki üç makaralı ana kasadan türetilmiştir. Kaynak sheet değiştirilmemiştir. UI, büyük source sheet'i CSS ile konumlandırmak yerine merkezi `SLOT_MACHINE_ASSETS.generated.frame` export'u üzerinden bu bağımsız frame dosyasını kullanır.

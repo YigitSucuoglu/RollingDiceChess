@@ -3,6 +3,7 @@ import gameManager from "../../engine/GameManager";
 import Piece from "../Piece/Piece";
 import { useEffect, useState } from "react";
 import type { PieceType } from "../../types/Chess";
+import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
 
 const RIGHT_LABELS: readonly [PieceType, string][] = [
   ["pawn", "Pawn"],
@@ -111,11 +112,6 @@ function Board() {
     };
   }, [rollAnimation.roll, rollAnimation.isRolling]);
 
-  const rights = game.turnRights.getSnapshot();
-  const activeRights = RIGHT_LABELS.filter(
-    ([pieceType]) => rights[pieceType] > 0
-  );
-
   const squares = [];
 
   for (let row = 0; row < 8; row++) {
@@ -185,40 +181,42 @@ function Board() {
             <div className="roll-section">
               <div className="panel-label">Current roll</div>
 
-              <div
-                className={`roll-slots ${isRolling ? "rolling" : ""}`}
-                aria-busy={isRolling}
-              >
-                {rollAnimation.displayedRoll.map((pieceType, index) => (
-                  <div
-                    className={`roll-slot ${
-                      isRolling && index >= rollAnimation.stoppedSlots
-                        ? "rolling-slot"
-                        : "stopped-slot"
-                    }`}
-                    data-piece-type={pieceType}
-                    key={index}
-                  >
-                    <span className="roll-piece-symbol" aria-hidden="true">
-                      {PIECE_SYMBOLS[pieceType]}
-                    </span>
-                    <span>
-                      {RIGHT_LABELS.find(([type]) => type === pieceType)?.[1]}
-                    </span>
-                  </div>
-                ))}
+              <div className="slot-machine-frame">
+                <img
+                  alt=""
+                  aria-hidden="true"
+                  className="slot-machine-frame-image"
+                  src={SLOT_MACHINE_ASSETS.generated.frame}
+                />
+
+                <div
+                  className={`roll-slots ${isRolling ? "rolling" : ""}`}
+                  aria-busy={isRolling}
+                >
+                  {rollAnimation.displayedRoll.map((pieceType, index) => (
+                    <div
+                      className={`roll-slot reel-window reel-window-${
+                        index + 1
+                      } ${
+                        isRolling && index >= rollAnimation.stoppedSlots
+                          ? "rolling-slot"
+                          : "stopped-slot"
+                      }`}
+                      data-piece-type={pieceType}
+                      key={index}
+                    >
+                      <span className="roll-piece-symbol" aria-hidden="true">
+                        {PIECE_SYMBOLS[pieceType]}
+                      </span>
+                      <span className="roll-piece-label">
+                        {RIGHT_LABELS.find(([type]) => type === pieceType)?.[1]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="panel-label">Remaining rights</div>
-
-            <div className="rights-list">
-              {activeRights.map(([pieceType, label]) => (
-                <span className="right-item" key={pieceType}>
-                  {label} ×{rights[pieceType]}
-                </span>
-              ))}
-            </div>
           </>
         )}
       </div>
