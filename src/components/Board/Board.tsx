@@ -13,11 +13,25 @@ const RIGHT_LABELS: readonly [PieceType, string][] = [
   ["king", "King"],
 ];
 
+const PIECE_TYPES = RIGHT_LABELS.map(([pieceType]) => pieceType);
+const PIECE_SYMBOLS: Readonly<Record<PieceType, string>> = {
+  pawn: "♟",
+  knight: "♞",
+  bishop: "♝",
+  rook: "♜",
+  queen: "♛",
+  king: "♚",
+};
+
 const ROLLING_DURATION_MS = 1000;
+const SLOT_STOP_TIMES_MS = [700, 850, ROLLING_DURATION_MS] as const;
+const SLOT_CHANGE_INTERVAL_MS = 75;
 
 interface RollAnimationState {
-  turn: "white" | "black";
+  roll: readonly PieceType[];
+  displayedRoll: readonly PieceType[];
   isRolling: boolean;
+  stoppedSlots: number;
 }
 
 function Board() {
@@ -25,31 +39,77 @@ function Board() {
 
   const [, setRefresh] = useState(0);
   const [rollAnimation, setRollAnimation] = useState<RollAnimationState>({
-    turn: game.currentTurn,
+    roll: game.currentRoll,
+    displayedRoll: PIECE_TYPES.slice(0, 3),
     isRolling: true,
+    stoppedSlots: 0,
   });
 
-  if (rollAnimation.turn !== game.currentTurn) {
+  if (rollAnimation.roll !== game.currentRoll) {
     setRollAnimation({
-      turn: game.currentTurn,
+      roll: game.currentRoll,
+      displayedRoll: PIECE_TYPES.slice(0, 3),
       isRolling: true,
+      stoppedSlots: 0,
     });
   }
 
   const isRolling =
-    rollAnimation.turn !== game.currentTurn || rollAnimation.isRolling;
+    rollAnimation.roll !== game.currentRoll || rollAnimation.isRolling;
 
   useEffect(() => {
     if (!rollAnimation.isRolling) {
       return;
     }
 
-    const timeoutId = window.setTimeout(() => {
-      setRollAnimation((state) => ({ ...state, isRolling: false }));
-    }, ROLLING_DURATION_MS);
+    const targetRoll = rollAnimation.roll;
+    const startedAt = performance.now();
+    let frame = 0;
 
-    return () => window.clearTimeout(timeoutId);
-  }, [rollAnimation.turn, rollAnimation.isRolling]);
+    const intervalId = window.setInterval(() => {
+      const elapsed = performance.now() - startedAt;
+      frame++;
+
+      setRollAnimation((state) => ({
+        ...state,
+        displayedRoll: targetRoll.map((pieceType, index) => {
+          const remainingTime = SLOT_STOP_TIMES_MS[index] - elapsed;
+
+          if (remainingTime <= 0) {
+            return pieceType;
+          }
+
+          const updateEveryFrames =
+            remainingTime <= 225 ? 3 : remainingTime <= 400 ? 2 : 1;
+
+          return frame % updateEveryFrames === 0
+            ? PIECE_TYPES[(frame + index * 2) % PIECE_TYPES.length]
+            : state.displayedRoll[index];
+        }),
+      }));
+    }, SLOT_CHANGE_INTERVAL_MS);
+
+    const stopTimeouts = SLOT_STOP_TIMES_MS.map((stopTime, slotIndex) =>
+      window.setTimeout(() => {
+        setRollAnimation((state) => {
+          const displayedRoll = [...state.displayedRoll];
+          displayedRoll[slotIndex] = targetRoll[slotIndex];
+
+          return {
+            ...state,
+            displayedRoll,
+            isRolling: slotIndex < targetRoll.length - 1,
+            stoppedSlots: slotIndex + 1,
+          };
+        });
+      }, stopTime)
+    );
+
+    return () => {
+      window.clearInterval(intervalId);
+      stopTimeouts.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    };
+  }, [rollAnimation.roll, rollAnimation.isRolling]);
 
   const rights = game.turnRights.getSnapshot();
   const activeRights = RIGHT_LABELS.filter(
@@ -129,21 +189,24 @@ function Board() {
                 className={`roll-slots ${isRolling ? "rolling" : ""}`}
                 aria-busy={isRolling}
               >
-                {isRolling
-                  ? [0, 1, 2].map((slot) => (
-                      <div className="roll-slot rolling-slot" key={slot}>
-                        <span className="rolling-dot" />
-                      </div>
-                    ))
-                  : game.currentRoll.map((pieceType, index) => (
-                      <div
-                        className="roll-slot"
-                        data-piece-type={pieceType}
-                        key={`${index}-${pieceType}`}
-                      >
-                        {RIGHT_LABELS.find(([type]) => type === pieceType)?.[1]}
-                      </div>
-                    ))}
+                {rollAnimation.displayedRoll.map((pieceType, index) => (
+                  <div
+                    className={`roll-slot ${
+                      isRolling && index >= rollAnimation.stoppedSlots
+                        ? "rolling-slot"
+                        : "stopped-slot"
+                    }`}
+                    data-piece-type={pieceType}
+                    key={index}
+                  >
+                    <span className="roll-piece-symbol" aria-hidden="true">
+                      {PIECE_SYMBOLS[pieceType]}
+                    </span>
+                    <span>
+                      {RIGHT_LABELS.find(([type]) => type === pieceType)?.[1]}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 
