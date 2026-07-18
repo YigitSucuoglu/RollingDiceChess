@@ -4,35 +4,14 @@ import Piece from "../Piece/Piece";
 import { useEffect, useState } from "react";
 import type { PieceType } from "../../types/Chess";
 import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
-
-const RIGHT_LABELS: readonly [PieceType, string][] = [
-  ["pawn", "Pawn"],
-  ["knight", "Knight"],
-  ["bishop", "Bishop"],
-  ["rook", "Rook"],
-  ["queen", "Queen"],
-  ["king", "King"],
-];
-
-const PIECE_TYPES = RIGHT_LABELS.map(([pieceType]) => pieceType);
-const PIECE_SYMBOLS: Readonly<Record<PieceType, string>> = {
-  pawn: "♟",
-  knight: "♞",
-  bishop: "♝",
-  rook: "♜",
-  queen: "♛",
-  king: "♚",
-};
+import SlotReel from "../SlotReel/SlotReel";
 
 const ROLLING_DURATION_MS = 1000;
 const SLOT_STOP_TIMES_MS = [700, 850, ROLLING_DURATION_MS] as const;
-const SLOT_CHANGE_INTERVAL_MS = 75;
 
 interface RollAnimationState {
   roll: readonly PieceType[];
-  displayedRoll: readonly PieceType[];
   isRolling: boolean;
-  stoppedSlots: number;
 }
 
 function Board() {
@@ -41,17 +20,13 @@ function Board() {
   const [, setRefresh] = useState(0);
   const [rollAnimation, setRollAnimation] = useState<RollAnimationState>({
     roll: game.currentRoll,
-    displayedRoll: PIECE_TYPES.slice(0, 3),
     isRolling: true,
-    stoppedSlots: 0,
   });
 
   if (rollAnimation.roll !== game.currentRoll) {
     setRollAnimation({
       roll: game.currentRoll,
-      displayedRoll: PIECE_TYPES.slice(0, 3),
       isRolling: true,
-      stoppedSlots: 0,
     });
   }
 
@@ -63,53 +38,11 @@ function Board() {
       return;
     }
 
-    const targetRoll = rollAnimation.roll;
-    const startedAt = performance.now();
-    let frame = 0;
+    const timeoutId = window.setTimeout(() => {
+      setRollAnimation((state) => ({ ...state, isRolling: false }));
+    }, ROLLING_DURATION_MS);
 
-    const intervalId = window.setInterval(() => {
-      const elapsed = performance.now() - startedAt;
-      frame++;
-
-      setRollAnimation((state) => ({
-        ...state,
-        displayedRoll: targetRoll.map((pieceType, index) => {
-          const remainingTime = SLOT_STOP_TIMES_MS[index] - elapsed;
-
-          if (remainingTime <= 0) {
-            return pieceType;
-          }
-
-          const updateEveryFrames =
-            remainingTime <= 225 ? 3 : remainingTime <= 400 ? 2 : 1;
-
-          return frame % updateEveryFrames === 0
-            ? PIECE_TYPES[(frame + index * 2) % PIECE_TYPES.length]
-            : state.displayedRoll[index];
-        }),
-      }));
-    }, SLOT_CHANGE_INTERVAL_MS);
-
-    const stopTimeouts = SLOT_STOP_TIMES_MS.map((stopTime, slotIndex) =>
-      window.setTimeout(() => {
-        setRollAnimation((state) => {
-          const displayedRoll = [...state.displayedRoll];
-          displayedRoll[slotIndex] = targetRoll[slotIndex];
-
-          return {
-            ...state,
-            displayedRoll,
-            isRolling: slotIndex < targetRoll.length - 1,
-            stoppedSlots: slotIndex + 1,
-          };
-        });
-      }, stopTime)
-    );
-
-    return () => {
-      window.clearInterval(intervalId);
-      stopTimeouts.forEach((timeoutId) => window.clearTimeout(timeoutId));
-    };
+    return () => window.clearTimeout(timeoutId);
   }, [rollAnimation.roll, rollAnimation.isRolling]);
 
   const squares = [];
@@ -193,38 +126,13 @@ function Board() {
                   className={`roll-slots ${isRolling ? "rolling" : ""}`}
                   aria-busy={isRolling}
                 >
-                  {rollAnimation.displayedRoll.map((pieceType, index) => (
-                    <div
-                      className={`roll-slot reel-window reel-window-${
-                        index + 1
-                      } ${
-                        isRolling && index >= rollAnimation.stoppedSlots
-                          ? "rolling-slot"
-                          : "stopped-slot"
-                      }`}
-                      data-piece-type={pieceType}
+                  {rollAnimation.roll.map((_, index) => (
+                    <SlotReel
                       key={index}
-                    >
-                      <img
-                        alt={`${
-                          RIGHT_LABELS.find(([type]) => type === pieceType)?.[1]
-                        } chess piece`}
-                        className="roll-piece-image"
-                        onError={(event) => {
-                          event.currentTarget.hidden = true;
-                          event.currentTarget.nextElementSibling?.classList.add(
-                            "is-visible"
-                          );
-                        }}
-                        src={SLOT_MACHINE_ASSETS.symbols[pieceType]}
-                      />
-                      <span
-                        aria-hidden="true"
-                        className="roll-piece-fallback"
-                      >
-                        {PIECE_SYMBOLS[pieceType]}
-                      </span>
-                    </div>
+                      reelIndex={index}
+                      roll={rollAnimation.roll}
+                      stopAfterMs={SLOT_STOP_TIMES_MS[index]}
+                    />
                   ))}
                 </div>
               </div>

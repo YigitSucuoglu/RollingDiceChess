@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.5.4
+v0.5.5
 
 ---
 
@@ -33,6 +33,7 @@ v0.5.4
 - Slot machine asset pipeline
 - Slot machine frame integration with calibrated reel windows
 - Gold chess symbol assets and roulette integration
+- Independent reel component foundation
 - Winner screen
 
 ---
@@ -40,7 +41,7 @@ v0.5.4
 ## Current Sprint
 
 Completed:
-- R-05C — Extract and Integrate Gold Chess Symbols
+- R-06A — Build Reel System
 
 Next:
 - To be defined by the project owner
