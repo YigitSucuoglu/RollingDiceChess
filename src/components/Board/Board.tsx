@@ -205,11 +205,24 @@ function Board() {
                       data-piece-type={pieceType}
                       key={index}
                     >
-                      <span className="roll-piece-symbol" aria-hidden="true">
+                      <img
+                        alt={`${
+                          RIGHT_LABELS.find(([type]) => type === pieceType)?.[1]
+                        } chess piece`}
+                        className="roll-piece-image"
+                        onError={(event) => {
+                          event.currentTarget.hidden = true;
+                          event.currentTarget.nextElementSibling?.classList.add(
+                            "is-visible"
+                          );
+                        }}
+                        src={SLOT_MACHINE_ASSETS.symbols[pieceType]}
+                      />
+                      <span
+                        aria-hidden="true"
+                        className="roll-piece-fallback"
+                      >
                         {PIECE_SYMBOLS[pieceType]}
-                      </span>
-                      <span className="roll-piece-label">
-                        {RIGHT_LABELS.find(([type]) => type === pieceType)?.[1]}
                       </span>
                     </div>
                   ))}

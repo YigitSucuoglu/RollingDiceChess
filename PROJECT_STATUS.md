@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.5.3
+v0.5.4
 
 ---
 
@@ -32,6 +32,7 @@ v0.5.3
 - Roulette slot animation
 - Slot machine asset pipeline
 - Slot machine frame integration with calibrated reel windows
+- Gold chess symbol assets and roulette integration
 - Winner screen
 
 ---
@@ -39,7 +40,7 @@ v0.5.3
 ## Current Sprint
 
 Completed:
-- R-05B — Integrate Slot Machine Frame (review calibration completed)
+- R-05C — Extract and Integrate Gold Chess Symbols
 
 Next:
 - To be defined by the project owner

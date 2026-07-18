@@ -115,21 +115,41 @@
     transition:background-color .2s ease, border-color .2s ease;
 }
 
-.roll-piece-symbol{
-    max-width:80%;
+.roll-piece-image{
+    width:76%;
+    height:76%;
+
+    display:block;
+
+    object-fit:contain;
+}
+
+.roll-slot[data-piece-type="pawn"] .roll-piece-image{
+    width:84%;
+    height:84%;
+}
+
+.roll-slot[data-piece-type="knight"] .roll-piece-image{
+    width:80%;
+    height:80%;
+    transform:translateX(2%);
+}
+
+.roll-slot[data-piece-type="queen"] .roll-piece-image,
+.roll-slot[data-piece-type="king"] .roll-piece-image{
+    width:72%;
+    height:72%;
+}
+
+.roll-piece-fallback{
+    display:none;
 
     font-size:min(30cqw,30cqh,30px);
     line-height:1;
 }
 
-.roll-piece-label{
-    max-width:100%;
-
-    overflow:hidden;
-    font-size:clamp(8px,15cqw,14px);
-    line-height:1.1;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+.roll-piece-fallback.is-visible{
+    display:inline;
 }
 
 @keyframes slot-spin-pulse{
@@ -211,11 +231,5 @@
 
     .roll-slot{
         padding:3px;
-    }
-}
-
-@media (max-width:360px){
-    .roll-piece-label{
-        display:none;
     }
 }
