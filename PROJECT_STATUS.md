@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.5.1
+v0.5.2
 
 ---
 
@@ -31,6 +31,7 @@ v0.5.1
 - Current Roll panel (3 fixed slots)
 - Roll animation state and move lock
 - Roulette slot animation
+- Slot machine asset pipeline
 - Winner screen
 
 ---
@@ -38,7 +39,7 @@ v0.5.1
 ## Current Sprint
 
 Completed:
-- R-04 — Roulette Slot Animation
+- R-05A — Build Slot Asset Pipeline
 
 Next:
 - To be defined by the project owner
