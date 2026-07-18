@@ -61,9 +61,44 @@
     user-select:none;
 }
 
+.slot-machine-lever{
+    width:38%;
+
+    display:block;
+    position:absolute;
+    left:82%;
+    bottom:5%;
+    z-index:0;
+
+    pointer-events:none;
+    transform-origin:28% 76%;
+    user-select:none;
+}
+
+.slot-machine-lever.is-pulling{
+    animation:lever-pull 560ms cubic-bezier(.3,.7,.25,1) both;
+    will-change:transform;
+}
+
+.slot-machine-frame-image,
+.roll-slots{
+    position:relative;
+    z-index:1;
+}
+
 .roll-slots{
     position:absolute;
     inset:0;
+}
+
+@keyframes lever-pull{
+    0%,100%{
+        transform:rotate(0deg) translate(0);
+    }
+
+    38%,55%{
+        transform:rotate(20deg) translate(1%,2%);
+    }
 }
 
 .roll-button{
@@ -184,9 +219,21 @@
     position:absolute;
 }
 
+@media (max-width:600px){
+    .slot-machine-lever{
+        display:none;
+    }
+}
+
 @media (max-width:480px){
     .turn-panel{
         padding:10px;
     }
 
+}
+
+@media (prefers-reduced-motion:reduce){
+    .slot-machine-lever.is-pulling{
+        animation:none;
+    }
 }

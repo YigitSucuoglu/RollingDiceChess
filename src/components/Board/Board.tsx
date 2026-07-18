@@ -151,6 +151,16 @@ function Board() {
                 <img
                   alt=""
                   aria-hidden="true"
+                  className={`slot-machine-lever ${
+                    rollPhase === "spinning" ? "is-pulling" : ""
+                  }`}
+                  key={`lever-${rollAnimation.spinId}`}
+                  src={SLOT_MACHINE_ASSETS.generated.lever}
+                />
+
+                <img
+                  alt=""
+                  aria-hidden="true"
                   className="slot-machine-frame-image"
                   src={SLOT_MACHINE_ASSETS.generated.frame}
                 />
