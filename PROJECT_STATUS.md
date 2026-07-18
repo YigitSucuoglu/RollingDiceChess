@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.5.5
+v0.5.6
 
 ---
 
@@ -34,6 +34,7 @@ v0.5.5
 - Slot machine frame integration with calibrated reel windows
 - Gold chess symbol assets and roulette integration
 - Independent reel component foundation
+- Real vertical reel animation with verified sequential symbol travel
 - Winner screen
 
 ---
@@ -41,7 +42,7 @@ v0.5.5
 ## Current Sprint
 
 Completed:
-- R-06A — Build Reel System
+- R-06B — Real Vertical Reel Animation (review fix verified)
 
 Next:
 - To be defined by the project owner

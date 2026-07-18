@@ -15,28 +15,28 @@
     height:52%;
 }
 
-.reel-track,
+.reel-track{
+    width:100%;
+    height:var(--reel-track-height);
+
+    display:grid;
+    grid-template-rows:repeat(
+        var(--reel-symbol-count),
+        minmax(0,1fr)
+    );
+
+    animation:reel-spin var(--reel-duration) linear forwards;
+    will-change:transform;
+}
+
 .reel-symbol{
     width:100%;
     height:100%;
-}
 
-.reel-symbol{
-    display:none;
+    display:flex;
     align-items:center;
     justify-content:center;
-}
-
-.reel-symbol.is-active{
-    display:flex;
-}
-
-.rolling-slot{
-    animation:slot-spin-pulse .15s ease-in-out infinite alternate;
-}
-
-.stopped-slot{
-    transition:background-color .2s ease, border-color .2s ease;
+    min-height:0;
 }
 
 .roll-piece-image{
@@ -48,19 +48,19 @@
     object-fit:contain;
 }
 
-.slot-reel[data-piece-type="pawn"] .roll-piece-image{
+.reel-symbol[data-piece-type="pawn"] .roll-piece-image{
     width:84%;
     height:84%;
 }
 
-.slot-reel[data-piece-type="knight"] .roll-piece-image{
+.reel-symbol[data-piece-type="knight"] .roll-piece-image{
     width:80%;
     height:80%;
     transform:translateX(2%);
 }
 
-.slot-reel[data-piece-type="queen"] .roll-piece-image,
-.slot-reel[data-piece-type="king"] .roll-piece-image{
+.reel-symbol[data-piece-type="queen"] .roll-piece-image,
+.reel-symbol[data-piece-type="king"] .roll-piece-image{
     width:72%;
     height:72%;
 }
@@ -76,13 +76,13 @@
     display:inline;
 }
 
-@keyframes slot-spin-pulse{
+@keyframes reel-spin{
     from{
-        opacity:.65;
+        transform:translateY(0);
     }
 
     to{
-        opacity:1;
+        transform:translateY(var(--reel-target-offset));
     }
 }
 

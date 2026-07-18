@@ -12,6 +12,7 @@ const SLOT_STOP_TIMES_MS = [700, 850, ROLLING_DURATION_MS] as const;
 interface RollAnimationState {
   roll: readonly PieceType[];
   isRolling: boolean;
+  spinId: number;
 }
 
 function Board() {
@@ -21,12 +22,14 @@ function Board() {
   const [rollAnimation, setRollAnimation] = useState<RollAnimationState>({
     roll: game.currentRoll,
     isRolling: true,
+    spinId: 0,
   });
 
   if (rollAnimation.roll !== game.currentRoll) {
     setRollAnimation({
       roll: game.currentRoll,
       isRolling: true,
+      spinId: rollAnimation.spinId + 1,
     });
   }
 
@@ -128,10 +131,10 @@ function Board() {
                 >
                   {rollAnimation.roll.map((_, index) => (
                     <SlotReel
-                      key={index}
+                      key={`${rollAnimation.spinId}-${index}`}
                       reelIndex={index}
-                      roll={rollAnimation.roll}
                       stopAfterMs={SLOT_STOP_TIMES_MS[index]}
+                      targetPiece={rollAnimation.roll[index]}
                     />
                   ))}
                 </div>
