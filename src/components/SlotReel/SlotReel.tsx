@@ -50,6 +50,7 @@ const REEL_SYMBOLS: readonly {
 ];
 
 interface SlotReelProps {
+  isSpinning: boolean;
   reelIndex: number;
   targetPiece: PieceType;
   stopAfterMs: number;
@@ -64,7 +65,12 @@ type ReelStyle = CSSProperties & {
   "--reel-track-height": string;
 };
 
-function SlotReel({ reelIndex, targetPiece, stopAfterMs }: SlotReelProps) {
+function SlotReel({
+  isSpinning,
+  reelIndex,
+  targetPiece,
+  stopAfterMs,
+}: SlotReelProps) {
   const trackSymbols = Array.from(
     { length: REEL_REPEAT_COUNT },
     () => REEL_SYMBOLS
@@ -88,11 +94,19 @@ function SlotReel({ reelIndex, targetPiece, stopAfterMs }: SlotReelProps) {
 
   return (
     <div
-      aria-label={`${targetPiece} reel`}
+      aria-label={
+        isSpinning
+          ? `Reel ${reelIndex + 1} spinning`
+          : `Reel ${reelIndex + 1}: ${targetPiece}`
+      }
       className={`slot-reel reel-window reel-window-${reelIndex + 1}`}
       role="img"
     >
-      <div aria-hidden="true" className="reel-track" style={reelStyle}>
+      <div
+        aria-hidden="true"
+        className={`reel-track ${isSpinning ? "is-spinning" : ""}`}
+        style={reelStyle}
+      >
         {trackSymbols.map((symbol, trackIndex) => (
           <div
             className={`reel-symbol ${

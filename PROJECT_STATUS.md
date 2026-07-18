@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.5.7
+v0.5.8
 
 ---
 
@@ -36,6 +36,7 @@ v0.5.7
 - Independent reel component foundation
 - Real vertical reel animation with verified sequential symbol travel
 - Reel landing polish with easing, subtle overshoot, and reduced-motion support
+- Manual ROLL button and explicit ready, spinning, and resolved UI phases
 - Winner screen
 
 ---
@@ -43,7 +44,7 @@ v0.5.7
 ## Current Sprint
 
 Completed:
-- R-06C — Reel Landing Polish
+- R-07A — Add Roll Button and Manual Spin Start
 
 Next:
 - To be defined by the project owner
@@ -57,3 +58,4 @@ Next:
 - Animation must never modify engine state.
 - Winner state overrides the roll display.
 - Board pieces and reel symbols will use the same selectable piece theme in a future phase.
+- The ROLL button will also trigger the lever animation in a future phase.

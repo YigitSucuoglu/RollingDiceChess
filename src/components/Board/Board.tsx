@@ -1,7 +1,7 @@
 import "./Board.css";
 import gameManager from "../../engine/GameManager";
 import Piece from "../Piece/Piece";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PieceType } from "../../types/Chess";
 import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
 import SlotReel from "../SlotReel/SlotReel";
@@ -9,44 +9,74 @@ import SlotReel from "../SlotReel/SlotReel";
 const ROLLING_DURATION_MS = 1000;
 const SLOT_STOP_TIMES_MS = [700, 850, ROLLING_DURATION_MS] as const;
 
+type RollPhase = "ready" | "spinning" | "resolved";
+
 interface RollAnimationState {
+  displayedRoll: readonly PieceType[];
+  phase: RollPhase;
   roll: readonly PieceType[];
-  isRolling: boolean;
   spinId: number;
 }
+
+const INITIAL_REEL_DISPLAY: readonly PieceType[] = [
+  "pawn",
+  "knight",
+  "bishop",
+];
 
 function Board() {
   const game = gameManager.getGame();
 
   const [, setRefresh] = useState(0);
+  const spinStartedForRollRef = useRef<readonly PieceType[] | null>(null);
   const [rollAnimation, setRollAnimation] = useState<RollAnimationState>({
+    displayedRoll: INITIAL_REEL_DISPLAY,
+    phase: "ready",
     roll: game.currentRoll,
-    isRolling: true,
     spinId: 0,
   });
 
   if (rollAnimation.roll !== game.currentRoll) {
     setRollAnimation({
+      displayedRoll: rollAnimation.displayedRoll,
+      phase: "ready",
       roll: game.currentRoll,
-      isRolling: true,
-      spinId: rollAnimation.spinId + 1,
+      spinId: rollAnimation.spinId,
     });
   }
 
-  const isRolling =
-    rollAnimation.roll !== game.currentRoll || rollAnimation.isRolling;
+  const rollPhase =
+    rollAnimation.roll === game.currentRoll ? rollAnimation.phase : "ready";
+  const isInputLocked = rollPhase !== "resolved";
 
   useEffect(() => {
-    if (!rollAnimation.isRolling) {
+    if (rollAnimation.phase !== "spinning") {
       return;
     }
 
     const timeoutId = window.setTimeout(() => {
-      setRollAnimation((state) => ({ ...state, isRolling: false }));
+      setRollAnimation((state) => ({ ...state, phase: "resolved" }));
     }, ROLLING_DURATION_MS);
 
     return () => window.clearTimeout(timeoutId);
-  }, [rollAnimation.roll, rollAnimation.isRolling]);
+  }, [rollAnimation.phase, rollAnimation.spinId]);
+
+  const startRoll = () => {
+    if (
+      rollPhase !== "ready" ||
+      spinStartedForRollRef.current === game.currentRoll
+    ) {
+      return;
+    }
+
+    spinStartedForRollRef.current = game.currentRoll;
+    setRollAnimation((state) => ({
+      ...state,
+      displayedRoll: game.currentRoll,
+      phase: "spinning",
+      spinId: state.spinId + 1,
+    }));
+  };
 
   const squares = [];
 
@@ -71,7 +101,7 @@ function Board() {
             isSelected ? "selected" : ""
           }`}
           onClick={() => {
-            if (isRolling) {
+            if (isInputLocked) {
               return;
             }
 
@@ -126,19 +156,31 @@ function Board() {
                 />
 
                 <div
-                  className={`roll-slots ${isRolling ? "rolling" : ""}`}
-                  aria-busy={isRolling}
+                  className={`roll-slots ${
+                    rollPhase === "spinning" ? "rolling" : ""
+                  }`}
+                  aria-busy={rollPhase === "spinning"}
                 >
-                  {rollAnimation.roll.map((_, index) => (
+                  {rollAnimation.displayedRoll.map((pieceType, index) => (
                     <SlotReel
                       key={`${rollAnimation.spinId}-${index}`}
+                      isSpinning={rollPhase === "spinning"}
                       reelIndex={index}
                       stopAfterMs={SLOT_STOP_TIMES_MS[index]}
-                      targetPiece={rollAnimation.roll[index]}
+                      targetPiece={pieceType}
                     />
                   ))}
                 </div>
               </div>
+
+              <button
+                className="roll-button"
+                disabled={rollPhase !== "ready"}
+                onClick={startRoll}
+                type="button"
+              >
+                ROLL
+              </button>
             </div>
 
           </>
