@@ -66,32 +66,6 @@
     inset:0;
 }
 
-.roll-slot{
-    box-sizing:border-box;
-    padding:4px;
-
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:2px;
-
-    border:1px solid rgba(54,31,10,.5);
-    border-radius:4px;
-
-    background:rgba(255,248,225,.18);
-    color:#241506;
-    font-size:14px;
-    font-weight:700;
-    text-align:center;
-
-    overflow:hidden;
-    container-type:size;
-    position:absolute;
-    top:21.5%;
-    height:52%;
-}
-
 .reel-window-1{
     left:20.1%;
     width:20.5%;
@@ -105,61 +79,6 @@
 .reel-window-3{
     left:63.3%;
     width:20.8%;
-}
-
-.rolling-slot{
-    animation:slot-spin-pulse .15s ease-in-out infinite alternate;
-}
-
-.stopped-slot{
-    transition:background-color .2s ease, border-color .2s ease;
-}
-
-.roll-piece-image{
-    width:76%;
-    height:76%;
-
-    display:block;
-
-    object-fit:contain;
-}
-
-.roll-slot[data-piece-type="pawn"] .roll-piece-image{
-    width:84%;
-    height:84%;
-}
-
-.roll-slot[data-piece-type="knight"] .roll-piece-image{
-    width:80%;
-    height:80%;
-    transform:translateX(2%);
-}
-
-.roll-slot[data-piece-type="queen"] .roll-piece-image,
-.roll-slot[data-piece-type="king"] .roll-piece-image{
-    width:72%;
-    height:72%;
-}
-
-.roll-piece-fallback{
-    display:none;
-
-    font-size:min(30cqw,30cqh,30px);
-    line-height:1;
-}
-
-.roll-piece-fallback.is-visible{
-    display:inline;
-}
-
-@keyframes slot-spin-pulse{
-    from{
-        opacity:.65;
-    }
-
-    to{
-        opacity:1;
-    }
 }
 
 .board{
@@ -229,7 +148,4 @@
         padding:10px;
     }
 
-    .roll-slot{
-        padding:3px;
-    }
 }
