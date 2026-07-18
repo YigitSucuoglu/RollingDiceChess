@@ -25,8 +25,12 @@
         minmax(0,1fr)
     );
 
-    animation:reel-spin var(--reel-duration) both;
+    transform:translateY(var(--reel-target-offset));
     will-change:transform;
+}
+
+.reel-track.is-spinning{
+    animation:reel-spin var(--reel-duration) both;
 }
 
 .reel-symbol{
@@ -76,8 +80,8 @@
     display:inline;
 }
 
-.reel-symbol.is-target .roll-piece-image,
-.reel-symbol.is-target .roll-piece-fallback{
+.reel-track.is-spinning .reel-symbol.is-target .roll-piece-image,
+.reel-track.is-spinning .reel-symbol.is-target .roll-piece-fallback{
     animation:reel-stop-accent 150ms ease-out var(--reel-accent-delay) both;
 }
 
@@ -112,12 +116,12 @@
 }
 
 @media (prefers-reduced-motion:reduce){
-    .reel-track{
+    .reel-track.is-spinning{
         animation:reel-reduced-motion 1ms linear forwards;
     }
 
-    .reel-symbol.is-target .roll-piece-image,
-    .reel-symbol.is-target .roll-piece-fallback{
+    .reel-track.is-spinning .reel-symbol.is-target .roll-piece-image,
+    .reel-track.is-spinning .reel-symbol.is-target .roll-piece-fallback{
         animation:none;
     }
 }
