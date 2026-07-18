@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.5.2
+v0.5.3
 
 ---
 
@@ -27,11 +27,11 @@ v0.5.2
 - Automatic pass system completed
 
 ### UI
-- Remaining Rights panel
 - Current Roll panel (3 fixed slots)
 - Roll animation state and move lock
 - Roulette slot animation
 - Slot machine asset pipeline
+- Slot machine frame integration with calibrated reel windows
 - Winner screen
 
 ---
@@ -39,7 +39,7 @@ v0.5.2
 ## Current Sprint
 
 Completed:
-- R-05A — Build Slot Asset Pipeline
+- R-05B — Integrate Slot Machine Frame (review calibration completed)
 
 Next:
 - To be defined by the project owner

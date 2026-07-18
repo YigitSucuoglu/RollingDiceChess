@@ -1,5 +1,5 @@
 .game-layout{
-    width:min(80vw,80vh);
+    width:min(80vw,calc(100vh - 280px));
 
     display:flex;
     flex-direction:column;
@@ -42,27 +42,69 @@
     text-transform:uppercase;
 }
 
+.slot-machine-frame{
+    width:min(100%,440px);
+    height:min(226px,20vh);
+    margin-inline:auto;
+
+    position:relative;
+}
+
+.slot-machine-frame-image{
+    width:100%;
+    height:100%;
+
+    display:block;
+
+    object-fit:fill;
+    pointer-events:none;
+    user-select:none;
+}
+
 .roll-slots{
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:8px;
+    position:absolute;
+    inset:0;
 }
 
 .roll-slot{
-    min-height:42px;
-    padding:8px;
+    box-sizing:border-box;
+    padding:4px;
 
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
+    gap:2px;
 
-    border:1px solid rgba(255,255,255,.16);
-    border-radius:8px;
+    border:1px solid rgba(54,31,10,.5);
+    border-radius:4px;
 
-    background:rgba(255,255,255,.08);
+    background:rgba(255,248,225,.18);
+    color:#241506;
     font-size:14px;
     font-weight:700;
     text-align:center;
+
+    overflow:hidden;
+    container-type:size;
+    position:absolute;
+    top:21.5%;
+    height:52%;
+}
+
+.reel-window-1{
+    left:20.1%;
+    width:20.5%;
+}
+
+.reel-window-2{
+    left:42.3%;
+    width:19%;
+}
+
+.reel-window-3{
+    left:63.3%;
+    width:20.8%;
 }
 
 .rolling-slot{
@@ -74,37 +116,30 @@
 }
 
 .roll-piece-symbol{
-    margin-right:6px;
+    max-width:80%;
 
-    font-size:22px;
+    font-size:min(30cqw,30cqh,30px);
     line-height:1;
+}
+
+.roll-piece-label{
+    max-width:100%;
+
+    overflow:hidden;
+    font-size:clamp(8px,15cqw,14px);
+    line-height:1.1;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
 @keyframes slot-spin-pulse{
     from{
         opacity:.65;
-        transform:translateY(-2px);
     }
 
     to{
         opacity:1;
-        transform:translateY(2px);
     }
-}
-
-.rights-list{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-}
-
-.right-item{
-    padding:4px 8px;
-
-    border-radius:6px;
-
-    background:rgba(255,255,255,.1);
-    font-size:14px;
 }
 
 .board{
@@ -174,13 +209,13 @@
         padding:10px;
     }
 
-    .roll-slots{
-        gap:6px;
-    }
-
     .roll-slot{
-        min-height:38px;
-        padding:6px 4px;
-        font-size:12px;
+        padding:3px;
+    }
+}
+
+@media (max-width:360px){
+    .roll-piece-label{
+        display:none;
     }
 }
