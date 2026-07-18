@@ -58,3 +58,5 @@ Bu aşamada sprite kırpma, CSS `background-position`, reel animasyonu veya oyun
 ## Üretilen frame
 
 `generated/slot-machine-frame.png`, `slot-machine-sheet.png` içindeki üç makaralı ana kasadan türetilmiştir. Kaynak sheet değiştirilmemiştir. UI, büyük source sheet'i CSS ile konumlandırmak yerine merkezi `SLOT_MACHINE_ASSETS.generated.frame` export'u üzerinden bu bağımsız frame dosyasını kullanır.
+
+`generated/pawn.png`, `knight.png`, `bishop.png`, `rook.png`, `queen.png` ve `king.png`, `chess-piece-sheet.png` içindeki altın taşlardan türetilmiş şeffaf ve optimize edilmiş sembollerdir. UI bu dosyalara yalnızca `SLOT_MACHINE_ASSETS.symbols` map'i üzerinden erişir; source sheet production bundle'a girmez.
