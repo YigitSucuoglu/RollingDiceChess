@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.5.6
+v0.5.7
 
 ---
 
@@ -35,6 +35,7 @@ v0.5.6
 - Gold chess symbol assets and roulette integration
 - Independent reel component foundation
 - Real vertical reel animation with verified sequential symbol travel
+- Reel landing polish with easing, subtle overshoot, and reduced-motion support
 - Winner screen
 
 ---
@@ -42,7 +43,7 @@ v0.5.6
 ## Current Sprint
 
 Completed:
-- R-06B — Real Vertical Reel Animation (review fix verified)
+- R-06C — Reel Landing Polish
 
 Next:
 - To be defined by the project owner
@@ -55,3 +56,4 @@ Next:
 - remainingRights changes after each move.
 - Animation must never modify engine state.
 - Winner state overrides the roll display.
+- Board pieces and reel symbols will use the same selectable piece theme in a future phase.
