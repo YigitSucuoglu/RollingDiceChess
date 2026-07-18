@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.5.0
+v0.5.1
 
 ---
 
@@ -30,6 +30,7 @@ v0.5.0
 - Remaining Rights panel
 - Current Roll panel (3 fixed slots)
 - Roll animation state and move lock
+- Roulette slot animation
 - Winner screen
 
 ---
@@ -37,7 +38,7 @@ v0.5.0
 ## Current Sprint
 
 Completed:
-- R-03 — Roll Animation State
+- R-04 — Roulette Slot Animation
 
 Next:
 - To be defined by the project owner

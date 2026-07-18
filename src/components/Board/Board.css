@@ -66,36 +66,29 @@
 }
 
 .rolling-slot{
-    opacity:.7;
+    animation:slot-spin-pulse .15s ease-in-out infinite alternate;
 }
 
-.rolling-dot{
-    width:10px;
-    height:10px;
-
-    border-radius:50%;
-
-    background:rgba(255,255,255,.85);
-    animation:rolling-pulse .7s ease-in-out infinite alternate;
+.stopped-slot{
+    transition:background-color .2s ease, border-color .2s ease;
 }
 
-.rolling-slot:nth-child(2) .rolling-dot{
-    animation-delay:.15s;
+.roll-piece-symbol{
+    margin-right:6px;
+
+    font-size:22px;
+    line-height:1;
 }
 
-.rolling-slot:nth-child(3) .rolling-dot{
-    animation-delay:.3s;
-}
-
-@keyframes rolling-pulse{
+@keyframes slot-spin-pulse{
     from{
-        opacity:.35;
-        transform:scale(.7);
+        opacity:.65;
+        transform:translateY(-2px);
     }
 
     to{
         opacity:1;
-        transform:scale(1.15);
+        transform:translateY(2px);
     }
 }
 
