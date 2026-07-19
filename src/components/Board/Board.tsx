@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import type { PieceType } from "../../types/Chess";
 import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
 import SlotReel from "../SlotReel/SlotReel";
+import GameResultModal from "../GameResultModal/GameResultModal";
+import { useNavigate } from "react-router-dom";
 
 const ROLLING_DURATION_MS = 1000;
 const SLOT_STOP_TIMES_MS = [700, 850, ROLLING_DURATION_MS] as const;
@@ -26,6 +28,7 @@ const INITIAL_REEL_DISPLAY: readonly PieceType[] = [
 
 function Board() {
   const game = gameManager.getGame();
+  const navigate = useNavigate();
 
   const [, setRefresh] = useState(0);
   const spinStartedForRollRef = useRef<readonly PieceType[] | null>(null);
@@ -47,7 +50,7 @@ function Board() {
 
   const rollPhase =
     rollAnimation.roll === game.currentRoll ? rollAnimation.phase : "ready";
-  const isInputLocked = rollPhase !== "resolved";
+  const isInputLocked = game.winner !== null || rollPhase !== "resolved";
 
   useEffect(() => {
     if (rollAnimation.phase !== "spinning") {
@@ -55,14 +58,19 @@ function Board() {
     }
 
     const timeoutId = window.setTimeout(() => {
+      if (game.winner) {
+        return;
+      }
+
       setRollAnimation((state) => ({ ...state, phase: "resolved" }));
     }, ROLLING_DURATION_MS);
 
     return () => window.clearTimeout(timeoutId);
-  }, [rollAnimation.phase, rollAnimation.spinId]);
+  }, [game.winner, rollAnimation.phase, rollAnimation.spinId]);
 
   const startRoll = () => {
     if (
+      game.winner !== null ||
       rollPhase !== "ready" ||
       spinStartedForRollRef.current === game.currentRoll
     ) {
@@ -76,6 +84,25 @@ function Board() {
       phase: "spinning",
       spinId: state.spinId + 1,
     }));
+  };
+
+  const startNewGame = () => {
+    gameManager.newGame();
+    const newGame = gameManager.getGame();
+
+    spinStartedForRollRef.current = null;
+    setRollAnimation((state) => ({
+      displayedRoll: INITIAL_REEL_DISPLAY,
+      phase: "ready",
+      roll: newGame.currentRoll,
+      spinId: state.spinId + 1,
+    }));
+    setRefresh((value) => value + 1);
+  };
+
+  const returnToMainMenu = () => {
+    gameManager.newGame();
+    navigate("/");
   };
 
   const squares = [];
@@ -133,18 +160,15 @@ function Board() {
 
   return (
     <div className="game-layout">
-      <div className="turn-panel" aria-live="polite">
-        {game.winner ? (
-          <div className="winner-text">
-            {game.winner === "white" ? "White" : "Black"} wins
-          </div>
-        ) : (
-          <>
-            <div className="turn-text">
-              {game.currentTurn === "white" ? "White" : "Black"} to move
-            </div>
+      <div
+        aria-hidden={game.winner ? true : undefined}
+        className="turn-panel"
+      >
+        <div className="turn-text">
+          {game.currentTurn === "white" ? "White" : "Black"} to move
+        </div>
 
-            <div className="roll-section">
+        <div className="roll-section">
               <div className="slot-machine-frame">
                 <img
                   alt=""
@@ -183,19 +207,30 @@ function Board() {
 
               <button
                 className="roll-button"
-                disabled={rollPhase !== "ready"}
+                disabled={game.winner !== null || rollPhase !== "ready"}
                 onClick={startRoll}
                 type="button"
               >
                 ROLL
               </button>
-            </div>
-
-          </>
-        )}
+        </div>
       </div>
 
-      <div className="board">{squares}</div>
+      <div
+        aria-hidden={game.winner ? true : undefined}
+        className="board"
+      >
+        {squares}
+      </div>
+
+      {game.winner && (
+        <GameResultModal
+          endReason="king-captured"
+          onMainMenu={returnToMainMenu}
+          onPlayAgain={startNewGame}
+          winner={game.winner}
+        />
+      )}
     </div>
   );
 }
