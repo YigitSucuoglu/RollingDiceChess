@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.5.9
+v0.6.0
 
 ---
 
@@ -38,6 +38,7 @@ v0.5.9
 - Reel landing polish with easing, subtle overshoot, and reduced-motion support
 - Manual ROLL button and explicit ready, spinning, and resolved UI phases
 - Decorative lever asset with ROLL-synchronized animation
+- Premium compact top Game HUD with integrated slot presentation
 - Winner screen
 
 ---
@@ -45,7 +46,7 @@ v0.5.9
 ## Current Sprint
 
 Completed:
-- R-07B — Lever Asset and Synchronized Animation
+- UI-01 — Redesign Top Game HUD
 
 Next:
 - To be defined by the project owner

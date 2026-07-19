@@ -3,48 +3,72 @@
 
     display:flex;
     flex-direction:column;
-    gap:14px;
+    gap:8px;
 }
 
 .turn-panel{
-    min-height:68px;
-    padding:12px 16px;
+    padding:7px 14px 9px;
 
     display:flex;
     flex-direction:column;
     justify-content:center;
-    gap:8px;
+    gap:4px;
 
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:10px;
+    border:1px solid rgba(202,151,58,.7);
+    border-radius:12px;
 
-    background:#2b2b2b;
-    color:white;
+    background:
+        radial-gradient(circle at 50% 45%,rgba(116,73,25,.2),transparent 52%),
+        linear-gradient(180deg,#25211c 0%,#141210 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,232,178,.1),
+        inset 0 -12px 24px rgba(0,0,0,.24),
+        0 6px 18px rgba(0,0,0,.28);
+    color:#fff6dc;
 }
 
 .turn-text,
 .winner-text{
-    font-size:18px;
-    font-weight:700;
+    min-height:30px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+
+    color:#fff3c7;
+    font-size:clamp(18px,2.2vh,24px);
+    font-weight:800;
+    letter-spacing:.11em;
+    line-height:1;
+    text-align:center;
+    text-shadow:0 1px 0 #000,0 0 14px rgba(217,164,66,.22);
+    text-transform:uppercase;
+}
+
+.turn-text::before,
+.turn-text::after{
+    width:min(8vw,64px);
+    height:1px;
+
+    content:"";
+    background:linear-gradient(90deg,transparent,#c8973a);
+}
+
+.turn-text::after{
+    background:linear-gradient(90deg,#c8973a,transparent);
 }
 
 .roll-section{
     display:flex;
     flex-direction:column;
-    gap:6px;
-}
-
-.panel-label{
-    color:rgba(255,255,255,.72);
-    font-size:12px;
-    font-weight:600;
-    letter-spacing:.04em;
-    text-transform:uppercase;
+    align-items:center;
+    gap:5px;
 }
 
 .slot-machine-frame{
-    width:min(100%,440px);
-    height:min(226px,20vh);
+    width:min(100%,360px);
+    height:clamp(128px,15vh,160px);
     margin-inline:auto;
 
     position:relative;
@@ -56,6 +80,7 @@
 
     display:block;
 
+    mix-blend-mode:screen;
     object-fit:fill;
     pointer-events:none;
     user-select:none;
@@ -107,11 +132,14 @@
     margin-inline:auto;
     padding:8px 24px;
 
-    border:2px solid #e8b84b;
-    border-radius:8px;
+    border:1px solid #e6bb61;
+    border-radius:9px;
 
-    background:linear-gradient(#9c3f1e,#65220f);
-    box-shadow:0 3px 0 #3a1308,0 5px 12px rgba(0,0,0,.35);
+    background:linear-gradient(180deg,#a94b23 0%,#65220f 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,225,151,.3),
+        0 3px 0 #351107,
+        0 5px 12px rgba(0,0,0,.35);
     color:#fff1b8;
 
     cursor:pointer;
@@ -226,8 +254,22 @@
 }
 
 @media (max-width:480px){
+    .game-layout{
+        gap:6px;
+    }
+
     .turn-panel{
-        padding:10px;
+        padding:6px 8px 8px;
+    }
+
+    .turn-text,
+    .winner-text{
+        font-size:17px;
+        letter-spacing:.08em;
+    }
+
+    .slot-machine-frame{
+        height:clamp(112px,14vh,132px);
     }
 
 }
