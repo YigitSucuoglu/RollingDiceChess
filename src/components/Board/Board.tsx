@@ -141,12 +141,10 @@ function Board() {
         ) : (
           <>
             <div className="turn-text">
-              {game.currentTurn === "white" ? "White" : "Black"} turn
+              {game.currentTurn === "white" ? "White" : "Black"} to move
             </div>
 
             <div className="roll-section">
-              <div className="panel-label">Current roll</div>
-
               <div className="slot-machine-frame">
                 <img
                   alt=""
