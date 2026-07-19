@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.6.0
+v0.6.1
 
 ---
 
@@ -39,6 +39,7 @@ v0.6.0
 - Manual ROLL button and explicit ready, spinning, and resolved UI phases
 - Decorative lever asset with ROLL-synchronized animation
 - Premium compact top Game HUD with integrated slot presentation
+- King-capture result dialog with Play Again and Main Menu flows
 - Winner screen
 
 ---
@@ -46,7 +47,7 @@ v0.6.0
 ## Current Sprint
 
 Completed:
-- UI-01 — Redesign Top Game HUD
+- UI-02 — Win Screen and Restart Flow
 
 Next:
 - To be defined by the project owner
@@ -61,3 +62,11 @@ Next:
 - Winner state overrides the roll display.
 - Board pieces and reel symbols will use the same selectable piece theme in a future phase.
 - The ROLL button is the primary interaction; the lever is decorative animation only.
+- Check and checkmate do not exist; the game ends only when a king is captured.
+- Move history is one of the next planned major features.
+
+
+## Future UI Polish
+
+- Replace temporary blend-mode background removal with true transparent slot frame assets.
+- Split lever into layered assets to achieve proper mechanical occlusion and depth.
