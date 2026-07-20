@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.6.2
+v0.6.3
 
 ---
 
@@ -40,6 +40,7 @@ v0.6.2
 - Manual ROLL button and explicit ready, spinning, and resolved UI phases
 - Decorative lever asset with ROLL-synchronized animation
 - Premium compact top Game HUD with integrated slot presentation
+- UI-03B — Two-Column Move History Panel
 - King-capture result dialog with Play Again and Main Menu flows
 - Winner screen
 
@@ -48,10 +49,10 @@ v0.6.2
 ## Current Sprint
 
 Completed:
-- E-03A — Move History Data Model and Notation Generator
+- UI-03B — Two-Column Move History Panel
 
 Next:
-- Move History two-column UI (White / Black turn grouping)
+- Move History visual polish
 
 ---
 
@@ -64,7 +65,7 @@ Next:
 - Board pieces and reel symbols will use the same selectable piece theme in a future phase.
 - The ROLL button is the primary interaction; the lever is decorative animation only.
 - Check and checkmate do not exist; the game ends only when a king is captured.
-- Move history data infrastructure is complete; the two-column history UI is planned.
+- Move history data infrastructure and two-column, three-slot UI are complete.
 
 
 ## Future UI Polish
