@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.6.1
+v0.6.2
 
 ---
 
@@ -25,6 +25,7 @@ v0.6.1
 - Simulation engine completed
 - DiceEngine integrated
 - Automatic pass system completed
+- E-03A — Move History Data Model and Notation Generator
 
 ### UI
 - Current Roll panel (3 fixed slots)
@@ -47,10 +48,10 @@ v0.6.1
 ## Current Sprint
 
 Completed:
-- UI-02 — Win Screen and Restart Flow
+- E-03A — Move History Data Model and Notation Generator
 
 Next:
-- To be defined by the project owner
+- Move History two-column UI (White / Black turn grouping)
 
 ---
 
@@ -63,7 +64,7 @@ Next:
 - Board pieces and reel symbols will use the same selectable piece theme in a future phase.
 - The ROLL button is the primary interaction; the lever is decorative animation only.
 - Check and checkmate do not exist; the game ends only when a king is captured.
-- Move history is one of the next planned major features.
+- Move history data infrastructure is complete; the two-column history UI is planned.
 
 
 ## Future UI Polish

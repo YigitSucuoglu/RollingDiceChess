@@ -5,6 +5,7 @@ import TurnRights from "./TurnRights";
 import { createSimulationState } from "./Simulation";
 import TurnResolver, { type TurnResolution } from "./TurnResolver";
 import DiceEngine from "./DiceEngine";
+import MoveHistory from "./MoveHistory";
 
 export default class Game {
   public board: ChessBoard;
@@ -21,6 +22,8 @@ export default class Game {
 
   public currentRoll!: readonly [PieceType, PieceType, PieceType];
 
+  public readonly moveHistory: MoveHistory;
+
   private turnResolver: TurnResolver;
 
   private diceEngine: DiceEngine;
@@ -34,6 +37,7 @@ export default class Game {
     this.winner = null;
     this.turnResolver = new TurnResolver();
     this.diceEngine = new DiceEngine();
+    this.moveHistory = new MoveHistory();
     this.initializeTurnRights();
     this.ensurePlayableTurn();
   }
@@ -108,6 +112,8 @@ export default class Game {
 
     if (!piece) return;
 
+    const movedPieceType = piece.type;
+
     this.board.squares[move.to.row][move.to.col] = piece;
     this.board.squares[move.from.row][move.from.col] = null;
 
@@ -168,6 +174,8 @@ export default class Game {
 
     this.lastMove = move;
 
+    this.moveHistory.recordMove(move, piece.color, movedPieceType);
+
     if (capturedPiece?.type === "king") {
       this.winner = piece.color;
     }
@@ -186,6 +194,7 @@ export default class Game {
         this.currentTurn === "white"
           ? "black"
           : "white";
+      this.moveHistory.startPlayerTurn(this.currentTurn);
       this.initializeTurnRights();
       this.ensurePlayableTurn();
     }   
@@ -224,6 +233,7 @@ export default class Game {
         this.currentTurn === "white"
           ? "black"
           : "white";
+      this.moveHistory.startPlayerTurn(this.currentTurn);
       this.initializeTurnRights();
       automaticPasses++;
     }
