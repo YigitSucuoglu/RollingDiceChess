@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.6.4
+v0.6.5
 
 ---
 
@@ -26,6 +26,7 @@ v0.6.4
 - DiceEngine integrated
 - Automatic pass system completed
 - E-03A — Move History Data Model and Notation Generator
+- AI-01A — Bot Framework
 
 ### UI
 - UI-04A — Full Play Setup Screen with time control and side selection
@@ -50,10 +51,10 @@ v0.6.4
 ## Current Sprint
 
 Completed:
-- UI-04A — Full Play Setup Screen
+- AI-01A — Bot Framework
 
 Next:
-1. AI-01 — Basic Bot
+1. AI-01B — Random Bot algorithm
 2. CLOCK-01 — Chess Clock
 
 ---
@@ -69,6 +70,7 @@ Next:
 - Check and checkmate do not exist; the game ends only when a king is captured.
 - Move history data infrastructure and two-column, three-slot UI are complete.
 - Play Setup stores time control and player side; bot behavior is not implemented yet.
+- Bot framework and turn detection are integrated; the bot does not make moves yet.
 - Chess clock behavior is not implemented yet.
 
 
