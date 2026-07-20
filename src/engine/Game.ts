@@ -52,7 +52,6 @@ export default class Game {
     this.bot = bot;
     this.initializeTurnRights();
     this.ensurePlayableTurn();
-    this.requestBotTurn();
   }
 
   public selectSquare(row: number, col: number): void {
@@ -103,6 +102,21 @@ export default class Game {
 
   public isBotTurn(): boolean {
     return this.currentTurn === this.setup.botColor;
+  }
+
+  public getSelectableMoves(): readonly Move[] {
+    return this.getTurnResolution().selectableMoves;
+  }
+
+  public playBotTurn(
+    onMove?: () => void,
+    signal?: AbortSignal
+  ): Promise<void> {
+    if (this.winner || !this.isBotTurn()) {
+      return Promise.resolve();
+    }
+
+    return this.bot.playTurn(this, onMove, signal);
   }
   
   public makeMove(move: Move): void {
@@ -214,7 +228,6 @@ export default class Game {
       this.moveHistory.startPlayerTurn(this.currentTurn);
       this.initializeTurnRights();
       this.ensurePlayableTurn();
-      this.requestBotTurn();
     }   
   }
 
@@ -234,14 +247,6 @@ export default class Game {
     const state = createSimulationState(this);
 
     return this.turnResolver.resolve(state);
-  }
-
-  private requestBotTurn(): void {
-    if (this.winner || !this.isBotTurn()) {
-      return;
-    }
-
-    this.bot.playTurn(this);
   }
 
   private ensurePlayableTurn(): void {
