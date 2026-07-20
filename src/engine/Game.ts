@@ -8,6 +8,7 @@ import DiceEngine from "./DiceEngine";
 import MoveHistory from "./MoveHistory";
 import { createDefaultGameSetup } from "../config/gameSetup";
 import type { GameSetup } from "../types/GameSetup";
+import BotController, { type Bot } from "./BotController";
 
 export default class Game {
   public board: ChessBoard;
@@ -32,8 +33,13 @@ export default class Game {
 
   private diceEngine: DiceEngine;
 
+  private readonly bot: Bot;
 
-  constructor(setup: GameSetup = createDefaultGameSetup()) {
+
+  constructor(
+    setup: GameSetup = createDefaultGameSetup(),
+    bot: Bot = new BotController(setup.botColor)
+  ) {
     this.board = new ChessBoard();
     this.selectedSquare = null;
     this.possibleMoves = [];
@@ -43,8 +49,10 @@ export default class Game {
     this.diceEngine = new DiceEngine();
     this.moveHistory = new MoveHistory();
     this.setup = setup;
+    this.bot = bot;
     this.initializeTurnRights();
     this.ensurePlayableTurn();
+    this.requestBotTurn();
   }
 
   public selectSquare(row: number, col: number): void {
@@ -92,6 +100,10 @@ export default class Game {
   }
   
   public currentTurn: PieceColor = "white";
+
+  public isBotTurn(): boolean {
+    return this.currentTurn === this.setup.botColor;
+  }
   
   public makeMove(move: Move): void {
     const resolution = this.getTurnResolution();
@@ -202,6 +214,7 @@ export default class Game {
       this.moveHistory.startPlayerTurn(this.currentTurn);
       this.initializeTurnRights();
       this.ensurePlayableTurn();
+      this.requestBotTurn();
     }   
   }
 
@@ -221,6 +234,14 @@ export default class Game {
     const state = createSimulationState(this);
 
     return this.turnResolver.resolve(state);
+  }
+
+  private requestBotTurn(): void {
+    if (this.winner || !this.isBotTurn()) {
+      return;
+    }
+
+    this.bot.playTurn(this);
   }
 
   private ensurePlayableTurn(): void {
