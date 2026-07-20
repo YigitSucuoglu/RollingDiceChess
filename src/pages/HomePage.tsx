@@ -9,7 +9,7 @@ function HomePage() {
       <h1 className="title">🎲 RollingDiceChess</h1>
 
       <div className="menu">
-        <button onClick={() => navigate("/game")}>Play</button>
+        <button onClick={() => navigate("/play")}>Play</button>
 
         <button onClick={() => navigate("/profile")}>Profile</button>
 

@@ -6,6 +6,8 @@ import { createSimulationState } from "./Simulation";
 import TurnResolver, { type TurnResolution } from "./TurnResolver";
 import DiceEngine from "./DiceEngine";
 import MoveHistory from "./MoveHistory";
+import { createDefaultGameSetup } from "../config/gameSetup";
+import type { GameSetup } from "../types/GameSetup";
 
 export default class Game {
   public board: ChessBoard;
@@ -24,12 +26,14 @@ export default class Game {
 
   public readonly moveHistory: MoveHistory;
 
+  public readonly setup: GameSetup;
+
   private turnResolver: TurnResolver;
 
   private diceEngine: DiceEngine;
 
 
-  constructor() {
+  constructor(setup: GameSetup = createDefaultGameSetup()) {
     this.board = new ChessBoard();
     this.selectedSquare = null;
     this.possibleMoves = [];
@@ -38,6 +42,7 @@ export default class Game {
     this.turnResolver = new TurnResolver();
     this.diceEngine = new DiceEngine();
     this.moveHistory = new MoveHistory();
+    this.setup = setup;
     this.initializeTurnRights();
     this.ensurePlayableTurn();
   }

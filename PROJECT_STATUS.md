@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.6.3
+v0.6.4
 
 ---
 
@@ -28,6 +28,7 @@ v0.6.3
 - E-03A — Move History Data Model and Notation Generator
 
 ### UI
+- UI-04A — Full Play Setup Screen with time control and side selection
 - Current Roll panel (3 fixed slots)
 - Roll animation state and move lock
 - Roulette slot animation
@@ -49,10 +50,11 @@ v0.6.3
 ## Current Sprint
 
 Completed:
-- UI-03B — Two-Column Move History Panel
+- UI-04A — Full Play Setup Screen
 
 Next:
-- Move History visual polish
+1. AI-01 — Basic Bot
+2. CLOCK-01 — Chess Clock
 
 ---
 
@@ -66,6 +68,8 @@ Next:
 - The ROLL button is the primary interaction; the lever is decorative animation only.
 - Check and checkmate do not exist; the game ends only when a king is captured.
 - Move history data infrastructure and two-column, three-slot UI are complete.
+- Play Setup stores time control and player side; bot behavior is not implemented yet.
+- Chess clock behavior is not implemented yet.
 
 
 ## Future UI Polish

@@ -4,12 +4,14 @@ import HomePage from "./pages/HomePage";
 import GamePage from "./pages/GamePage";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
+import PlaySetupPage from "./pages/PlaySetupPage";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/play" element={<PlaySetupPage />} />
         <Route path="/game" element={<GamePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
