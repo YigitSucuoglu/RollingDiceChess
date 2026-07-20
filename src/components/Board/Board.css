@@ -1,5 +1,18 @@
+.game-shell{
+    width:fit-content;
+    max-width:calc(100vw - 32px);
+    max-height:calc(100vh - 32px);
+
+    display:grid;
+    grid-template-columns:min(80vw,calc(100vh - 280px),calc(100vw - 470px),800px) minmax(360px,420px);
+    align-items:stretch;
+    justify-content:center;
+    gap:18px;
+}
+
 .game-layout{
-    width:min(80vw,calc(100vh - 280px));
+    width:100%;
+    min-width:0;
 
     display:flex;
     flex-direction:column;
@@ -249,6 +262,19 @@
 
 @media (max-width:600px){
     .slot-machine-lever{
+        display:none;
+    }
+}
+
+@media (max-width:1050px){
+    .game-shell{
+        width:min(80vw,calc(100vh - 280px));
+        max-width:none;
+
+        display:block;
+    }
+
+    .move-history-panel{
         display:none;
     }
 }

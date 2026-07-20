@@ -6,6 +6,7 @@ import type { PieceType } from "../../types/Chess";
 import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
 import SlotReel from "../SlotReel/SlotReel";
 import GameResultModal from "../GameResultModal/GameResultModal";
+import MoveHistoryPanel from "../MoveHistory/MoveHistoryPanel";
 import { useNavigate } from "react-router-dom";
 
 const ROLLING_DURATION_MS = 1000;
@@ -51,6 +52,7 @@ function Board() {
   const rollPhase =
     rollAnimation.roll === game.currentRoll ? rollAnimation.phase : "ready";
   const isInputLocked = game.winner !== null || rollPhase !== "resolved";
+  const moveHistory = game.moveHistory.getSnapshot();
 
   useEffect(() => {
     if (rollAnimation.phase !== "spinning") {
@@ -159,7 +161,8 @@ function Board() {
   }
 
   return (
-    <div className="game-layout">
+    <div className="game-shell">
+      <div className="game-layout">
       <div
         aria-hidden={game.winner ? true : undefined}
         className="turn-panel"
@@ -222,6 +225,9 @@ function Board() {
       >
         {squares}
       </div>
+      </div>
+
+      <MoveHistoryPanel history={moveHistory} />
 
       {game.winner && (
         <GameResultModal
