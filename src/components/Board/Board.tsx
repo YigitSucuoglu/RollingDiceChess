@@ -1,7 +1,7 @@
 import "./Board.css";
 import gameManager from "../../engine/GameManager";
 import Piece from "../Piece/Piece";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { PieceType } from "../../types/Chess";
 import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
 import SlotReel from "../SlotReel/SlotReel";
@@ -10,6 +10,7 @@ import MoveHistoryPanel from "../MoveHistory/MoveHistoryPanel";
 import { useNavigate } from "react-router-dom";
 
 const ROLLING_DURATION_MS = 1000;
+const BOT_ROLL_DELAY_MS = 500;
 const SLOT_STOP_TIMES_MS = [700, 850, ROLLING_DURATION_MS] as const;
 
 type RollPhase = "ready" | "spinning" | "resolved";
@@ -33,6 +34,8 @@ function Board() {
 
   const [, setRefresh] = useState(0);
   const spinStartedForRollRef = useRef<readonly PieceType[] | null>(null);
+  const botTurnInProgressRef = useRef(false);
+  const botTurnAbortControllerRef = useRef<AbortController | null>(null);
   const [rollAnimation, setRollAnimation] = useState<RollAnimationState>({
     displayedRoll: INITIAL_REEL_DISPLAY,
     phase: "ready",
@@ -51,7 +54,8 @@ function Board() {
 
   const rollPhase =
     rollAnimation.roll === game.currentRoll ? rollAnimation.phase : "ready";
-  const isInputLocked = game.winner !== null || rollPhase !== "resolved";
+  const isInputLocked =
+    game.winner !== null || game.isBotTurn() || rollPhase !== "resolved";
   const moveHistory = game.moveHistory.getSnapshot();
 
   useEffect(() => {
@@ -70,7 +74,7 @@ function Board() {
     return () => window.clearTimeout(timeoutId);
   }, [game.winner, rollAnimation.phase, rollAnimation.spinId]);
 
-  const startRoll = () => {
+  const startRoll = useCallback(() => {
     if (
       game.winner !== null ||
       rollPhase !== "ready" ||
@@ -86,13 +90,55 @@ function Board() {
       phase: "spinning",
       spinId: state.spinId + 1,
     }));
-  };
+  }, [game, rollPhase, setRollAnimation]);
+
+  useEffect(() => {
+    if (game.winner || !game.isBotTurn() || rollPhase !== "ready") {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(startRoll, BOT_ROLL_DELAY_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [game, rollPhase, startRoll]);
+
+  useEffect(() => {
+    if (
+      game.winner ||
+      !game.isBotTurn() ||
+      rollPhase !== "resolved" ||
+      botTurnInProgressRef.current
+    ) {
+      return;
+    }
+
+    botTurnInProgressRef.current = true;
+    const abortController = new AbortController();
+    botTurnAbortControllerRef.current = abortController;
+
+    void game
+      .playBotTurn(
+        () => setRefresh((value) => value + 1),
+        abortController.signal
+      )
+      .finally(() => {
+        if (botTurnAbortControllerRef.current === abortController) {
+          botTurnAbortControllerRef.current = null;
+        }
+        botTurnInProgressRef.current = false;
+        setRefresh((value) => value + 1);
+      });
+
+    return () => abortController.abort();
+  }, [game, rollPhase]);
 
   const startNewGame = () => {
+    botTurnAbortControllerRef.current?.abort();
     gameManager.newGame(game.setup);
     const newGame = gameManager.getGame();
 
     spinStartedForRollRef.current = null;
+    botTurnInProgressRef.current = false;
     setRollAnimation((state) => ({
       displayedRoll: INITIAL_REEL_DISPLAY,
       phase: "ready",
@@ -103,6 +149,7 @@ function Board() {
   };
 
   const returnToMainMenu = () => {
+    botTurnAbortControllerRef.current?.abort();
     gameManager.newGame();
     navigate("/");
   };
@@ -210,7 +257,9 @@ function Board() {
 
               <button
                 className="roll-button"
-                disabled={game.winner !== null || rollPhase !== "ready"}
+                disabled={
+                  game.winner !== null || game.isBotTurn() || rollPhase !== "ready"
+                }
                 onClick={startRoll}
                 type="button"
               >

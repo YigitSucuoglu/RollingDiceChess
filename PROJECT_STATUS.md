@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.6.5
+v0.6.6
 
 ---
 
@@ -27,6 +27,7 @@ v0.6.5
 - Automatic pass system completed
 - E-03A — Move History Data Model and Notation Generator
 - AI-01A — Bot Framework
+- AI-01B — Random Legal Bot
 
 ### UI
 - UI-04A — Full Play Setup Screen with time control and side selection
@@ -51,11 +52,11 @@ v0.6.5
 ## Current Sprint
 
 Completed:
-- AI-01A — Bot Framework
+- AI-01B — Random Legal Bot
 
 Next:
-1. AI-01B — Random Bot algorithm
-2. CLOCK-01 — Chess Clock
+1. CLOCK-01 — Chess Clock
+2. AI-01C — Enhanced Bot (capture, material, position, and king-capture evaluation)
 
 ---
 
@@ -70,7 +71,7 @@ Next:
 - Check and checkmate do not exist; the game ends only when a king is captured.
 - Move history data infrastructure and two-column, three-slot UI are complete.
 - Play Setup stores time control and player side; bot behavior is not implemented yet.
-- Bot framework and turn detection are integrated; the bot does not make moves yet.
+- Random Bot uses current TurnResolver-approved moves after the shared roll animation.
 - Chess clock behavior is not implemented yet.
 
 
