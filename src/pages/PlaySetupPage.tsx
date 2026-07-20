@@ -1,0 +1,143 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  DEFAULT_TIME_CONTROL,
+  TIME_CONTROL_CATEGORIES,
+  TIME_CONTROL_OPTIONS,
+} from "../config/gameSetup";
+import gameManager from "../engine/GameManager";
+import type { PieceColor } from "../types/Chess";
+import type { GameSetup } from "../types/GameSetup";
+import "../styles/PlaySetupPage.css";
+
+const COMING_SOON_BOARD_THEMES = ["Wood", "Marble", "Dark"] as const;
+
+function ComingSoon() {
+  return <span className="coming-soon">Coming soon</span>;
+}
+
+function PlaySetupPage() {
+  const navigate = useNavigate();
+  const [timeControlId, setTimeControlId] = useState(DEFAULT_TIME_CONTROL.id);
+  const [playerColor, setPlayerColor] = useState<PieceColor>("white");
+
+  const startGame = () => {
+    const timeControl = TIME_CONTROL_OPTIONS.find(
+      (option) => option.id === timeControlId
+    );
+
+    if (!timeControl) {
+      return;
+    }
+
+    const setup: GameSetup = {
+      timeControl,
+      playerColor,
+      botColor: playerColor === "white" ? "black" : "white",
+      opponentType: "bot",
+      pieceTheme: "gold",
+      boardTheme: "default",
+    };
+
+    gameManager.newGame(setup);
+    navigate("/game");
+  };
+
+  return (
+    <main className="play-setup-page">
+      <div className="play-setup-shell">
+        <header className="play-setup-header">
+          <p>RollingDiceChess</p>
+          <h1>Play Setup</h1>
+        </header>
+
+        <div className="play-setup-grid">
+          <section aria-labelledby="time-control-heading" className="setup-card time-control-card">
+            <h2 id="time-control-heading">Time Control</h2>
+
+            <div className="time-control-groups">
+              {TIME_CONTROL_CATEGORIES.map((category) => (
+                <fieldset className="time-control-group" key={category}>
+                  <legend>{category}</legend>
+
+                  <div className="setup-options time-options">
+                    {TIME_CONTROL_OPTIONS.filter(
+                      (option) => option.category === category
+                    ).map((option) => (
+                      <label className="setup-radio" key={option.id}>
+                        <input
+                          checked={timeControlId === option.id}
+                          name="time-control"
+                          onChange={() => setTimeControlId(option.id)}
+                          type="radio"
+                          value={option.id}
+                        />
+                        <span>{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              ))}
+            </div>
+          </section>
+
+          <div className="setup-card setup-secondary">
+            <fieldset className="setup-section">
+              <legend>Play As</legend>
+              <div className="setup-options two-options">
+                {(["white", "black"] as const).map((color) => (
+                  <label className="setup-radio" key={color}>
+                    <input
+                      checked={playerColor === color}
+                      name="player-color"
+                      onChange={() => setPlayerColor(color)}
+                      type="radio"
+                      value={color}
+                    />
+                    <span>{color}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            <section aria-labelledby="opponent-heading" className="setup-section">
+              <h2 id="opponent-heading">Opponent</h2>
+              <div className="setup-options three-options">
+                <button aria-pressed="true" className="setup-choice selected" type="button">Bot</button>
+                <button className="setup-choice" disabled type="button">Local<ComingSoon /></button>
+                <button className="setup-choice" disabled type="button">Online<ComingSoon /></button>
+              </div>
+            </section>
+
+            <section aria-labelledby="piece-theme-heading" className="setup-section">
+              <h2 id="piece-theme-heading">Piece Theme</h2>
+              <div className="setup-options two-options">
+                <button aria-pressed="true" className="setup-choice selected" type="button">Gold</button>
+                <button className="setup-choice" disabled type="button">Classic<ComingSoon /></button>
+              </div>
+            </section>
+
+            <section aria-labelledby="board-theme-heading" className="setup-section">
+              <h2 id="board-theme-heading">Board Theme</h2>
+              <div className="setup-options board-theme-options">
+                <button aria-pressed="true" className="setup-choice selected" type="button">Default</button>
+                {COMING_SOON_BOARD_THEMES.map((theme) => (
+                  <button className="setup-choice" disabled key={theme} type="button">
+                    {theme}<ComingSoon />
+                  </button>
+                ))}
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div className="play-setup-actions">
+          <button className="setup-action primary" onClick={startGame} type="button">Start Game</button>
+          <button className="setup-action secondary" onClick={() => navigate("/")} type="button">Back</button>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export default PlaySetupPage;

@@ -1,4 +1,5 @@
 import Game from "./Game";
+import type { GameSetup } from "../types/GameSetup";
 
 class GameManager {
   private game: Game;
@@ -11,8 +12,8 @@ class GameManager {
     return this.game;
   }
 
-  public newGame(): void {
-    this.game = new Game();
+  public newGame(setup?: GameSetup): void {
+    this.game = new Game(setup);
   }
 }
 

@@ -89,7 +89,7 @@ function Board() {
   };
 
   const startNewGame = () => {
-    gameManager.newGame();
+    gameManager.newGame(game.setup);
     const newGame = gameManager.getGame();
 
     spinStartedForRollRef.current = null;
