@@ -13,6 +13,7 @@ class GameManager {
   }
 
   public newGame(setup?: GameSetup): void {
+    this.game.dispose();
     this.game = new Game(setup);
   }
 }

@@ -1,5 +1,7 @@
 export type PieceColor = "white" | "black";
 
+export type GameResultReason = "king-captured" | "timeout";
+
 export type PieceType =
   | "king"
   | "queen"
