@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.6.6
+v0.6.9
 
 ---
 
@@ -28,9 +28,11 @@ v0.6.6
 - E-03A — Move History Data Model and Notation Generator
 - AI-01A — Bot Framework
 - AI-01B — Random Legal Bot
+- UX-01 — Mandatory Roll Reveal Before Auto Pass
 
 ### UI
 - UI-04A — Full Play Setup Screen with time control and side selection
+- UI-04C — Board Coordinates & Player Perspective
 - Current Roll panel (3 fixed slots)
 - Roll animation state and move lock
 - Roulette slot animation
@@ -52,7 +54,7 @@ v0.6.6
 ## Current Sprint
 
 Completed:
-- AI-01B — Random Legal Bot
+- UI-04C — Board Coordinates & Player Perspective
 
 Next:
 1. CLOCK-01 — Chess Clock
