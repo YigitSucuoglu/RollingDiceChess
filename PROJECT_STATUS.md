@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.7.0
+v0.7.2
 
 ---
 
@@ -28,8 +28,10 @@ v0.7.0
 - E-03A — Move History Data Model and Notation Generator
 - AI-01A — Bot Framework
 - AI-01B — Random Legal Bot
+- AI-01C — Heuristic Bot v1
 - UX-01 — Mandatory Roll Reveal Before Auto Pass
 - CLOCK-01A — Chess Clock Engine & Timeout
+- CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
 - UI-04A — Full Play Setup Screen with time control and side selection
@@ -55,11 +57,10 @@ v0.7.0
 ## Current Sprint
 
 Completed:
-- CLOCK-01A — Chess Clock Engine & Timeout
+- AI-01C — Heuristic Bot v1
 
 Next:
-1. CLOCK-01B — Dual Clock UI & Integration
-2. AI-01C — Enhanced Bot (capture, material, position, and king-capture evaluation)
+1. AI-01D — Full Turn Sequence Evaluation
 
 ---
 
@@ -73,9 +74,9 @@ Next:
 - The ROLL button is the primary interaction; the lever is decorative animation only.
 - Check and checkmate do not exist; the game ends only when a king is captured.
 - Move history data infrastructure and two-column, three-slot UI are complete.
-- Play Setup stores time control and player side; bot behavior is not implemented yet.
-- Random Bot uses current TurnResolver-approved moves after the shared roll animation.
-- Chess clock engine and timeout result are complete; dual clock UI is pending.
+- Play Setup stores time control and player side; difficulty selection remains a future task.
+- Heuristic Bot scores current TurnResolver-approved moves after the shared roll animation.
+- Chess clock engine, timeout result, and perspective-aware dual clock UI are complete.
 
 
 ## Future UI Polish

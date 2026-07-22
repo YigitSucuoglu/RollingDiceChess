@@ -1,0 +1,93 @@
+.chess-clock{
+    width:100%;
+    min-height:46px;
+    padding:8px 14px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+
+    border:1px solid rgba(154,125,78,.48);
+    border-radius:10px;
+
+    background:linear-gradient(180deg,rgba(43,39,33,.96),rgba(25,22,19,.96));
+    box-shadow:inset 0 1px 0 rgba(255,238,199,.07),0 4px 12px rgba(0,0,0,.22);
+    color:#d8cdb8;
+    transition:border-color 160ms ease,box-shadow 160ms ease,background 160ms ease;
+}
+
+.chess-clock-player{
+    overflow:hidden;
+
+    font-size:clamp(11px,1.5vh,13px);
+    font-weight:800;
+    letter-spacing:.12em;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.chess-clock-time{
+    min-width:5.2ch;
+
+    color:#f0e7d4;
+    font-family:"Roboto Mono","SFMono-Regular",Consolas,monospace;
+    font-size:clamp(22px,3.1vh,30px);
+    font-variant-numeric:tabular-nums;
+    font-weight:800;
+    letter-spacing:.02em;
+    line-height:1;
+    text-align:right;
+}
+
+.chess-clock.is-active{
+    border-color:#e2b85f;
+    background:
+        radial-gradient(circle at 85% 50%,rgba(190,130,37,.18),transparent 42%),
+        linear-gradient(180deg,#352d22,#1b1712);
+    box-shadow:
+        inset 0 1px 0 rgba(255,237,188,.13),
+        0 0 0 1px rgba(226,184,95,.16),
+        0 0 18px rgba(205,145,47,.22);
+    color:#ffe9b5;
+}
+
+.chess-clock.is-active .chess-clock-time{
+    color:#fff1c4;
+    text-shadow:0 0 12px rgba(236,179,72,.28);
+}
+
+.chess-clock.is-low-time .chess-clock-time{
+    color:#ffbe83;
+}
+
+.chess-clock.is-active.is-low-time{
+    border-color:#e78b53;
+    box-shadow:
+        inset 0 1px 0 rgba(255,237,188,.13),
+        0 0 0 1px rgba(231,139,83,.2),
+        0 0 18px rgba(190,74,32,.24);
+}
+
+@media (max-width:480px){
+    .chess-clock{
+        min-height:40px;
+        padding:6px 10px;
+        gap:8px;
+    }
+
+    .chess-clock-player{
+        font-size:10px;
+        letter-spacing:.09em;
+    }
+
+    .chess-clock-time{
+        font-size:21px;
+    }
+}
+
+@media (prefers-reduced-motion:reduce){
+    .chess-clock{
+        transition:none;
+    }
+}

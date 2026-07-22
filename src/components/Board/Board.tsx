@@ -7,6 +7,8 @@ import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
 import SlotReel from "../SlotReel/SlotReel";
 import GameResultModal from "../GameResultModal/GameResultModal";
 import MoveHistoryPanel from "../MoveHistory/MoveHistoryPanel";
+import ChessClockPanel from "../ChessClock/ChessClockPanel";
+import type { ChessClockSnapshot } from "../../engine/ChessClock";
 import { useNavigate } from "react-router-dom";
 
 const ROLLING_DURATION_MS = 1000;
@@ -14,6 +16,9 @@ const AUTOMATIC_ROLL_DELAY_MS = 500;
 const UNPLAYABLE_ROLL_REVIEW_MS = 1200;
 const TURN_SKIPPED_MESSAGE_MS = 1000;
 const SLOT_STOP_TIMES_MS = [700, 850, ROLLING_DURATION_MS] as const;
+const CLOCK_REFRESH_INTERVAL_MS = 250;
+const LOW_TIME_CLOCK_REFRESH_INTERVAL_MS = 75;
+const LOW_TIME_THRESHOLD_MS = 15_000;
 
 type RollPhase = "ready" | "spinning" | "resolved";
 
@@ -36,6 +41,9 @@ function Board() {
   const navigate = useNavigate();
 
   const [, setRefresh] = useState(0);
+  const [clockSnapshot, setClockSnapshot] = useState<ChessClockSnapshot>(() =>
+    game.clock.getSnapshot()
+  );
   const spinStartedForRollRef = useRef<readonly PieceType[] | null>(null);
   const botTurnInProgressRef = useRef(false);
   const botTurnAbortControllerRef = useRef<AbortController | null>(null);
@@ -72,6 +80,49 @@ function Board() {
     () => game.subscribe(() => setRefresh((value) => value + 1)),
     [game]
   );
+
+  useEffect(() => {
+    let isCancelled = false;
+    let timeoutId: number | undefined;
+
+    const refreshClock = () => {
+      const snapshot = game.clock.getSnapshot();
+
+      if (isCancelled) {
+        return;
+      }
+
+      setClockSnapshot(snapshot);
+
+      if (game.winner) {
+        return;
+      }
+
+      const activeRemainingMs =
+        snapshot.activeColor === "white"
+          ? snapshot.whiteRemainingMs
+          : snapshot.activeColor === "black"
+            ? snapshot.blackRemainingMs
+            : null;
+      const refreshInterval =
+        activeRemainingMs !== null &&
+        activeRemainingMs <= LOW_TIME_THRESHOLD_MS
+          ? LOW_TIME_CLOCK_REFRESH_INTERVAL_MS
+          : CLOCK_REFRESH_INTERVAL_MS;
+
+      timeoutId = window.setTimeout(refreshClock, refreshInterval);
+    };
+
+    refreshClock();
+
+    return () => {
+      isCancelled = true;
+
+      if (timeoutId !== undefined) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [game]);
 
   useEffect(() => {
     if (rollAnimation.phase !== "spinning") {
@@ -200,6 +251,7 @@ function Board() {
     spinStartedForRollRef.current = null;
     botTurnInProgressRef.current = false;
     setIsTurnSkippedMessageVisible(false);
+    setClockSnapshot(newGame.clock.getSnapshot());
     setRollAnimation((state) => ({
       displayedRoll: INITIAL_REEL_DISPLAY,
       phase: "ready",
@@ -217,8 +269,10 @@ function Board() {
   };
 
   const squares = [];
+  const playerColor = game.setup.playerColor;
+  const opponentColor = playerColor === "white" ? "black" : "white";
   const displayIndexes =
-    game.setup.playerColor === "black"
+    playerColor === "black"
       ? [...BOARD_INDEXES].reverse()
       : BOARD_INDEXES;
 
@@ -357,12 +411,24 @@ function Board() {
         </div>
       </div>
 
+      <ChessClockPanel
+        color={opponentColor}
+        isPlayer={false}
+        snapshot={clockSnapshot}
+      />
+
       <div
         aria-hidden={game.winner ? true : undefined}
         className="board"
       >
         {squares}
       </div>
+
+      <ChessClockPanel
+        color={playerColor}
+        isPlayer
+        snapshot={clockSnapshot}
+      />
 
       {isTurnSkippedMessageVisible && (
         <div className="turn-skipped-message" role="status">
