@@ -51,7 +51,6 @@ export default class Game {
     this.setup = setup;
     this.bot = bot;
     this.initializeTurnRights();
-    this.ensurePlayableTurn();
   }
 
   public selectSquare(row: number, col: number): void {
@@ -106,6 +105,22 @@ export default class Game {
 
   public getSelectableMoves(): readonly Move[] {
     return this.getTurnResolution().selectableMoves;
+  }
+
+  public hasPlayableMoves(): boolean {
+    return this.getTurnResolution().maxConsumableRights > 0;
+  }
+
+  public skipUnplayableTurn(): boolean {
+    if (this.winner || this.hasPlayableMoves()) {
+      return false;
+    }
+
+    this.selectedSquare = null;
+    this.possibleMoves = [];
+    this.startNextTurn();
+
+    return true;
   }
 
   public playBotTurn(
@@ -221,13 +236,7 @@ export default class Game {
     const nextResolution = this.getTurnResolution();
 
     if (nextResolution.maxConsumableRights === 0) {
-      this.currentTurn =
-        this.currentTurn === "white"
-          ? "black"
-          : "white";
-      this.moveHistory.startPlayerTurn(this.currentTurn);
-      this.initializeTurnRights();
-      this.ensurePlayableTurn();
+      this.startNextTurn();
     }   
   }
 
@@ -249,25 +258,13 @@ export default class Game {
     return this.turnResolver.resolve(state);
   }
 
-  private ensurePlayableTurn(): void {
-    const maximumAutomaticPasses = 100;
-    let automaticPasses = 0;
-
-    while (this.getTurnResolution().maxConsumableRights === 0) {
-      if (automaticPasses >= maximumAutomaticPasses) {
-        throw new Error(
-          "Unable to start a playable turn after 100 automatic passes."
-        );
-      }
-
-      this.currentTurn =
-        this.currentTurn === "white"
-          ? "black"
-          : "white";
-      this.moveHistory.startPlayerTurn(this.currentTurn);
-      this.initializeTurnRights();
-      automaticPasses++;
-    }
+  private startNextTurn(): void {
+    this.currentTurn =
+      this.currentTurn === "white"
+        ? "black"
+        : "white";
+    this.moveHistory.startPlayerTurn(this.currentTurn);
+    this.initializeTurnRights();
   }
 
 }

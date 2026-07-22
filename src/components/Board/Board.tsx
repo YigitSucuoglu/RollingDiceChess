@@ -10,7 +10,9 @@ import MoveHistoryPanel from "../MoveHistory/MoveHistoryPanel";
 import { useNavigate } from "react-router-dom";
 
 const ROLLING_DURATION_MS = 1000;
-const BOT_ROLL_DELAY_MS = 500;
+const AUTOMATIC_ROLL_DELAY_MS = 500;
+const UNPLAYABLE_ROLL_REVIEW_MS = 1200;
+const TURN_SKIPPED_MESSAGE_MS = 1000;
 const SLOT_STOP_TIMES_MS = [700, 850, ROLLING_DURATION_MS] as const;
 
 type RollPhase = "ready" | "spinning" | "resolved";
@@ -36,6 +38,8 @@ function Board() {
   const spinStartedForRollRef = useRef<readonly PieceType[] | null>(null);
   const botTurnInProgressRef = useRef(false);
   const botTurnAbortControllerRef = useRef<AbortController | null>(null);
+  const [isTurnSkippedMessageVisible, setIsTurnSkippedMessageVisible] =
+    useState(false);
   const [rollAnimation, setRollAnimation] = useState<RollAnimationState>({
     displayedRoll: INITIAL_REEL_DISPLAY,
     phase: "ready",
@@ -54,8 +58,13 @@ function Board() {
 
   const rollPhase =
     rollAnimation.roll === game.currentRoll ? rollAnimation.phase : "ready";
+  const hasPlayableMoves = game.hasPlayableMoves();
   const isInputLocked =
-    game.winner !== null || game.isBotTurn() || rollPhase !== "resolved";
+    game.winner !== null ||
+    game.isBotTurn() ||
+    !hasPlayableMoves ||
+    isTurnSkippedMessageVisible ||
+    rollPhase !== "resolved";
   const moveHistory = game.moveHistory.getSnapshot();
 
   useEffect(() => {
@@ -93,19 +102,56 @@ function Board() {
   }, [game, rollPhase, setRollAnimation]);
 
   useEffect(() => {
-    if (game.winner || !game.isBotTurn() || rollPhase !== "ready") {
+    if (
+      game.winner ||
+      (hasPlayableMoves && !game.isBotTurn()) ||
+      rollPhase !== "ready"
+    ) {
       return;
     }
 
-    const timeoutId = window.setTimeout(startRoll, BOT_ROLL_DELAY_MS);
+    const timeoutId = window.setTimeout(startRoll, AUTOMATIC_ROLL_DELAY_MS);
 
     return () => window.clearTimeout(timeoutId);
-  }, [game, rollPhase, startRoll]);
+  }, [game, hasPlayableMoves, rollPhase, startRoll]);
+
+  useEffect(() => {
+    if (game.winner || hasPlayableMoves || rollPhase !== "resolved") {
+      return;
+    }
+
+    const turnRoll = game.currentRoll;
+    let skipTimeoutId: number | undefined;
+    const reviewTimeoutId = window.setTimeout(() => {
+      if (game.winner || game.currentRoll !== turnRoll) {
+        return;
+      }
+
+      setIsTurnSkippedMessageVisible(true);
+      skipTimeoutId = window.setTimeout(() => {
+        if (!game.winner && game.currentRoll === turnRoll) {
+          game.skipUnplayableTurn();
+        }
+
+        setIsTurnSkippedMessageVisible(false);
+        setRefresh((value) => value + 1);
+      }, TURN_SKIPPED_MESSAGE_MS);
+    }, UNPLAYABLE_ROLL_REVIEW_MS);
+
+    return () => {
+      window.clearTimeout(reviewTimeoutId);
+
+      if (skipTimeoutId !== undefined) {
+        window.clearTimeout(skipTimeoutId);
+      }
+    };
+  }, [game, hasPlayableMoves, rollPhase]);
 
   useEffect(() => {
     if (
       game.winner ||
       !game.isBotTurn() ||
+      !hasPlayableMoves ||
       rollPhase !== "resolved" ||
       botTurnInProgressRef.current
     ) {
@@ -130,7 +176,7 @@ function Board() {
       });
 
     return () => abortController.abort();
-  }, [game, rollPhase]);
+  }, [game, hasPlayableMoves, rollPhase]);
 
   const startNewGame = () => {
     botTurnAbortControllerRef.current?.abort();
@@ -139,6 +185,7 @@ function Board() {
 
     spinStartedForRollRef.current = null;
     botTurnInProgressRef.current = false;
+    setIsTurnSkippedMessageVisible(false);
     setRollAnimation((state) => ({
       displayedRoll: INITIAL_REEL_DISPLAY,
       phase: "ready",
@@ -150,6 +197,7 @@ function Board() {
 
   const returnToMainMenu = () => {
     botTurnAbortControllerRef.current?.abort();
+    setIsTurnSkippedMessageVisible(false);
     gameManager.newGame();
     navigate("/");
   };
@@ -258,7 +306,10 @@ function Board() {
               <button
                 className="roll-button"
                 disabled={
-                  game.winner !== null || game.isBotTurn() || rollPhase !== "ready"
+                  game.winner !== null ||
+                  game.isBotTurn() ||
+                  !hasPlayableMoves ||
+                  rollPhase !== "ready"
                 }
                 onClick={startRoll}
                 type="button"
@@ -274,6 +325,12 @@ function Board() {
       >
         {squares}
       </div>
+
+      {isTurnSkippedMessageVisible && (
+        <div className="turn-skipped-message" role="status">
+          No playable pieces — Turn skipped
+        </div>
+      )}
       </div>
 
       <div className="move-history-column">
