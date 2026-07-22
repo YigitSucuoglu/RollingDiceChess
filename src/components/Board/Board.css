@@ -19,6 +19,18 @@
     gap:8px;
 }
 
+.move-history-column{
+    min-width:0;
+    min-height:0;
+
+    position:relative;
+}
+
+.move-history-column .move-history-panel{
+    position:absolute;
+    inset:0;
+}
+
 .turn-panel{
     padding:7px 14px 9px;
 
@@ -274,7 +286,7 @@
         display:block;
     }
 
-    .move-history-panel{
+    .move-history-column{
         display:none;
     }
 }
