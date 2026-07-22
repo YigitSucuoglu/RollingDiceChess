@@ -276,7 +276,9 @@ function Board() {
       </div>
       </div>
 
-      <MoveHistoryPanel history={moveHistory} />
+      <div className="move-history-column">
+        <MoveHistoryPanel history={moveHistory} />
+      </div>
 
       {game.winner && (
         <GameResultModal

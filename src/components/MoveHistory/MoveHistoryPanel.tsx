@@ -7,11 +7,9 @@ interface MoveHistoryPanelProps {
 }
 
 const MOVE_SLOTS = [0, 1, 2] as const;
-const AUTO_SCROLL_THRESHOLD_PX = 48;
 
 function MoveHistoryPanel({ history }: MoveHistoryPanelProps) {
   const rowsRef = useRef<HTMLDivElement>(null);
-  const shouldAutoScrollRef = useRef(true);
   const moveCount = history.reduce(
     (total, turn) => total + turn.whiteMoves.length + turn.blackMoves.length,
     0
@@ -29,23 +27,10 @@ function MoveHistoryPanel({ history }: MoveHistoryPanelProps) {
   useEffect(() => {
     const rows = rowsRef.current;
 
-    if (rows && shouldAutoScrollRef.current) {
+    if (rows) {
       rows.scrollTop = rows.scrollHeight;
     }
   }, [history.length, latestTimestamp]);
-
-  const trackScrollPosition = () => {
-    const rows = rowsRef.current;
-
-    if (!rows) {
-      return;
-    }
-
-    const distanceFromBottom =
-      rows.scrollHeight - rows.scrollTop - rows.clientHeight;
-    shouldAutoScrollRef.current =
-      distanceFromBottom <= AUTO_SCROLL_THRESHOLD_PX;
-  };
 
   return (
     <section
@@ -63,7 +48,6 @@ function MoveHistoryPanel({ history }: MoveHistoryPanelProps) {
       <div
         aria-label="Move history turns"
         className="move-history-rows"
-        onScroll={trackScrollPosition}
         ref={rowsRef}
         role="table"
         tabIndex={0}
