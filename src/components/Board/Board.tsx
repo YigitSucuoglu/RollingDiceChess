@@ -29,6 +29,7 @@ const INITIAL_REEL_DISPLAY: readonly PieceType[] = [
   "knight",
   "bishop",
 ];
+const BOARD_INDEXES = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
 function Board() {
   const game = gameManager.getGame();
@@ -203,9 +204,15 @@ function Board() {
   };
 
   const squares = [];
+  const displayIndexes =
+    game.setup.playerColor === "black"
+      ? [...BOARD_INDEXES].reverse()
+      : BOARD_INDEXES;
 
-  for (let row = 0; row < 8; row++) {
-    for (let col = 0; col < 8; col++) {
+  for (let displayRow = 0; displayRow < 8; displayRow++) {
+    for (let displayCol = 0; displayCol < 8; displayCol++) {
+      const row = displayIndexes[displayRow];
+      const col = displayIndexes[displayCol];
       const piece = game.board.squares[row][col];
 
       const isSelected =
@@ -250,6 +257,24 @@ function Board() {
           {piece && <Piece piece={piece} />}
 
           {isPossibleMove && <div className="move-dot" />}
+
+          {displayRow === 7 && (
+            <span
+              aria-hidden="true"
+              className="board-coordinate file-coordinate"
+            >
+              {String.fromCharCode(97 + col)}
+            </span>
+          )}
+
+          {displayCol === 0 && (
+            <span
+              aria-hidden="true"
+              className="board-coordinate rank-coordinate"
+            >
+              {8 - row}
+            </span>
+          )}
         </div>
       );
     }

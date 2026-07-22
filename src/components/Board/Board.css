@@ -263,6 +263,37 @@
     position:relative;
 }
 
+.board-coordinate{
+    position:absolute;
+    z-index:2;
+
+    font-size:clamp(8px,1.2vmin,11px);
+    font-weight:800;
+    line-height:1;
+
+    pointer-events:none;
+    user-select:none;
+}
+
+.file-coordinate{
+    right:4px;
+    bottom:3px;
+}
+
+.rank-coordinate{
+    top:3px;
+    left:4px;
+}
+
+.light .board-coordinate{
+    color:rgba(83,53,24,.78);
+}
+
+.dark .board-coordinate{
+    color:rgba(255,235,195,.78);
+    text-shadow:0 1px 1px rgba(0,0,0,.28);
+}
+
 .light{
     background:#f0d9b5;
 }
