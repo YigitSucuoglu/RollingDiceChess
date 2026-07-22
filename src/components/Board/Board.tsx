@@ -68,6 +68,11 @@ function Board() {
     rollPhase !== "resolved";
   const moveHistory = game.moveHistory.getSnapshot();
 
+  useEffect(
+    () => game.subscribe(() => setRefresh((value) => value + 1)),
+    [game]
+  );
+
   useEffect(() => {
     if (rollAnimation.phase !== "spinning") {
       return;
@@ -114,7 +119,7 @@ function Board() {
     const timeoutId = window.setTimeout(startRoll, AUTOMATIC_ROLL_DELAY_MS);
 
     return () => window.clearTimeout(timeoutId);
-  }, [game, hasPlayableMoves, rollPhase, startRoll]);
+  }, [game, game.winner, hasPlayableMoves, rollPhase, startRoll]);
 
   useEffect(() => {
     if (game.winner || hasPlayableMoves || rollPhase !== "resolved") {
@@ -146,7 +151,15 @@ function Board() {
         window.clearTimeout(skipTimeoutId);
       }
     };
-  }, [game, hasPlayableMoves, rollPhase]);
+  }, [game, game.winner, hasPlayableMoves, rollPhase]);
+
+  useEffect(() => {
+    if (game.winner || !hasPlayableMoves || rollPhase !== "resolved") {
+      return;
+    }
+
+    game.startClockForCurrentTurn();
+  }, [game, game.winner, hasPlayableMoves, rollPhase]);
 
   useEffect(() => {
     if (
@@ -177,7 +190,7 @@ function Board() {
       });
 
     return () => abortController.abort();
-  }, [game, hasPlayableMoves, rollPhase]);
+  }, [game, game.winner, hasPlayableMoves, rollPhase]);
 
   const startNewGame = () => {
     botTurnAbortControllerRef.current?.abort();
@@ -364,7 +377,7 @@ function Board() {
 
       {game.winner && (
         <GameResultModal
-          endReason="king-captured"
+          endReason={game.resultReason ?? "king-captured"}
           onMainMenu={returnToMainMenu}
           onPlayAgain={startNewGame}
           winner={game.winner}

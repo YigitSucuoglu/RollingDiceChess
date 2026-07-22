@@ -1,20 +1,19 @@
 import { useEffect, useRef } from "react";
 import type { KeyboardEvent } from "react";
 import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
-import type { PieceColor } from "../../types/Chess";
+import type { GameResultReason, PieceColor } from "../../types/Chess";
 import "./GameResultModal.css";
 
-export type GameEndReason = "king-captured";
-
 interface GameResultModalProps {
-  endReason: GameEndReason;
+  endReason: GameResultReason;
   onMainMenu: () => void;
   onPlayAgain: () => void;
   winner: PieceColor;
 }
 
-const END_REASON_LABELS: Record<GameEndReason, string> = {
+const END_REASON_LABELS: Record<GameResultReason, string> = {
   "king-captured": "King captured",
+  timeout: "Time expired",
 };
 
 function GameResultModal({

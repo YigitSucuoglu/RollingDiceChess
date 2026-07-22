@@ -1,6 +1,11 @@
-import type { Move, PieceType, Position } from "../types/Chess";
+import type {
+  GameResultReason,
+  Move,
+  PieceColor,
+  PieceType,
+  Position,
+} from "../types/Chess";
 import ChessBoard from "./ChessBoard";
-import type { PieceColor } from "../types/Chess";
 import TurnRights from "./TurnRights";
 import { createSimulationState } from "./Simulation";
 import TurnResolver, { type TurnResolution } from "./TurnResolver";
@@ -9,6 +14,7 @@ import MoveHistory from "./MoveHistory";
 import { createDefaultGameSetup } from "../config/gameSetup";
 import type { GameSetup } from "../types/GameSetup";
 import BotController, { type Bot } from "./BotController";
+import ChessClock from "./ChessClock";
 
 export default class Game {
   public board: ChessBoard;
@@ -21,6 +27,8 @@ export default class Game {
 
   public winner: PieceColor | null;
 
+  public resultReason: GameResultReason | null;
+
   public turnRights!: TurnRights;
 
   public currentRoll!: readonly [PieceType, PieceType, PieceType];
@@ -29,11 +37,15 @@ export default class Game {
 
   public readonly setup: GameSetup;
 
+  public readonly clock: ChessClock;
+
   private turnResolver: TurnResolver;
 
   private diceEngine: DiceEngine;
 
   private readonly bot: Bot;
+
+  private readonly listeners: Set<() => void>;
 
 
   constructor(
@@ -45,11 +57,18 @@ export default class Game {
     this.possibleMoves = [];
     this.lastMove = null;
     this.winner = null;
+    this.resultReason = null;
     this.turnResolver = new TurnResolver();
     this.diceEngine = new DiceEngine();
     this.moveHistory = new MoveHistory();
     this.setup = setup;
     this.bot = bot;
+    this.listeners = new Set();
+    this.clock = new ChessClock(
+      setup.timeControl.initialMinutes,
+      setup.timeControl.incrementSeconds,
+      (timedOutColor) => this.handleTimeout(timedOutColor)
+    );
     this.initializeTurnRights();
   }
 
@@ -118,6 +137,7 @@ export default class Game {
 
     this.selectedSquare = null;
     this.possibleMoves = [];
+    this.clock.stop();
     this.startNextTurn();
 
     return true;
@@ -133,8 +153,37 @@ export default class Game {
 
     return this.bot.playTurn(this, onMove, signal);
   }
+
+  public startClockForCurrentTurn(): boolean {
+    if (this.winner || !this.hasPlayableMoves()) {
+      return false;
+    }
+
+    return this.clock.start(this.currentTurn);
+  }
+
+  public subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+
+    return () => this.listeners.delete(listener);
+  }
+
+  public dispose(): void {
+    this.clock.dispose();
+    this.listeners.clear();
+  }
   
   public makeMove(move: Move): void {
+    if (this.winner) {
+      return;
+    }
+
+    this.clock.getRemainingTime(this.currentTurn);
+
+    if (this.winner) {
+      return;
+    }
+
     const resolution = this.getTurnResolution();
     const isApproved = resolution.selectableMoves.some(
       (approvedMove) =>
@@ -224,6 +273,8 @@ export default class Game {
 
     if (capturedPiece?.type === "king") {
       this.winner = piece.color;
+      this.resultReason = "king-captured";
+      this.clock.stop();
     }
 
     this.selectedSquare = null;
@@ -236,6 +287,12 @@ export default class Game {
     const nextResolution = this.getTurnResolution();
 
     if (nextResolution.maxConsumableRights === 0) {
+      this.clock.completeTurn(this.currentTurn);
+
+      if (this.winner) {
+        return;
+      }
+
       this.startNextTurn();
     }   
   }
@@ -265,6 +322,24 @@ export default class Game {
         : "white";
     this.moveHistory.startPlayerTurn(this.currentTurn);
     this.initializeTurnRights();
+  }
+
+  private handleTimeout(timedOutColor: PieceColor): void {
+    if (this.winner) {
+      return;
+    }
+
+    this.winner = timedOutColor === "white" ? "black" : "white";
+    this.resultReason = "timeout";
+    this.selectedSquare = null;
+    this.possibleMoves = [];
+    this.notifyListeners();
+  }
+
+  private notifyListeners(): void {
+    for (const listener of this.listeners) {
+      listener();
+    }
   }
 
 }
