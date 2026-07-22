@@ -11,11 +11,6 @@ interface GameResultModalProps {
   winner: PieceColor;
 }
 
-const END_REASON_LABELS: Record<GameResultReason, string> = {
-  "king-captured": "King captured",
-  timeout: "Time expired",
-};
-
 function GameResultModal({
   endReason,
   onMainMenu,
@@ -24,6 +19,9 @@ function GameResultModal({
 }: GameResultModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const playAgainRef = useRef<HTMLButtonElement>(null);
+  const loser = winner === "white" ? "Black" : "White";
+  const endReasonLabel =
+    endReason === "timeout" ? `${loser} ran out of time` : "King captured";
 
   useEffect(() => {
     playAgainRef.current?.focus();
@@ -78,7 +76,7 @@ function GameResultModal({
           {winner === "white" ? "White" : "Black"} wins
         </h2>
 
-        <p id="game-result-reason">{END_REASON_LABELS[endReason]}</p>
+        <p id="game-result-reason">{endReasonLabel}</p>
 
         <div className="game-result-actions">
           <button

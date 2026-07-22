@@ -1,5 +1,7 @@
 import type Game from "./Game";
 import type { PieceColor } from "../types/Chess";
+import type { BotMoveSelector } from "./BotMoveSelector";
+import HeuristicMoveSelector from "./HeuristicMoveSelector";
 
 export interface Bot {
   readonly color: PieceColor;
@@ -19,9 +21,16 @@ export default class BotController implements Bot {
 
   private readonly random: () => number;
 
-  constructor(color: PieceColor, random: () => number = Math.random) {
+  private readonly moveSelector: BotMoveSelector;
+
+  constructor(
+    color: PieceColor,
+    random: () => number = Math.random,
+    moveSelector: BotMoveSelector = new HeuristicMoveSelector()
+  ) {
     this.color = color;
     this.random = random;
+    this.moveSelector = moveSelector;
   }
 
   public async playTurn(
@@ -54,12 +63,11 @@ export default class BotController implements Bot {
         return;
       }
 
-      const moveIndex = Math.floor(this.random() * selectableMoves.length);
-      const selectedMove = selectableMoves[moveIndex];
-
-      if (!selectedMove) {
-        throw new RangeError("Bot random source must return a value in [0, 1).");
-      }
+      const selectedMove = this.moveSelector.selectMove(
+        selectableMoves,
+        game.board,
+        this.random
+      );
 
       game.makeMove(selectedMove);
       onMove?.();
