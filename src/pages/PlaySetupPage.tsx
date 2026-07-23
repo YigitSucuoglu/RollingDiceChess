@@ -7,10 +7,23 @@ import {
 } from "../config/gameSetup";
 import gameManager from "../engine/GameManager";
 import type { PieceColor } from "../types/Chess";
-import type { GameSetup } from "../types/GameSetup";
+import type { BotDifficulty, GameSetup } from "../types/GameSetup";
 import "../styles/PlaySetupPage.css";
 
 const COMING_SOON_BOARD_THEMES = ["Wood", "Marble", "Dark"] as const;
+const BOT_DIFFICULTY_OPTIONS: readonly {
+  value: BotDifficulty;
+  label: string;
+  description: string;
+}[] = [
+  { value: "easy", label: "Easy", description: "Random legal moves" },
+  {
+    value: "medium",
+    label: "Medium",
+    description: "Tactical move choices",
+  },
+  { value: "hard", label: "Hard", description: "Plans the full turn" },
+];
 
 function ComingSoon() {
   return <span className="coming-soon">Coming soon</span>;
@@ -20,6 +33,8 @@ function PlaySetupPage() {
   const navigate = useNavigate();
   const [timeControlId, setTimeControlId] = useState(DEFAULT_TIME_CONTROL.id);
   const [playerColor, setPlayerColor] = useState<PieceColor>("white");
+  const [botDifficulty, setBotDifficulty] =
+    useState<BotDifficulty>("medium");
 
   const startGame = () => {
     const timeControl = TIME_CONTROL_OPTIONS.find(
@@ -37,7 +52,7 @@ function PlaySetupPage() {
       opponentType: "bot",
       pieceTheme: "gold",
       boardTheme: "default",
-      botDifficulty: "hard",
+      botDifficulty,
     };
 
     gameManager.newGame(setup);
@@ -109,6 +124,33 @@ function PlaySetupPage() {
                 <button className="setup-choice" disabled type="button">Online<ComingSoon /></button>
               </div>
             </section>
+
+            <fieldset className="setup-section">
+              <legend>Bot Difficulty</legend>
+              <div className="setup-options difficulty-options">
+                {BOT_DIFFICULTY_OPTIONS.map((option) => (
+                  <label
+                    className="setup-radio difficulty-option"
+                    key={option.value}
+                  >
+                    <input
+                      checked={botDifficulty === option.value}
+                      name="bot-difficulty"
+                      onChange={() => setBotDifficulty(option.value)}
+                      type="radio"
+                      value={option.value}
+                    />
+                    <span className="difficulty-card">
+                      <strong>{option.label}</strong>
+                      <small>{option.description}</small>
+                      <span aria-hidden="true" className="difficulty-selected">
+                        Selected
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
 
             <section aria-labelledby="piece-theme-heading" className="setup-section">
               <h2 id="piece-theme-heading">Piece Theme</h2>

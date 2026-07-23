@@ -117,6 +117,10 @@
     grid-template-columns:repeat(4,minmax(0,1fr));
 }
 
+.difficulty-options{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
 .setup-radio{
     min-width:0;
 
@@ -131,7 +135,7 @@
     opacity:0;
 }
 
-.setup-radio span,
+.setup-radio > span,
 .setup-choice{
     min-height:44px;
     padding:8px;
@@ -154,7 +158,7 @@
     text-transform:uppercase;
 }
 
-.setup-radio:hover span,
+.setup-radio:hover > span,
 .setup-choice:hover:not(:disabled){
     border-color:#b58d49;
     background:#383027;
@@ -173,6 +177,48 @@
     background:linear-gradient(180deg,#81501f,#4d2e12);
     box-shadow:inset 0 1px 0 rgba(255,230,163,.25),0 0 0 1px rgba(225,184,95,.18);
     color:#fff0bd;
+}
+
+.difficulty-card{
+    min-height:82px;
+    padding:8px 6px;
+}
+
+.difficulty-card strong{
+    font-size:12px;
+    line-height:1;
+}
+
+.difficulty-card small{
+    min-height:24px;
+
+    display:flex;
+    align-items:center;
+
+    color:#bdb197;
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:.02em;
+    line-height:1.25;
+    text-transform:none;
+}
+
+.difficulty-selected{
+    visibility:hidden;
+
+    color:#f6d98e;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:.06em;
+    line-height:1;
+}
+
+.difficulty-option input:checked + .difficulty-card .difficulty-selected{
+    visibility:visible;
+}
+
+.difficulty-option input:checked + .difficulty-card small{
+    color:#f2dfb1;
 }
 
 .setup-secondary{
@@ -255,6 +301,14 @@
 
     .three-options{
         grid-template-columns:1fr;
+    }
+
+    .difficulty-options{
+        grid-template-columns:1fr;
+    }
+
+    .difficulty-card{
+        min-height:66px;
     }
 
     .play-setup-actions{
