@@ -18,7 +18,12 @@ export default class ChessBoard {
     const clonedBoard = Object.create(ChessBoard.prototype) as ChessBoard;
 
     clonedBoard.squares = this.squares.map((row) =>
-      row.map((piece) => piece ? { ...piece } : null)
+      row.map((piece) => piece
+        ? {
+            ...piece,
+            initialPosition: { ...piece.initialPosition },
+          }
+        : null)
     );
 
     return clonedBoard;
@@ -26,13 +31,16 @@ export default class ChessBoard {
   
   private createPiece(
     type: Piece["type"],
-    color: Piece["color"]
+    color: Piece["color"],
+    row: number,
+    col: number
   ): Piece {
     return {
       id: crypto.randomUUID(),
       type,
       color,
       hasMoved: false,
+      initialPosition: { row, col },
     };
   }
 
@@ -53,16 +61,16 @@ export default class ChessBoard {
     for (let col = 0; col < 8; col++) {
 
         this.squares[0][col] =
-          this.createPiece(backRank[col], "black");
+          this.createPiece(backRank[col], "black", 0, col);
 
         this.squares[1][col] =
-          this.createPiece("pawn", "black");
+          this.createPiece("pawn", "black", 1, col);
 
         this.squares[6][col] =
-            this.createPiece("pawn", "white");
+            this.createPiece("pawn", "white", 6, col);
 
         this.squares[7][col] =
-            this.createPiece(backRank[col], "white");
+            this.createPiece(backRank[col], "white", 7, col);
 
       }
 

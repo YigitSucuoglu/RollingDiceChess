@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.7.5
+v0.7.6
 
 ---
 
@@ -32,6 +32,7 @@ v0.7.5
 - AI-01D1 — Turn Sequence Generator
 - AI-01D2 — Sequence Evaluation & Bot Integration
 - AI-01E — Tactical Exposure Evaluation
+- AI-01F — Positional Evaluation
 - UX-01 — Mandatory Roll Reveal Before Auto Pass
 - CLOCK-01A — Chess Clock Engine & Timeout
 - CLOCK-01B — Dual Clock UI & Full Game Integration
@@ -60,10 +61,10 @@ v0.7.5
 ## Current Sprint
 
 Completed:
-- AI-01E — Tactical Exposure Evaluation
+- AI-01F — Positional Evaluation
 
 Next:
-1. AI-01F — Positional Evaluation
+1. AI-02A — Bot Difficulty Architecture
 
 ---
 
@@ -82,6 +83,7 @@ Next:
 - Turn Sequence Generator enumerates maximum-right continuations without mutating live game state.
 - Default bot evaluates and safely executes complete maximum-right turn sequences.
 - Sequence evaluation penalizes the highest exposed non-king material on the final board.
+- Positional evaluation adds low-weight center, development, and mobility signals.
 - Chess clock engine, timeout result, and perspective-aware dual clock UI are complete.
 
 

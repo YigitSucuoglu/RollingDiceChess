@@ -15,6 +15,7 @@ export interface Piece {
   type: PieceType;
   color: PieceColor;
   hasMoved: boolean;
+  readonly initialPosition: Readonly<Position>;
 }
 
 export interface Position {
