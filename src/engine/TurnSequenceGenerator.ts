@@ -8,6 +8,7 @@ import TurnResolver from "./TurnResolver";
 export interface TurnSequenceStep {
   readonly move: Move;
   readonly consumedRight: PieceType;
+  readonly capturedPieceType: PieceType | null;
 }
 
 export interface TurnSequence {
@@ -86,11 +87,13 @@ export default class TurnSequenceGenerator {
       }
 
       const childState = this.turnResolver.createContinuationState(state, move);
+      const capturedPieceType = this.getCapturedPieceType(state, move);
       const nextSteps = [
         ...steps,
         {
           move: this.cloneMove(move),
           consumedRight: movingPiece.type,
+          capturedPieceType,
         },
       ];
 
@@ -120,6 +123,7 @@ export default class TurnSequenceGenerator {
     const storedSteps = steps.map((step) => ({
       move: this.cloneMove(step.move),
       consumedRight: step.consumedRight,
+      capturedPieceType: step.capturedPieceType,
     }));
 
     sequences.push({
@@ -154,5 +158,20 @@ export default class TurnSequenceGenerator {
       from: { ...move.from },
       to: { ...move.to },
     };
+  }
+
+  private getCapturedPieceType(
+    state: SimulationState,
+    move: Move
+  ): PieceType | null {
+    if (!move.isCapture) {
+      return null;
+    }
+
+    const capturedPiece = move.isEnPassant
+      ? state.board.squares[move.from.row]?.[move.to.col]
+      : state.board.squares[move.to.row]?.[move.to.col];
+
+    return capturedPiece?.type ?? null;
   }
 }
