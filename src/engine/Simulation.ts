@@ -12,18 +12,30 @@ export interface SimulationState {
 }
 
 export function createSimulationState(game: Game): SimulationState {
-  return {
-    board: game.board.clone(),
-    rights: game.turnRights.clone(),
+  return cloneSimulationState({
+    board: game.board,
+    rights: game.turnRights,
     currentTurn: game.currentTurn,
-    lastMove: game.lastMove
+    lastMove: game.lastMove,
+    winner: game.winner,
+  });
+}
+
+export function cloneSimulationState(
+  state: SimulationState
+): SimulationState {
+  return {
+    board: state.board.clone(),
+    rights: state.rights.clone(),
+    currentTurn: state.currentTurn,
+    lastMove: state.lastMove
       ? {
-          ...game.lastMove,
-          from: { ...game.lastMove.from },
-          to: { ...game.lastMove.to },
+          ...state.lastMove,
+          from: { ...state.lastMove.from },
+          to: { ...state.lastMove.to },
         }
       : null,
-    winner: game.winner,
+    winner: state.winner,
   };
 }
 
