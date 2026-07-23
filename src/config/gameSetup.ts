@@ -40,13 +40,13 @@ export function createDefaultGameSetup(): GameSetup {
     opponentType: "bot",
     pieceTheme: "gold",
     boardTheme: "default",
-    botDifficulty: "hard",
+    botDifficulty: "medium",
   };
 }
 
 export function normalizeGameSetup(setup: GameSetupInput): GameSetup {
   return {
     ...setup,
-    botDifficulty: setup.botDifficulty ?? "hard",
+    botDifficulty: setup.botDifficulty ?? "medium",
   };
 }

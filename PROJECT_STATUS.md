@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.7.7
+v0.7.8
 
 ---
 
@@ -39,6 +39,7 @@ v0.7.7
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- AI-02B — Difficulty Selection UI
 - UI-04A — Full Play Setup Screen with time control and side selection
 - UI-04C — Board Coordinates & Player Perspective
 - Current Roll panel (3 fixed slots)
@@ -62,10 +63,10 @@ v0.7.7
 ## Current Sprint
 
 Completed:
-- AI-02A — Bot Difficulty Architecture
+- AI-02B — Difficulty Selection UI
 
 Next:
-1. AI-02B — Difficulty Selection UI
+1. THEME-01A — Classic Piece Theme Foundation
 
 ---
 
@@ -79,13 +80,16 @@ Next:
 - The ROLL button is the primary interaction; the lever is decorative animation only.
 - Check and checkmate do not exist; the game ends only when a king is captured.
 - Move history data infrastructure and two-column, three-slot UI are complete.
-- Play Setup stores time control and player side; difficulty selection UI remains a future task.
+- Play Setup stores time control, player side, and Easy/Medium/Hard bot difficulty; Medium is the default and legacy fallback.
 - Heuristic Bot scores current TurnResolver-approved moves after the shared roll animation.
 - Turn Sequence Generator enumerates maximum-right continuations without mutating live game state.
 - Default bot evaluates and safely executes complete maximum-right turn sequences.
 - Sequence evaluation penalizes the highest exposed non-king material on the final board.
 - Positional evaluation adds low-weight center, development, and mobility signals.
 - Difficulty mapping: Easy uses random single moves, Medium uses heuristic single moves, and Hard uses full sequence evaluation.
+- Difficulty UI descriptions: Easy — Random legal moves; Medium — Tactical move choices; Hard — Plans the full turn.
+- Classic theme foundation will cover both board pieces and slot/roulette symbols.
+- Wood, Marble, and Dark board theme integration remains planned.
 - Chess clock engine, timeout result, and perspective-aware dual clock UI are complete.
 
 
