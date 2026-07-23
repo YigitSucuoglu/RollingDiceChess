@@ -47,6 +47,8 @@ export default class Game {
 
   private readonly listeners: Set<() => void>;
 
+  private disposed: boolean;
+
 
   constructor(
     setup: GameSetup = createDefaultGameSetup(),
@@ -64,6 +66,7 @@ export default class Game {
     this.setup = setup;
     this.bot = bot;
     this.listeners = new Set();
+    this.disposed = false;
     this.clock = new ChessClock(
       setup.timeControl.initialMinutes,
       setup.timeControl.incrementSeconds,
@@ -169,12 +172,17 @@ export default class Game {
   }
 
   public dispose(): void {
+    this.disposed = true;
     this.clock.dispose();
     this.listeners.clear();
   }
+
+  public isDisposed(): boolean {
+    return this.disposed;
+  }
   
   public makeMove(move: Move): void {
-    if (this.winner) {
+    if (this.disposed || this.winner) {
       return;
     }
 
