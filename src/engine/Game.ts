@@ -11,9 +11,13 @@ import { createSimulationState } from "./Simulation";
 import TurnResolver, { type TurnResolution } from "./TurnResolver";
 import DiceEngine from "./DiceEngine";
 import MoveHistory from "./MoveHistory";
-import { createDefaultGameSetup } from "../config/gameSetup";
-import type { GameSetup } from "../types/GameSetup";
-import BotController, { type Bot } from "./BotController";
+import {
+  createDefaultGameSetup,
+  normalizeGameSetup,
+} from "../config/gameSetup";
+import type { GameSetup, GameSetupInput } from "../types/GameSetup";
+import type { Bot } from "./BotController";
+import BotFactory from "./BotFactory";
 import ChessClock from "./ChessClock";
 
 export default class Game {
@@ -51,9 +55,10 @@ export default class Game {
 
 
   constructor(
-    setup: GameSetup = createDefaultGameSetup(),
-    bot: Bot = new BotController(setup.botColor)
+    setupInput: GameSetupInput = createDefaultGameSetup(),
+    bot?: Bot
   ) {
+    const setup = normalizeGameSetup(setupInput);
     this.board = new ChessBoard();
     this.selectedSquare = null;
     this.possibleMoves = [];
@@ -64,7 +69,8 @@ export default class Game {
     this.diceEngine = new DiceEngine();
     this.moveHistory = new MoveHistory();
     this.setup = setup;
-    this.bot = bot;
+    this.bot =
+      bot ?? BotFactory.create(setup.botColor, setup.botDifficulty);
     this.listeners = new Set();
     this.disposed = false;
     this.clock = new ChessClock(

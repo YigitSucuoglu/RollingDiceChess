@@ -37,6 +37,7 @@ function PlaySetupPage() {
       opponentType: "bot",
       pieceTheme: "gold",
       boardTheme: "default",
+      botDifficulty: "hard",
     };
 
     gameManager.newGame(setup);

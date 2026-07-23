@@ -1,5 +1,6 @@
 import type {
   GameSetup,
+  GameSetupInput,
   TimeControlCategory,
   TimeControlOption,
 } from "../types/GameSetup";
@@ -39,5 +40,13 @@ export function createDefaultGameSetup(): GameSetup {
     opponentType: "bot",
     pieceTheme: "gold",
     boardTheme: "default",
+    botDifficulty: "hard",
+  };
+}
+
+export function normalizeGameSetup(setup: GameSetupInput): GameSetup {
+  return {
+    ...setup,
+    botDifficulty: setup.botDifficulty ?? "hard",
   };
 }

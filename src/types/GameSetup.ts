@@ -1,5 +1,7 @@
 import type { PieceColor } from "./Chess";
 
+export type BotDifficulty = "easy" | "medium" | "hard";
+
 export type TimeControlCategory =
   | "bullet"
   | "blitz"
@@ -21,4 +23,9 @@ export interface GameSetup {
   readonly opponentType: "bot";
   readonly pieceTheme: "gold";
   readonly boardTheme: "default";
+  readonly botDifficulty: BotDifficulty;
 }
+
+export type GameSetupInput = Omit<GameSetup, "botDifficulty"> & {
+  readonly botDifficulty?: BotDifficulty;
+};

@@ -1,9 +1,6 @@
 import type Game from "./Game";
 import type { Move, PieceColor } from "../types/Chess";
-import { createSimulationState } from "./Simulation";
-import HeuristicSequenceSelector from "./HeuristicSequenceSelector";
-import TurnSequenceGenerator from "./TurnSequenceGenerator";
-import type { TurnSequenceSelector } from "./TurnSequenceSelector";
+import type { BotTurnPlanner } from "./BotTurnPlanner";
 
 export interface Bot {
   readonly color: PieceColor;
@@ -23,20 +20,16 @@ export default class BotController implements Bot {
 
   private readonly random: () => number;
 
-  private readonly sequenceGenerator: TurnSequenceGenerator;
-
-  private readonly sequenceSelector: TurnSequenceSelector;
+  private readonly turnPlanner: BotTurnPlanner;
 
   constructor(
     color: PieceColor,
-    random: () => number = Math.random,
-    sequenceGenerator: TurnSequenceGenerator = new TurnSequenceGenerator(),
-    sequenceSelector: TurnSequenceSelector = new HeuristicSequenceSelector()
+    random: () => number,
+    turnPlanner: BotTurnPlanner
   ) {
     this.color = color;
     this.random = random;
-    this.sequenceGenerator = sequenceGenerator;
-    this.sequenceSelector = sequenceSelector;
+    this.turnPlanner = turnPlanner;
   }
 
   public async playTurn(
@@ -47,22 +40,14 @@ export default class BotController implements Bot {
     const turnRoll = game.currentRoll;
 
     while (this.canContinueTurn(game, turnRoll, signal)) {
-      const generation = this.sequenceGenerator.generate(
-        createSimulationState(game)
-      );
+      const plan = this.turnPlanner.planTurn(game, this.random);
 
-      if (generation.sequences.length === 0) {
+      if (!plan || plan.moves.length === 0) {
         return;
       }
-
-      const sequence = this.sequenceSelector.selectSequence(
-        generation.sequences,
-        this.color,
-        this.random
-      );
       let shouldReplan = false;
 
-      for (const plannedMove of sequence.moves) {
+      for (const plannedMove of plan.moves) {
         await this.wait(this.getRandomMoveDelay(), signal);
 
         if (!this.canContinueTurn(game, turnRoll, signal)) {
@@ -86,8 +71,8 @@ export default class BotController implements Bot {
         }
       }
 
-      if (!shouldReplan) {
-        return;
+      if (shouldReplan) {
+        continue;
       }
     }
   }
