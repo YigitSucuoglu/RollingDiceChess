@@ -3,6 +3,9 @@ import { TERMINAL_WIN_SCORE } from "./MoveEvaluator";
 import { PIECE_VALUES } from "./PieceValues";
 import type { TurnSequence } from "./TurnSequenceGenerator";
 import MaterialExposureEvaluator from "./MaterialExposureEvaluator";
+import PositionalEvaluator, {
+  type PositionalScore,
+} from "./PositionalEvaluator";
 
 export interface SequenceScore {
   readonly terminalScore: number;
@@ -11,6 +14,7 @@ export interface SequenceScore {
   readonly finalMaterialScore: number;
   readonly maxExposedMaterial: number;
   readonly exposurePenalty: number;
+  readonly positionalScore: PositionalScore;
   readonly totalScore: number;
 }
 
@@ -20,11 +24,15 @@ const EXPOSURE_PENALTY_MULTIPLIER = 8;
 export default class SequenceEvaluator {
   private readonly exposureEvaluator: MaterialExposureEvaluator;
 
+  private readonly positionalEvaluator: PositionalEvaluator;
+
   constructor(
     exposureEvaluator: MaterialExposureEvaluator =
-      new MaterialExposureEvaluator()
+      new MaterialExposureEvaluator(),
+    positionalEvaluator: PositionalEvaluator = new PositionalEvaluator()
   ) {
     this.exposureEvaluator = exposureEvaluator;
+    this.positionalEvaluator = positionalEvaluator;
   }
 
   public evaluate(
@@ -62,6 +70,14 @@ export default class SequenceEvaluator {
         );
     const exposurePenalty =
       maxExposedMaterial * EXPOSURE_PENALTY_MULTIPLIER;
+    const positionalScore = terminalScore
+      ? {
+          centerScore: 0,
+          developmentScore: 0,
+          mobilityScore: 0,
+          totalPositionalScore: 0,
+        }
+      : this.positionalEvaluator.evaluate(sequence.finalState, botColor);
 
     return {
       terminalScore,
@@ -70,11 +86,13 @@ export default class SequenceEvaluator {
       finalMaterialScore,
       maxExposedMaterial,
       exposurePenalty,
+      positionalScore,
       totalScore:
         terminalScore +
         captureScore +
         finalMaterialScore -
-        exposurePenalty,
+        exposurePenalty +
+        positionalScore.totalPositionalScore,
     };
   }
 }
