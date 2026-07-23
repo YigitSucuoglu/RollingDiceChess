@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.7.4
+v0.7.5
 
 ---
 
@@ -31,6 +31,7 @@ v0.7.4
 - AI-01C — Heuristic Bot v1
 - AI-01D1 — Turn Sequence Generator
 - AI-01D2 — Sequence Evaluation & Bot Integration
+- AI-01E — Tactical Exposure Evaluation
 - UX-01 — Mandatory Roll Reveal Before Auto Pass
 - CLOCK-01A — Chess Clock Engine & Timeout
 - CLOCK-01B — Dual Clock UI & Full Game Integration
@@ -59,10 +60,10 @@ v0.7.4
 ## Current Sprint
 
 Completed:
-- AI-01D — Full Turn Sequence Evaluation & Bot Integration
+- AI-01E — Tactical Exposure Evaluation
 
 Next:
-1. AI-01E — Threat & Exchange Evaluation
+1. AI-01F — Positional Evaluation
 
 ---
 
@@ -80,6 +81,7 @@ Next:
 - Heuristic Bot scores current TurnResolver-approved moves after the shared roll animation.
 - Turn Sequence Generator enumerates maximum-right continuations without mutating live game state.
 - Default bot evaluates and safely executes complete maximum-right turn sequences.
+- Sequence evaluation penalizes the highest exposed non-king material on the final board.
 - Chess clock engine, timeout result, and perspective-aware dual clock UI are complete.
 
 
