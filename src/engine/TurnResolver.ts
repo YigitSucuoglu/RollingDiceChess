@@ -13,7 +13,7 @@ export default class TurnResolver {
     const maxConsumableRights = this.calculateMaximumConsumable(state, cache);
     const candidateMoves = this.enumerateCandidateMoves(state);
     const selectableMoves = candidateMoves.filter((move) => {
-      const childState = this.createChildState(state, move);
+      const childState = this.createContinuationState(state, move);
 
       if (childState.winner !== null) {
         return true;
@@ -28,6 +28,31 @@ export default class TurnResolver {
       maxConsumableRights,
       selectableMoves,
     };
+  }
+
+  public createContinuationState(
+    state: SimulationState,
+    move: Move
+  ): SimulationState {
+    const movingPiece = state.board.squares[move.from.row]?.[move.from.col];
+
+    if (!movingPiece) {
+      throw new Error("Cannot create child state: source square is empty.");
+    }
+
+    if (movingPiece.id !== move.pieceId) {
+      throw new Error("Cannot create child state: pieceId does not match.");
+    }
+
+    if (!state.rights.has(movingPiece.type)) {
+      throw new Error("Cannot create child state: matching right is missing.");
+    }
+
+    const childState = applySimulatedMove(state, move);
+
+    childState.rights.consume(movingPiece.type);
+
+    return childState;
   }
 
   private enumerateCandidateMoves(state: SimulationState): Move[] {
@@ -60,31 +85,6 @@ export default class TurnResolver {
     return moves;
   }
 
-  private createChildState(
-    state: SimulationState,
-    move: Move
-  ): SimulationState {
-    const movingPiece = state.board.squares[move.from.row]?.[move.from.col];
-
-    if (!movingPiece) {
-      throw new Error("Cannot create child state: source square is empty.");
-    }
-
-    if (movingPiece.id !== move.pieceId) {
-      throw new Error("Cannot create child state: pieceId does not match.");
-    }
-
-    if (!state.rights.has(movingPiece.type)) {
-      throw new Error("Cannot create child state: matching right is missing.");
-    }
-
-    const childState = applySimulatedMove(state, move);
-
-    childState.rights.consume(movingPiece.type);
-
-    return childState;
-  }
-
   private calculateMaximumConsumable(
     state: SimulationState,
     cache: Map<string, number>
@@ -109,7 +109,7 @@ export default class TurnResolver {
     let maximumConsumable = 0;
 
     for (const move of candidateMoves) {
-      const childState = this.createChildState(state, move);
+      const childState = this.createContinuationState(state, move);
       const childRightCount = Object.values(
         childState.rights.getSnapshot()
       ).reduce((total, count) => total + count, 0);

@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.7.2
+v0.7.3
 
 ---
 
@@ -29,6 +29,7 @@ v0.7.2
 - AI-01A — Bot Framework
 - AI-01B — Random Legal Bot
 - AI-01C — Heuristic Bot v1
+- AI-01D1 — Turn Sequence Generator
 - UX-01 — Mandatory Roll Reveal Before Auto Pass
 - CLOCK-01A — Chess Clock Engine & Timeout
 - CLOCK-01B — Dual Clock UI & Full Game Integration
@@ -57,10 +58,10 @@ v0.7.2
 ## Current Sprint
 
 Completed:
-- AI-01C — Heuristic Bot v1
+- AI-01D1 — Turn Sequence Generator
 
 Next:
-1. AI-01D — Full Turn Sequence Evaluation
+1. AI-01D2 — Sequence Evaluation & Bot Integration
 
 ---
 
@@ -76,6 +77,7 @@ Next:
 - Move history data infrastructure and two-column, three-slot UI are complete.
 - Play Setup stores time control and player side; difficulty selection remains a future task.
 - Heuristic Bot scores current TurnResolver-approved moves after the shared roll animation.
+- Turn Sequence Generator enumerates maximum-right continuations without mutating live game state.
 - Chess clock engine, timeout result, and perspective-aware dual clock UI are complete.
 
 
