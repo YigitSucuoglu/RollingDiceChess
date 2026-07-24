@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.7.9
+v0.8.0
 
 ---
 
@@ -39,6 +39,7 @@ v0.7.9
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- THEME-01B — Classic Piece Assets
 - THEME-01A — Piece Theme Foundation
 - AI-02B — Difficulty Selection UI
 - UI-04A — Full Play Setup Screen with time control and side selection
@@ -64,10 +65,10 @@ v0.7.9
 ## Current Sprint
 
 Completed:
-- THEME-01A — Piece Theme Foundation
+- THEME-01B — Classic Piece Assets
 
 Next:
-1. THEME-01B — Classic Piece Assets
+1. THEME-02A — Board Theme Integration
 
 ---
 
@@ -90,8 +91,9 @@ Next:
 - Difficulty mapping: Easy uses random single moves, Medium uses heuristic single moves, and Hard uses full sequence evaluation.
 - Difficulty UI descriptions: Easy — Random legal moves; Medium — Tactical move choices; Hard — Plans the full turn.
 - Gold board and slot visuals are provided by the central Piece Theme resolver.
-- Classic is defined at the Piece Theme foundation level and remains unavailable until its asset sprint.
-- Wood, Marble, and Dark board theme integration remains planned.
+- Classic uses original local, contrast-outlined Staunton SVGs across the Board, Slot, and Result Modal.
+- Gold visuals remain unchanged, and the Piece Theme infrastructure is complete.
+- Wood, Marble, and Dark remain planned Board Theme options and will affect only the board appearance.
 - Chess clock engine, timeout result, and perspective-aware dual clock UI are complete.
 
 

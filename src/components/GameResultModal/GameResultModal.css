@@ -53,6 +53,14 @@
     object-fit:contain;
 }
 
+.game-result-king-text{
+    align-items:center;
+    justify-content:center;
+
+    font-size:clamp(58px,9vh,84px);
+    line-height:1;
+}
+
 .game-result-dialog h2{
     margin:0;
 

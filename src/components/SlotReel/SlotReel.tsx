@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useMemo, type CSSProperties } from "react";
 import { resolvePieceVisual } from "../../config/pieceThemes";
 import type { PieceColor, PieceType } from "../../types/Chess";
 import type { PieceTheme } from "../../types/PieceTheme";
@@ -41,15 +41,19 @@ function SlotReel({
   targetPiece,
   stopAfterMs,
 }: SlotReelProps) {
-  const reelSymbols = REEL_PIECE_TYPES.map((type) => ({
-    type,
-    visual: resolvePieceVisual({
-      context: "slot",
-      pieceColor,
-      pieceType: type,
-      theme: pieceTheme,
-    }),
-  }));
+  const reelSymbols = useMemo(
+    () =>
+      REEL_PIECE_TYPES.map((type) => ({
+        type,
+        visual: resolvePieceVisual({
+          context: "slot",
+          pieceColor,
+          pieceType: type,
+          theme: pieceTheme,
+        }),
+      })),
+    [pieceColor, pieceTheme]
+  );
   const trackSymbols = Array.from(
     { length: REEL_REPEAT_COUNT },
     () => reelSymbols
@@ -95,7 +99,8 @@ function SlotReel({
             key={`${trackIndex}-${symbol.type}`}
           >
             <img
-              alt={`${symbol.visual.label} chess piece`}
+              alt=""
+              aria-hidden="true"
               className="roll-piece-image"
               onError={(event) => {
                 event.currentTarget.hidden = true;
@@ -103,10 +108,16 @@ function SlotReel({
                   "is-visible"
                 );
               }}
-              src={symbol.visual.src ?? undefined}
+              src={
+                symbol.visual.kind === "image"
+                  ? symbol.visual.src
+                  : undefined
+              }
             />
             <span aria-hidden="true" className="roll-piece-fallback">
-              {symbol.visual.fallback}
+              {symbol.visual.kind === "image"
+                ? symbol.visual.fallback
+                : symbol.visual.value}
             </span>
           </div>
         ))}

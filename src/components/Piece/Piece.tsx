@@ -16,7 +16,17 @@ function Piece({ piece, theme }: PieceProps) {
     theme,
   });
 
-  return <span className="piece">{visual.fallback}</span>;
+  if (visual.kind === "image") {
+    return (
+      <img
+        alt={`${piece.color === "white" ? "White" : "Black"} ${visual.label}`}
+        className="piece piece-image"
+        src={visual.src}
+      />
+    );
+  }
+
+  return <span className="piece">{visual.value}</span>;
 }
 
 export default Piece;

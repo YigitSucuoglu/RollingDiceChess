@@ -74,12 +74,17 @@ function GameResultModal({
       >
         <div className="game-result-eyebrow">Game over</div>
 
-        <img
-          alt=""
-          aria-hidden="true"
-          className="game-result-king"
-          src={kingVisual.src ?? undefined}
-        />
+        {kingVisual.kind === "image" ? (
+          <img
+            alt={`${winner === "white" ? "White" : "Black"} King`}
+            className="game-result-king"
+            src={kingVisual.src}
+          />
+        ) : (
+          <span className="game-result-king game-result-king-text">
+            {kingVisual.value}
+          </span>
+        )}
 
         <h2 id="game-result-title">
           {winner === "white" ? "White" : "Black"} wins

@@ -8,7 +8,7 @@ import {
 import gameManager from "../engine/GameManager";
 import {
   DEFAULT_PIECE_THEME,
-  PIECE_THEME_OPTIONS,
+  SELECTABLE_PIECE_THEMES,
 } from "../config/pieceThemes";
 import type { PieceColor } from "../types/Chess";
 import type { BotDifficulty, GameSetup } from "../types/GameSetup";
@@ -162,19 +162,17 @@ function PlaySetupPage() {
             <section aria-labelledby="piece-theme-heading" className="setup-section">
               <h2 id="piece-theme-heading">Piece Theme</h2>
               <div className="setup-options two-options">
-                {PIECE_THEME_OPTIONS.map((theme) => (
+                {SELECTABLE_PIECE_THEMES.map((theme) => (
                   <button
                     aria-pressed={pieceTheme === theme.id}
                     className={`setup-choice ${
                       pieceTheme === theme.id ? "selected" : ""
                     }`}
-                    disabled={!theme.isSelectable}
                     key={theme.id}
                     onClick={() => setPieceTheme(theme.id)}
                     type="button"
                   >
                     {theme.label}
-                    {!theme.isSelectable && <ComingSoon />}
                   </button>
                 ))}
               </div>

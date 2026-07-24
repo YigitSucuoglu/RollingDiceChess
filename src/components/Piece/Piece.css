@@ -8,3 +8,12 @@
 
     pointer-events:none;
 }
+
+.piece-image{
+    width:84%;
+    height:84%;
+
+    display:block;
+
+    object-fit:contain;
+}
