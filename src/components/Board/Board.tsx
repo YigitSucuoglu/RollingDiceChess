@@ -9,6 +9,7 @@ import GameResultModal from "../GameResultModal/GameResultModal";
 import MoveHistoryPanel from "../MoveHistory/MoveHistoryPanel";
 import ChessClockPanel from "../ChessClock/ChessClockPanel";
 import type { ChessClockSnapshot } from "../../engine/ChessClock";
+import { BOARD_THEME_CATALOG } from "../../config/boardThemes";
 import { useNavigate } from "react-router-dom";
 
 const ROLLING_DURATION_MS = 1000;
@@ -75,6 +76,7 @@ function Board() {
     isTurnSkippedMessageVisible ||
     rollPhase !== "resolved";
   const moveHistory = game.moveHistory.getSnapshot();
+  const boardTheme = BOARD_THEME_CATALOG[game.setup.boardTheme];
 
   useEffect(
     () => game.subscribe(() => setRefresh((value) => value + 1)),
@@ -422,6 +424,8 @@ function Board() {
       <div
         aria-hidden={game.winner ? true : undefined}
         className="board"
+        data-board-theme={boardTheme.id}
+        style={boardTheme.style}
       >
         {squares}
       </div>

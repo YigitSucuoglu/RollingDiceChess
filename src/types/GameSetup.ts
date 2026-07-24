@@ -1,4 +1,5 @@
 import type { PieceColor } from "./Chess";
+import type { BoardTheme } from "./BoardTheme";
 import type { PieceTheme } from "./PieceTheme";
 
 export type BotDifficulty = "easy" | "medium" | "hard";
@@ -23,14 +24,15 @@ export interface GameSetup {
   readonly botColor: PieceColor;
   readonly opponentType: "bot";
   readonly pieceTheme: PieceTheme;
-  readonly boardTheme: "default";
+  readonly boardTheme: BoardTheme;
   readonly botDifficulty: BotDifficulty;
 }
 
 export type GameSetupInput = Omit<
   GameSetup,
-  "botDifficulty" | "pieceTheme"
+  "boardTheme" | "botDifficulty" | "pieceTheme"
 > & {
+  readonly boardTheme?: unknown;
   readonly botDifficulty?: BotDifficulty;
   readonly pieceTheme?: unknown;
 };
