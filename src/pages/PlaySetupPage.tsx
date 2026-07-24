@@ -10,12 +10,16 @@ import {
   DEFAULT_PIECE_THEME,
   SELECTABLE_PIECE_THEMES,
 } from "../config/pieceThemes";
+import {
+  DEFAULT_BOARD_THEME,
+  SELECTABLE_BOARD_THEMES,
+} from "../config/boardThemes";
 import type { PieceColor } from "../types/Chess";
 import type { BotDifficulty, GameSetup } from "../types/GameSetup";
+import type { BoardTheme } from "../types/BoardTheme";
 import type { PieceTheme } from "../types/PieceTheme";
 import "../styles/PlaySetupPage.css";
 
-const COMING_SOON_BOARD_THEMES = ["Wood", "Marble", "Dark"] as const;
 const BOT_DIFFICULTY_OPTIONS: readonly {
   value: BotDifficulty;
   label: string;
@@ -42,6 +46,8 @@ function PlaySetupPage() {
     useState<BotDifficulty>("medium");
   const [pieceTheme, setPieceTheme] =
     useState<PieceTheme>(DEFAULT_PIECE_THEME);
+  const [boardTheme, setBoardTheme] =
+    useState<BoardTheme>(DEFAULT_BOARD_THEME);
 
   const startGame = () => {
     const timeControl = TIME_CONTROL_OPTIONS.find(
@@ -58,7 +64,7 @@ function PlaySetupPage() {
       botColor: playerColor === "white" ? "black" : "white",
       opponentType: "bot",
       pieceTheme,
-      boardTheme: "default",
+      boardTheme,
       botDifficulty,
     };
 
@@ -181,10 +187,25 @@ function PlaySetupPage() {
             <section aria-labelledby="board-theme-heading" className="setup-section">
               <h2 id="board-theme-heading">Board Theme</h2>
               <div className="setup-options board-theme-options">
-                <button aria-pressed="true" className="setup-choice selected" type="button">Default</button>
-                {COMING_SOON_BOARD_THEMES.map((theme) => (
-                  <button className="setup-choice" disabled key={theme} type="button">
-                    {theme}<ComingSoon />
+                {SELECTABLE_BOARD_THEMES.map((theme) => (
+                  <button
+                    aria-pressed={boardTheme === theme.id}
+                    className={`setup-choice board-theme-choice ${
+                      boardTheme === theme.id ? "selected" : ""
+                    }`}
+                    key={theme.id}
+                    onClick={() => setBoardTheme(theme.id)}
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="board-theme-preview"
+                      style={theme.style}
+                    >
+                      <i />
+                      <i />
+                    </span>
+                    {theme.label}
                   </button>
                 ))}
               </div>

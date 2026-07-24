@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.8.0
+v0.8.1
 
 ---
 
@@ -39,6 +39,7 @@ v0.8.0
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- THEME-02A — Board Theme Integration
 - THEME-01B — Classic Piece Assets
 - THEME-01A — Piece Theme Foundation
 - AI-02B — Difficulty Selection UI
@@ -65,10 +66,10 @@ v0.8.0
 ## Current Sprint
 
 Completed:
-- THEME-01B — Classic Piece Assets
+- THEME-02A — Board Theme Integration
 
 Next:
-1. THEME-02A — Board Theme Integration
+1. SOUND-01A — Core Sound Effects Foundation
 
 ---
 
@@ -93,7 +94,8 @@ Next:
 - Gold board and slot visuals are provided by the central Piece Theme resolver.
 - Classic uses original local, contrast-outlined Staunton SVGs across the Board, Slot, and Result Modal.
 - Gold visuals remain unchanged, and the Piece Theme infrastructure is complete.
-- Wood, Marble, and Dark remain planned Board Theme options and will affect only the board appearance.
+- Wood, Marble, and Dark Board Themes are integrated and affect only board squares, surface, frame, and coordinates.
+- Piece Theme and Board Theme remain independent; Wood/Marble/Dark each support both Gold and Classic pieces.
 - Chess clock engine, timeout result, and perspective-aware dual clock UI are complete.
 
 
