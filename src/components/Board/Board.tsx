@@ -1,7 +1,13 @@
 import "./Board.css";
 import gameManager from "../../engine/GameManager";
 import Piece from "../Piece/Piece";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import type { PieceType } from "../../types/Chess";
 import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
 import SlotReel from "../SlotReel/SlotReel";
@@ -10,16 +16,24 @@ import MoveHistoryPanel from "../MoveHistory/MoveHistoryPanel";
 import ChessClockPanel from "../ChessClock/ChessClockPanel";
 import type { ChessClockSnapshot } from "../../engine/ChessClock";
 import { BOARD_THEME_CATALOG } from "../../config/boardThemes";
+import { ROLL_TIMING } from "../../config/rollTiming";
+import soundManager from "../../services/SoundManager";
 import { useNavigate } from "react-router-dom";
 
-const ROLLING_DURATION_MS = 1000;
 const AUTOMATIC_ROLL_DELAY_MS = 500;
 const UNPLAYABLE_ROLL_REVIEW_MS = 1200;
 const TURN_SKIPPED_MESSAGE_MS = 1000;
-const SLOT_STOP_TIMES_MS = [700, 850, ROLLING_DURATION_MS] as const;
 const CLOCK_REFRESH_INTERVAL_MS = 250;
 const LOW_TIME_CLOCK_REFRESH_INTERVAL_MS = 75;
 const LOW_TIME_THRESHOLD_MS = 15_000;
+
+type LeverStyle = CSSProperties & {
+  "--lever-animation-duration": string;
+};
+
+const LEVER_STYLE: LeverStyle = {
+  "--lever-animation-duration": `${ROLL_TIMING.leverAnimationDurationMs}ms`,
+};
 
 type RollPhase = "ready" | "spinning" | "resolved";
 
@@ -48,6 +62,8 @@ function Board() {
   const spinStartedForRollRef = useRef<readonly PieceType[] | null>(null);
   const botTurnInProgressRef = useRef(false);
   const botTurnAbortControllerRef = useRef<AbortController | null>(null);
+  const lastSoundedMoveRef = useRef({ game, timestamp: 0 });
+  const resultSoundGameRef = useRef<object | null>(null);
   const [isTurnSkippedMessageVisible, setIsTurnSkippedMessageVisible] =
     useState(false);
   const [rollAnimation, setRollAnimation] = useState<RollAnimationState>({
@@ -82,6 +98,46 @@ function Board() {
     () => game.subscribe(() => setRefresh((value) => value + 1)),
     [game]
   );
+
+  useEffect(
+    () => () => soundManager.stopAll(),
+    [game]
+  );
+
+  useEffect(() => {
+    if (lastSoundedMoveRef.current.game !== game) {
+      lastSoundedMoveRef.current = { game, timestamp: 0 };
+    }
+
+    const newMoves = moveHistory
+      .flatMap((turn) => [...turn.whiteMoves, ...turn.blackMoves])
+      .filter(
+        (move) => move.timestamp > lastSoundedMoveRef.current.timestamp
+      )
+      .sort((first, second) => first.timestamp - second.timestamp);
+
+    for (const move of newMoves) {
+      soundManager.play(move.capture ? "capture" : "move");
+      lastSoundedMoveRef.current.timestamp = move.timestamp;
+    }
+  }, [game, moveHistory]);
+
+  useEffect(() => {
+    if (!game.winner || resultSoundGameRef.current === game) {
+      return;
+    }
+
+    resultSoundGameRef.current = game;
+    soundManager.stop("reel-spin");
+
+    if (game.resultReason === "timeout") {
+      soundManager.play("timeout");
+    } else if (game.winner === game.setup.playerColor) {
+      soundManager.play("victory");
+    } else {
+      soundManager.play("defeat");
+    }
+  }, [game, game.resultReason, game.winner]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -137,12 +193,17 @@ function Board() {
       }
 
       setRollAnimation((state) => ({ ...state, phase: "resolved" }));
-    }, ROLLING_DURATION_MS);
+      soundManager.stop("reel-spin");
+      soundManager.play("reel-stop");
+    }, ROLL_TIMING.durationMs);
 
-    return () => window.clearTimeout(timeoutId);
+    return () => {
+      window.clearTimeout(timeoutId);
+      soundManager.stop("reel-spin");
+    };
   }, [game.winner, rollAnimation.phase, rollAnimation.spinId]);
 
-  const startRoll = useCallback(() => {
+  const startRoll = useCallback((withButtonFeedback = false) => {
     if (
       game.winner !== null ||
       rollPhase !== "ready" ||
@@ -151,6 +212,12 @@ function Board() {
       return;
     }
 
+    if (withButtonFeedback) {
+      soundManager.play("roll-button");
+    }
+
+    soundManager.play("lever-pull");
+    soundManager.play("reel-spin");
     spinStartedForRollRef.current = game.currentRoll;
     setRollAnimation((state) => ({
       ...state,
@@ -186,6 +253,7 @@ function Board() {
         return;
       }
 
+      soundManager.play("turn-skipped");
       setIsTurnSkippedMessageVisible(true);
       skipTimeoutId = window.setTimeout(() => {
         if (!game.winner && game.currentRoll === turnRoll) {
@@ -247,6 +315,7 @@ function Board() {
 
   const startNewGame = () => {
     botTurnAbortControllerRef.current?.abort();
+    soundManager.stopAll();
     gameManager.newGame(game.setup);
     const newGame = gameManager.getGame();
 
@@ -265,6 +334,7 @@ function Board() {
 
   const returnToMainMenu = () => {
     botTurnAbortControllerRef.current?.abort();
+    soundManager.stopAll();
     setIsTurnSkippedMessageVisible(false);
     gameManager.newGame();
     navigate("/");
@@ -370,6 +440,7 @@ function Board() {
                   }`}
                   key={`lever-${rollAnimation.spinId}`}
                   src={SLOT_MACHINE_ASSETS.generated.lever}
+                  style={LEVER_STYLE}
                 />
 
                 <img
@@ -392,7 +463,7 @@ function Board() {
                       pieceColor={game.currentTurn}
                       pieceTheme={game.setup.pieceTheme}
                       reelIndex={index}
-                      stopAfterMs={SLOT_STOP_TIMES_MS[index]}
+                      stopAfterMs={ROLL_TIMING.reelStopTimesMs[index]}
                       targetPiece={pieceType}
                     />
                   ))}
@@ -407,7 +478,7 @@ function Board() {
                   !hasPlayableMoves ||
                   rollPhase !== "ready"
                 }
-                onClick={startRoll}
+                onClick={() => startRoll(true)}
                 type="button"
               >
                 ROLL
