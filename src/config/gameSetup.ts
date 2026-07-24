@@ -4,6 +4,10 @@ import type {
   TimeControlCategory,
   TimeControlOption,
 } from "../types/GameSetup";
+import {
+  DEFAULT_PIECE_THEME,
+  normalizePieceTheme,
+} from "./pieceThemes";
 
 export const TIME_CONTROL_CATEGORIES: readonly TimeControlCategory[] = [
   "bullet",
@@ -38,7 +42,7 @@ export function createDefaultGameSetup(): GameSetup {
     playerColor: "white",
     botColor: "black",
     opponentType: "bot",
-    pieceTheme: "gold",
+    pieceTheme: DEFAULT_PIECE_THEME,
     boardTheme: "default",
     botDifficulty: "medium",
   };
@@ -48,5 +52,6 @@ export function normalizeGameSetup(setup: GameSetupInput): GameSetup {
   return {
     ...setup,
     botDifficulty: setup.botDifficulty ?? "medium",
+    pieceTheme: normalizePieceTheme(setup.pieceTheme),
   };
 }

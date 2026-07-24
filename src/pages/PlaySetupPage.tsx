@@ -6,8 +6,13 @@ import {
   TIME_CONTROL_OPTIONS,
 } from "../config/gameSetup";
 import gameManager from "../engine/GameManager";
+import {
+  DEFAULT_PIECE_THEME,
+  PIECE_THEME_OPTIONS,
+} from "../config/pieceThemes";
 import type { PieceColor } from "../types/Chess";
 import type { BotDifficulty, GameSetup } from "../types/GameSetup";
+import type { PieceTheme } from "../types/PieceTheme";
 import "../styles/PlaySetupPage.css";
 
 const COMING_SOON_BOARD_THEMES = ["Wood", "Marble", "Dark"] as const;
@@ -35,6 +40,8 @@ function PlaySetupPage() {
   const [playerColor, setPlayerColor] = useState<PieceColor>("white");
   const [botDifficulty, setBotDifficulty] =
     useState<BotDifficulty>("medium");
+  const [pieceTheme, setPieceTheme] =
+    useState<PieceTheme>(DEFAULT_PIECE_THEME);
 
   const startGame = () => {
     const timeControl = TIME_CONTROL_OPTIONS.find(
@@ -50,7 +57,7 @@ function PlaySetupPage() {
       playerColor,
       botColor: playerColor === "white" ? "black" : "white",
       opponentType: "bot",
-      pieceTheme: "gold",
+      pieceTheme,
       boardTheme: "default",
       botDifficulty,
     };
@@ -155,8 +162,21 @@ function PlaySetupPage() {
             <section aria-labelledby="piece-theme-heading" className="setup-section">
               <h2 id="piece-theme-heading">Piece Theme</h2>
               <div className="setup-options two-options">
-                <button aria-pressed="true" className="setup-choice selected" type="button">Gold</button>
-                <button className="setup-choice" disabled type="button">Classic<ComingSoon /></button>
+                {PIECE_THEME_OPTIONS.map((theme) => (
+                  <button
+                    aria-pressed={pieceTheme === theme.id}
+                    className={`setup-choice ${
+                      pieceTheme === theme.id ? "selected" : ""
+                    }`}
+                    disabled={!theme.isSelectable}
+                    key={theme.id}
+                    onClick={() => setPieceTheme(theme.id)}
+                    type="button"
+                  >
+                    {theme.label}
+                    {!theme.isSelectable && <ComingSoon />}
+                  </button>
+                ))}
               </div>
             </section>
 
