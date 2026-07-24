@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.8.1
+v0.8.2
 
 ---
 
@@ -39,6 +39,7 @@ v0.8.1
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- SOUND-01A — Core Sound Effects Foundation
 - THEME-02A — Board Theme Integration
 - THEME-01B — Classic Piece Assets
 - THEME-01A — Piece Theme Foundation
@@ -66,10 +67,10 @@ v0.8.1
 ## Current Sprint
 
 Completed:
-- THEME-02A — Board Theme Integration
+- SOUND-01A — Core Sound Effects Foundation
 
 Next:
-1. SOUND-01A — Core Sound Effects Foundation
+1. SOUND-01B — Sound Balancing and Browser QA
 
 ---
 
@@ -96,6 +97,9 @@ Next:
 - Gold visuals remain unchanged, and the Piece Theme infrastructure is complete.
 - Wood, Marble, and Dark Board Themes are integrated and affect only board squares, surface, frame, and coordinates.
 - Piece Theme and Board Theme remain independent; Wood/Marble/Dark each support both Gold and Classic pieces.
+- Central SoundManager provides cached, master-mutable audio with a persistent Move History header toggle.
+- Supported effects: Roll button, Lever pull, Reel spin, Reel stop, Move, Capture, Turn skipped, Victory, Defeat, and Timeout.
+- Lever audio starts with the animation and follows the shared roll timing config; volume sliders and background music are not included.
 - Chess clock engine, timeout result, and perspective-aware dual clock UI are complete.
 
 
