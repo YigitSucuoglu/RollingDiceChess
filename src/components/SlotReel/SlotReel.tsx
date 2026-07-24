@@ -1,56 +1,24 @@
 import type { CSSProperties } from "react";
-import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
-import type { PieceType } from "../../types/Chess";
+import { resolvePieceVisual } from "../../config/pieceThemes";
+import type { PieceColor, PieceType } from "../../types/Chess";
+import type { PieceTheme } from "../../types/PieceTheme";
 import "./SlotReel.css";
 
 const REEL_REPEAT_COUNT = 3;
 
-const REEL_SYMBOLS: readonly {
-  type: PieceType;
-  label: string;
-  fallback: string;
-  src: string;
-}[] = [
-  {
-    type: "pawn",
-    label: "Pawn",
-    fallback: "♟",
-    src: SLOT_MACHINE_ASSETS.symbols.pawn,
-  },
-  {
-    type: "knight",
-    label: "Knight",
-    fallback: "♞",
-    src: SLOT_MACHINE_ASSETS.symbols.knight,
-  },
-  {
-    type: "bishop",
-    label: "Bishop",
-    fallback: "♝",
-    src: SLOT_MACHINE_ASSETS.symbols.bishop,
-  },
-  {
-    type: "rook",
-    label: "Rook",
-    fallback: "♜",
-    src: SLOT_MACHINE_ASSETS.symbols.rook,
-  },
-  {
-    type: "queen",
-    label: "Queen",
-    fallback: "♛",
-    src: SLOT_MACHINE_ASSETS.symbols.queen,
-  },
-  {
-    type: "king",
-    label: "King",
-    fallback: "♚",
-    src: SLOT_MACHINE_ASSETS.symbols.king,
-  },
+const REEL_PIECE_TYPES: readonly PieceType[] = [
+  "pawn",
+  "knight",
+  "bishop",
+  "rook",
+  "queen",
+  "king",
 ];
 
 interface SlotReelProps {
   isSpinning: boolean;
+  pieceColor: PieceColor;
+  pieceTheme: PieceTheme;
   reelIndex: number;
   targetPiece: PieceType;
   stopAfterMs: number;
@@ -67,19 +35,30 @@ type ReelStyle = CSSProperties & {
 
 function SlotReel({
   isSpinning,
+  pieceColor,
+  pieceTheme,
   reelIndex,
   targetPiece,
   stopAfterMs,
 }: SlotReelProps) {
+  const reelSymbols = REEL_PIECE_TYPES.map((type) => ({
+    type,
+    visual: resolvePieceVisual({
+      context: "slot",
+      pieceColor,
+      pieceType: type,
+      theme: pieceTheme,
+    }),
+  }));
   const trackSymbols = Array.from(
     { length: REEL_REPEAT_COUNT },
-    () => REEL_SYMBOLS
+    () => reelSymbols
   ).flat();
-  const targetSymbolIndex = REEL_SYMBOLS.findIndex(
+  const targetSymbolIndex = reelSymbols.findIndex(
     (symbol) => symbol.type === targetPiece
   );
   const targetTrackIndex =
-    (REEL_REPEAT_COUNT - 1) * REEL_SYMBOLS.length + targetSymbolIndex;
+    (REEL_REPEAT_COUNT - 1) * reelSymbols.length + targetSymbolIndex;
   const trackSymbolCount = trackSymbols.length;
   const reelStyle: ReelStyle = {
     "--reel-accent-delay": `${Math.max(0, stopAfterMs - 150)}ms`,
@@ -116,7 +95,7 @@ function SlotReel({
             key={`${trackIndex}-${symbol.type}`}
           >
             <img
-              alt={`${symbol.label} chess piece`}
+              alt={`${symbol.visual.label} chess piece`}
               className="roll-piece-image"
               onError={(event) => {
                 event.currentTarget.hidden = true;
@@ -124,10 +103,10 @@ function SlotReel({
                   "is-visible"
                 );
               }}
-              src={symbol.src}
+              src={symbol.visual.src ?? undefined}
             />
             <span aria-hidden="true" className="roll-piece-fallback">
-              {symbol.fallback}
+              {symbol.visual.fallback}
             </span>
           </div>
         ))}

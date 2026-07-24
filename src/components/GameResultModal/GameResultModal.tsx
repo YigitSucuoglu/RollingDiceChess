@@ -1,13 +1,15 @@
 import { useEffect, useRef } from "react";
 import type { KeyboardEvent } from "react";
-import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
+import { resolvePieceVisual } from "../../config/pieceThemes";
 import type { GameResultReason, PieceColor } from "../../types/Chess";
+import type { PieceTheme } from "../../types/PieceTheme";
 import "./GameResultModal.css";
 
 interface GameResultModalProps {
   endReason: GameResultReason;
   onMainMenu: () => void;
   onPlayAgain: () => void;
+  pieceTheme: PieceTheme;
   winner: PieceColor;
 }
 
@@ -15,6 +17,7 @@ function GameResultModal({
   endReason,
   onMainMenu,
   onPlayAgain,
+  pieceTheme,
   winner,
 }: GameResultModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -22,6 +25,12 @@ function GameResultModal({
   const loser = winner === "white" ? "Black" : "White";
   const endReasonLabel =
     endReason === "timeout" ? `${loser} ran out of time` : "King captured";
+  const kingVisual = resolvePieceVisual({
+    context: "slot",
+    pieceColor: winner,
+    pieceType: "king",
+    theme: pieceTheme,
+  });
 
   useEffect(() => {
     playAgainRef.current?.focus();
@@ -69,7 +78,7 @@ function GameResultModal({
           alt=""
           aria-hidden="true"
           className="game-result-king"
-          src={SLOT_MACHINE_ASSETS.symbols.king}
+          src={kingVisual.src ?? undefined}
         />
 
         <h2 id="game-result-title">

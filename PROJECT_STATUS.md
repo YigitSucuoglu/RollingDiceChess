@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.7.8
+v0.7.9
 
 ---
 
@@ -39,6 +39,7 @@ v0.7.8
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- THEME-01A — Piece Theme Foundation
 - AI-02B — Difficulty Selection UI
 - UI-04A — Full Play Setup Screen with time control and side selection
 - UI-04C — Board Coordinates & Player Perspective
@@ -63,10 +64,10 @@ v0.7.8
 ## Current Sprint
 
 Completed:
-- AI-02B — Difficulty Selection UI
+- THEME-01A — Piece Theme Foundation
 
 Next:
-1. THEME-01A — Classic Piece Theme Foundation
+1. THEME-01B — Classic Piece Assets
 
 ---
 
@@ -76,7 +77,7 @@ Next:
 - remainingRights changes after each move.
 - Animation must never modify engine state.
 - Winner state overrides the roll display.
-- Board pieces and reel symbols will use the same selectable piece theme in a future phase.
+- Piece Theme controls board pieces and slot symbols through one central resolver; Board Theme remains independent.
 - The ROLL button is the primary interaction; the lever is decorative animation only.
 - Check and checkmate do not exist; the game ends only when a king is captured.
 - Move history data infrastructure and two-column, three-slot UI are complete.
@@ -88,7 +89,8 @@ Next:
 - Positional evaluation adds low-weight center, development, and mobility signals.
 - Difficulty mapping: Easy uses random single moves, Medium uses heuristic single moves, and Hard uses full sequence evaluation.
 - Difficulty UI descriptions: Easy — Random legal moves; Medium — Tactical move choices; Hard — Plans the full turn.
-- Classic theme foundation will cover both board pieces and slot/roulette symbols.
+- Gold board and slot visuals are provided by the central Piece Theme resolver.
+- Classic is defined at the Piece Theme foundation level and remains unavailable until its asset sprint.
 - Wood, Marble, and Dark board theme integration remains planned.
 - Chess clock engine, timeout result, and perspective-aware dual clock UI are complete.
 

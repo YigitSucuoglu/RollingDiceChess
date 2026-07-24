@@ -321,7 +321,7 @@ function Board() {
             setRefresh((v) => v + 1);
           }}
         >
-          {piece && <Piece piece={piece} />}
+          {piece && <Piece piece={piece} theme={game.setup.pieceTheme} />}
 
           {isPossibleMove && <div className="move-dot" />}
 
@@ -387,6 +387,8 @@ function Board() {
                     <SlotReel
                       key={`${rollAnimation.spinId}-${index}`}
                       isSpinning={rollPhase === "spinning"}
+                      pieceColor={game.currentTurn}
+                      pieceTheme={game.setup.pieceTheme}
                       reelIndex={index}
                       stopAfterMs={SLOT_STOP_TIMES_MS[index]}
                       targetPiece={pieceType}
@@ -446,6 +448,7 @@ function Board() {
           endReason={game.resultReason ?? "king-captured"}
           onMainMenu={returnToMainMenu}
           onPlayAgain={startNewGame}
+          pieceTheme={game.setup.pieceTheme}
           winner={game.winner}
         />
       )}
