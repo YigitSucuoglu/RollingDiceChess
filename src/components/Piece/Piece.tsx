@@ -1,19 +1,19 @@
 import type { Piece as ChessPiece } from "../../types/Chess";
-import type { PieceTheme } from "../../types/PieceTheme";
-import { resolvePieceVisual } from "../../config/pieceThemes";
+import type { PieceSet } from "../../types/PieceSet";
+import { resolvePieceVisual } from "../../config/pieceSets";
 import "./Piece.css";
 
 interface PieceProps {
   piece: ChessPiece;
-  theme: PieceTheme;
+  pieceSet: PieceSet;
 }
 
-function Piece({ piece, theme }: PieceProps) {
+function Piece({ piece, pieceSet }: PieceProps) {
   const visual = resolvePieceVisual({
     context: "board",
     pieceColor: piece.color,
     pieceType: piece.type,
-    theme,
+    pieceSet,
   });
 
   if (visual.kind === "image") {

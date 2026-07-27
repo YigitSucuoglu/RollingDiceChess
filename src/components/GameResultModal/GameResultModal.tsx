@@ -1,15 +1,15 @@
 import { useEffect, useRef } from "react";
 import type { KeyboardEvent } from "react";
-import { resolvePieceVisual } from "../../config/pieceThemes";
+import { resolvePieceVisual } from "../../config/pieceSets";
 import type { GameResultReason, PieceColor } from "../../types/Chess";
-import type { PieceTheme } from "../../types/PieceTheme";
+import type { PieceSet } from "../../types/PieceSet";
 import "./GameResultModal.css";
 
 interface GameResultModalProps {
   endReason: GameResultReason;
   onMainMenu: () => void;
   onPlayAgain: () => void;
-  pieceTheme: PieceTheme;
+  pieceSet: PieceSet;
   winner: PieceColor;
 }
 
@@ -17,7 +17,7 @@ function GameResultModal({
   endReason,
   onMainMenu,
   onPlayAgain,
-  pieceTheme,
+  pieceSet,
   winner,
 }: GameResultModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -29,7 +29,7 @@ function GameResultModal({
     context: "slot",
     pieceColor: winner,
     pieceType: "king",
-    theme: pieceTheme,
+    pieceSet,
   });
 
   useEffect(() => {

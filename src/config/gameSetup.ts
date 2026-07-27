@@ -5,9 +5,10 @@ import type {
   TimeControlOption,
 } from "../types/GameSetup";
 import {
-  DEFAULT_PIECE_THEME,
-  normalizePieceTheme,
-} from "./pieceThemes";
+  DEFAULT_PIECE_SET,
+  migrateLegacyPieceSet,
+  normalizePieceSet,
+} from "./pieceSets";
 import {
   DEFAULT_BOARD_THEME,
   normalizeBoardTheme,
@@ -46,7 +47,7 @@ export function createDefaultGameSetup(): GameSetup {
     playerColor: "white",
     botColor: "black",
     opponentType: "bot",
-    pieceTheme: DEFAULT_PIECE_THEME,
+    pieceSet: DEFAULT_PIECE_SET,
     boardTheme: DEFAULT_BOARD_THEME,
     botDifficulty: "medium",
   };
@@ -57,6 +58,9 @@ export function normalizeGameSetup(setup: GameSetupInput): GameSetup {
     ...setup,
     boardTheme: normalizeBoardTheme(setup.boardTheme),
     botDifficulty: setup.botDifficulty ?? "medium",
-    pieceTheme: normalizePieceTheme(setup.pieceTheme),
+    pieceSet:
+      setup.pieceSet === undefined
+        ? migrateLegacyPieceSet(setup.pieceTheme)
+        : normalizePieceSet(setup.pieceSet),
   };
 }

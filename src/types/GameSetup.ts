@@ -1,6 +1,6 @@
 import type { PieceColor } from "./Chess";
 import type { BoardTheme } from "./BoardTheme";
-import type { PieceTheme } from "./PieceTheme";
+import type { PieceSet } from "./PieceSet";
 
 export type BotDifficulty = "easy" | "medium" | "hard";
 
@@ -23,16 +23,18 @@ export interface GameSetup {
   readonly playerColor: PieceColor;
   readonly botColor: PieceColor;
   readonly opponentType: "bot";
-  readonly pieceTheme: PieceTheme;
+  readonly pieceSet: PieceSet;
   readonly boardTheme: BoardTheme;
   readonly botDifficulty: BotDifficulty;
 }
 
 export type GameSetupInput = Omit<
   GameSetup,
-  "boardTheme" | "botDifficulty" | "pieceTheme"
+  "boardTheme" | "botDifficulty" | "pieceSet"
 > & {
   readonly boardTheme?: unknown;
   readonly botDifficulty?: BotDifficulty;
+  readonly pieceSet?: unknown;
+  /** Legacy serialized field. Normalized to pieceSet at the setup boundary. */
   readonly pieceTheme?: unknown;
 };

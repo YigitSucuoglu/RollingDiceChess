@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.8.4
+v0.8.5
 
 ---
 
@@ -39,13 +39,15 @@ v0.8.4
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- PIECESET-01B — Replace Classic Unicode Symbols with revised Classic SVG design
+- PIECESET-01 — Rename Piece Theme Architecture to Piece Set
 - BUG-01 — Prevent Automatic Human Roll After Initial No-Move Result
 - UI-01B — Collapsible Move History & Adaptive Desktop Layout with Desktop Overflow Fix
 - UI-01A — Game Screen Layout & Board Priority
 - SOUND-01A — Core Sound Effects Foundation
 - THEME-02A — Board Theme Integration
 - THEME-01B — Classic Piece Assets
-- THEME-01A — Piece Theme Foundation
+- THEME-01A — Piece Set Foundation
 - AI-02B — Difficulty Selection UI
 - UI-04A — Full Play Setup Screen with time control and side selection
 - UI-04C — Board Coordinates & Player Perspective
@@ -70,12 +72,14 @@ v0.8.4
 ## Current Sprint
 
 Completed:
+- PIECESET-01B — Replace Classic Unicode Symbols with revised Classic SVG design
+- PIECESET-01 — Rename Piece Theme Architecture to Piece Set
 - BUG-01 — Prevent Automatic Human Roll After Initial No-Move Result
 - UI-01B — Collapsible Move History & Adaptive Desktop Layout with Desktop Overflow Fix
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. THEME-03A — Classic and Gold Piece Visual Polish
+1. PIECESET-02 — Design and Add Premium Gold Piece Set
 
 Roadmap:
 - HOME-01 — Home, Profile and Settings Redesign
@@ -90,7 +94,7 @@ Roadmap:
 - remainingRights changes after each move.
 - Animation must never modify engine state.
 - Winner state overrides the roll display.
-- Piece Theme controls board pieces and slot symbols through one central resolver; Board Theme remains independent.
+- Piece Set controls board pieces, slot symbols, and result visuals through one central resolver; Board Theme remains independent.
 - The ROLL button is the primary interaction; the lever is decorative animation only.
 - Check and checkmate do not exist; the game ends only when a king is captured.
 - Move history data infrastructure and two-column, three-slot UI are complete.
@@ -102,11 +106,11 @@ Roadmap:
 - Positional evaluation adds low-weight center, development, and mobility signals.
 - Difficulty mapping: Easy uses random single moves, Medium uses heuristic single moves, and Hard uses full sequence evaluation.
 - Difficulty UI descriptions: Easy — Random legal moves; Medium — Tactical move choices; Hard — Plans the full turn.
-- Gold board and slot visuals are provided by the central Piece Theme resolver.
-- Classic uses original local, contrast-outlined Staunton SVGs across the Board, Slot, and Result Modal.
-- Gold visuals remain unchanged, and the Piece Theme infrastructure is complete.
+- Classic uses revised, Unicode-diagram-inspired local SVGs across the Board, Slot, and Result Modal.
+- Retro uses the original local, contrast-outlined SVGs across the Board, Slot, and Result Modal.
+- Premium Gold is not selectable and remains planned for PIECESET-02.
 - Wood, Marble, and Dark Board Themes are integrated and affect only board squares, surface, frame, and coordinates.
-- Piece Theme and Board Theme remain independent; Wood/Marble/Dark each support both Gold and Classic pieces.
+- Piece Set and Board Theme remain independent; Wood/Marble/Dark each support both Classic and Retro pieces.
 - Central SoundManager provides cached, master-mutable audio with a persistent turn-header toggle.
 - Supported effects: Roll button, Lever pull, Reel spin, Reel stop, Move, Capture, Turn skipped, Victory, Defeat, and Timeout.
 - Lever audio starts with the animation and follows the shared roll timing config; volume sliders and background music are not included.

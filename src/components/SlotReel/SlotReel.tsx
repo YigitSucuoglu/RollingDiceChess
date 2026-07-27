@@ -1,7 +1,7 @@
 import { useMemo, type CSSProperties } from "react";
-import { resolvePieceVisual } from "../../config/pieceThemes";
+import { resolvePieceVisual } from "../../config/pieceSets";
 import type { PieceColor, PieceType } from "../../types/Chess";
-import type { PieceTheme } from "../../types/PieceTheme";
+import type { PieceSet } from "../../types/PieceSet";
 import "./SlotReel.css";
 
 const REEL_REPEAT_COUNT = 3;
@@ -18,7 +18,7 @@ const REEL_PIECE_TYPES: readonly PieceType[] = [
 interface SlotReelProps {
   isSpinning: boolean;
   pieceColor: PieceColor;
-  pieceTheme: PieceTheme;
+  pieceSet: PieceSet;
   reelIndex: number;
   targetPiece: PieceType;
   stopAfterMs: number;
@@ -36,7 +36,7 @@ type ReelStyle = CSSProperties & {
 function SlotReel({
   isSpinning,
   pieceColor,
-  pieceTheme,
+  pieceSet,
   reelIndex,
   targetPiece,
   stopAfterMs,
@@ -49,10 +49,10 @@ function SlotReel({
           context: "slot",
           pieceColor,
           pieceType: type,
-          theme: pieceTheme,
+          pieceSet,
         }),
       })),
-    [pieceColor, pieceTheme]
+    [pieceColor, pieceSet]
   );
   const trackSymbols = Array.from(
     { length: REEL_REPEAT_COUNT },
@@ -98,27 +98,32 @@ function SlotReel({
             data-piece-type={symbol.type}
             key={`${trackIndex}-${symbol.type}`}
           >
-            <img
-              alt=""
-              aria-hidden="true"
-              className="roll-piece-image"
-              onError={(event) => {
-                event.currentTarget.hidden = true;
-                event.currentTarget.nextElementSibling?.classList.add(
-                  "is-visible"
-                );
-              }}
-              src={
-                symbol.visual.kind === "image"
-                  ? symbol.visual.src
-                  : undefined
-              }
-            />
-            <span aria-hidden="true" className="roll-piece-fallback">
-              {symbol.visual.kind === "image"
-                ? symbol.visual.fallback
-                : symbol.visual.value}
-            </span>
+            {symbol.visual.kind === "image" ? (
+              <>
+                <img
+                  alt=""
+                  aria-hidden="true"
+                  className="roll-piece-image"
+                  onError={(event) => {
+                    event.currentTarget.hidden = true;
+                    event.currentTarget.nextElementSibling?.classList.add(
+                      "is-visible"
+                    );
+                  }}
+                  src={symbol.visual.src}
+                />
+                <span aria-hidden="true" className="roll-piece-fallback">
+                  {symbol.visual.fallback}
+                </span>
+              </>
+            ) : (
+              <span
+                aria-hidden="true"
+                className="roll-piece-fallback is-visible"
+              >
+                {symbol.visual.value}
+              </span>
+            )}
           </div>
         ))}
       </div>

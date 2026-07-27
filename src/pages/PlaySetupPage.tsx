@@ -7,9 +7,9 @@ import {
 } from "../config/gameSetup";
 import gameManager from "../engine/GameManager";
 import {
-  DEFAULT_PIECE_THEME,
-  SELECTABLE_PIECE_THEMES,
-} from "../config/pieceThemes";
+  DEFAULT_PIECE_SET,
+  SELECTABLE_PIECE_SETS,
+} from "../config/pieceSets";
 import {
   DEFAULT_BOARD_THEME,
   SELECTABLE_BOARD_THEMES,
@@ -17,7 +17,7 @@ import {
 import type { PieceColor } from "../types/Chess";
 import type { BotDifficulty, GameSetup } from "../types/GameSetup";
 import type { BoardTheme } from "../types/BoardTheme";
-import type { PieceTheme } from "../types/PieceTheme";
+import type { PieceSet } from "../types/PieceSet";
 import "../styles/PlaySetupPage.css";
 
 const BOT_DIFFICULTY_OPTIONS: readonly {
@@ -44,8 +44,8 @@ function PlaySetupPage() {
   const [playerColor, setPlayerColor] = useState<PieceColor>("white");
   const [botDifficulty, setBotDifficulty] =
     useState<BotDifficulty>("medium");
-  const [pieceTheme, setPieceTheme] =
-    useState<PieceTheme>(DEFAULT_PIECE_THEME);
+  const [pieceSet, setPieceSet] =
+    useState<PieceSet>(DEFAULT_PIECE_SET);
   const [boardTheme, setBoardTheme] =
     useState<BoardTheme>(DEFAULT_BOARD_THEME);
 
@@ -63,7 +63,7 @@ function PlaySetupPage() {
       playerColor,
       botColor: playerColor === "white" ? "black" : "white",
       opponentType: "bot",
-      pieceTheme,
+      pieceSet,
       boardTheme,
       botDifficulty,
     };
@@ -165,20 +165,20 @@ function PlaySetupPage() {
               </div>
             </fieldset>
 
-            <section aria-labelledby="piece-theme-heading" className="setup-section">
-              <h2 id="piece-theme-heading">Piece Theme</h2>
+            <section aria-labelledby="piece-set-heading" className="setup-section">
+              <h2 id="piece-set-heading">Piece Set</h2>
               <div className="setup-options two-options">
-                {SELECTABLE_PIECE_THEMES.map((theme) => (
+                {SELECTABLE_PIECE_SETS.map((set) => (
                   <button
-                    aria-pressed={pieceTheme === theme.id}
+                    aria-pressed={pieceSet === set.id}
                     className={`setup-choice ${
-                      pieceTheme === theme.id ? "selected" : ""
+                      pieceSet === set.id ? "selected" : ""
                     }`}
-                    key={theme.id}
-                    onClick={() => setPieceTheme(theme.id)}
+                    key={set.id}
+                    onClick={() => setPieceSet(set.id)}
                     type="button"
                   >
-                    {theme.label}
+                    {set.label}
                   </button>
                 ))}
               </div>

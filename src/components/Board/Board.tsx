@@ -466,7 +466,7 @@ function Board() {
             setRefresh((v) => v + 1);
           }}
         >
-          {piece && <Piece piece={piece} theme={game.setup.pieceTheme} />}
+          {piece && <Piece piece={piece} pieceSet={game.setup.pieceSet} />}
 
           {isPossibleMove && <div className="move-dot" />}
 
@@ -584,7 +584,7 @@ function Board() {
                       key={`${rollAnimation.spinId}-${index}`}
                       isSpinning={rollPhase === "spinning"}
                       pieceColor={game.currentTurn}
-                      pieceTheme={game.setup.pieceTheme}
+                      pieceSet={game.setup.pieceSet}
                       reelIndex={index}
                       stopAfterMs={ROLL_TIMING.reelStopTimesMs[index]}
                       targetPiece={pieceType}
@@ -651,7 +651,7 @@ function Board() {
           endReason={game.resultReason ?? "king-captured"}
           onMainMenu={returnToMainMenu}
           onPlayAgain={startNewGame}
-          pieceTheme={game.setup.pieceTheme}
+          pieceSet={game.setup.pieceSet}
           winner={game.winner}
         />
       )}
