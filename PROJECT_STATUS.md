@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.8.3
+v0.8.4
 
 ---
 
@@ -39,6 +39,7 @@ v0.8.3
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- BUG-01 — Prevent Automatic Human Roll After Initial No-Move Result
 - UI-01B — Collapsible Move History & Adaptive Desktop Layout with Desktop Overflow Fix
 - UI-01A — Game Screen Layout & Board Priority
 - SOUND-01A — Core Sound Effects Foundation
@@ -69,14 +70,14 @@ v0.8.3
 ## Current Sprint
 
 Completed:
+- BUG-01 — Prevent Automatic Human Roll After Initial No-Move Result
 - UI-01B — Collapsible Move History & Adaptive Desktop Layout with Desktop Overflow Fix
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. BUG-01 — Prevent Automatic Human Roll After Initial No-Move Result
+1. THEME-03A — Classic and Gold Piece Visual Polish
 
 Roadmap:
-- THEME-03A — Classic and Gold Piece Visual Polish
 - HOME-01 — Home, Profile and Settings Redesign
 - HELP-01 — How to Play
 - SOUND-01B — Sound Asset Replacement and Balancing

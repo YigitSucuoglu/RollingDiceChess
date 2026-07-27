@@ -257,7 +257,7 @@ function Board() {
   useEffect(() => {
     if (
       game.winner ||
-      (hasPlayableMoves && !game.isBotTurn()) ||
+      !game.isBotTurn() ||
       rollPhase !== "ready"
     ) {
       return;
@@ -266,7 +266,7 @@ function Board() {
     const timeoutId = window.setTimeout(startRoll, AUTOMATIC_ROLL_DELAY_MS);
 
     return () => window.clearTimeout(timeoutId);
-  }, [game, game.winner, hasPlayableMoves, rollPhase, startRoll]);
+  }, [game, game.winner, rollPhase, startRoll]);
 
   useEffect(() => {
     if (game.winner || hasPlayableMoves || rollPhase !== "resolved") {
@@ -598,7 +598,6 @@ function Board() {
                 disabled={
                   game.winner !== null ||
                   game.isBotTurn() ||
-                  !hasPlayableMoves ||
                   rollPhase !== "ready"
                 }
                 onClick={() => startRoll(true)}
