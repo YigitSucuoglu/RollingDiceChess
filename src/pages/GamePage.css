@@ -1,0 +1,20 @@
+.game-page{
+    width:100%;
+    height:100vh;
+    height:100dvh;
+    padding:var(--game-page-padding,12px);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    overflow:clip;
+    background:#202020;
+}
+
+@media (max-width:900px){
+    .game-page{
+        align-items:flex-start;
+        overflow:auto;
+    }
+}

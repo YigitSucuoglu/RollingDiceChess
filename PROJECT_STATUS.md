@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.8.2
+v0.8.3
 
 ---
 
@@ -39,6 +39,8 @@ v0.8.2
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- UI-01B — Collapsible Move History & Adaptive Desktop Layout with Desktop Overflow Fix
+- UI-01A — Game Screen Layout & Board Priority
 - SOUND-01A — Core Sound Effects Foundation
 - THEME-02A — Board Theme Integration
 - THEME-01B — Classic Piece Assets
@@ -67,10 +69,17 @@ v0.8.2
 ## Current Sprint
 
 Completed:
-- SOUND-01A — Core Sound Effects Foundation
+- UI-01B — Collapsible Move History & Adaptive Desktop Layout with Desktop Overflow Fix
+- UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. SOUND-01B — Sound Balancing and Browser QA
+1. BUG-01 — Prevent Automatic Human Roll After Initial No-Move Result
+
+Roadmap:
+- THEME-03A — Classic and Gold Piece Visual Polish
+- HOME-01 — Home, Profile and Settings Redesign
+- HELP-01 — How to Play
+- SOUND-01B — Sound Asset Replacement and Balancing
 
 ---
 
@@ -97,9 +106,13 @@ Next:
 - Gold visuals remain unchanged, and the Piece Theme infrastructure is complete.
 - Wood, Marble, and Dark Board Themes are integrated and affect only board squares, surface, frame, and coordinates.
 - Piece Theme and Board Theme remain independent; Wood/Marble/Dark each support both Gold and Classic pieces.
-- Central SoundManager provides cached, master-mutable audio with a persistent Move History header toggle.
+- Central SoundManager provides cached, master-mutable audio with a persistent turn-header toggle.
 - Supported effects: Roll button, Lever pull, Reel spin, Reel stop, Move, Capture, Turn skipped, Victory, Defeat, and Timeout.
 - Lever audio starts with the animation and follows the shared roll timing config; volume sliders and background music are not included.
+- Desktop game layout prioritizes a viewport-sized board with a narrow secondary Move History panel.
+- Move History starts closed, releases its layout space, and keeps the centered desktop game layout free of page-level overflow.
+- At narrow breakpoints, Move History stacks below the main game column and remains internally scrollable.
+- UI-01A changes layout only; gameplay, bot pacing, clock, and sound behavior remain unchanged.
 - Chess clock engine, timeout result, and perspective-aware dual clock UI are complete.
 
 

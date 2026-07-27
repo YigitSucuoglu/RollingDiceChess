@@ -1,19 +1,11 @@
 import Board from "../components/Board/Board";
+import "./GamePage.css";
 
 function GamePage() {
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "#202020",
-      }}
-    >
+    <main className="game-page">
       <Board />
-    </div>
+    </main>
   );
 }
 

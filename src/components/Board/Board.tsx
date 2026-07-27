@@ -26,6 +26,7 @@ const TURN_SKIPPED_MESSAGE_MS = 1000;
 const CLOCK_REFRESH_INTERVAL_MS = 250;
 const LOW_TIME_CLOCK_REFRESH_INTERVAL_MS = 75;
 const LOW_TIME_THRESHOLD_MS = 15_000;
+const HISTORY_TRANSITION_MS = 260;
 
 type LeverStyle = CSSProperties & {
   "--lever-animation-duration": string;
@@ -56,9 +57,17 @@ function Board() {
   const navigate = useNavigate();
 
   const [, setRefresh] = useState(0);
+  const [isMoveHistoryOpen, setIsMoveHistoryOpen] = useState(false);
+  const [isMoveHistoryMounted, setIsMoveHistoryMounted] = useState(false);
+  const [isSoundEnabled, setIsSoundEnabled] = useState(
+    soundManager.isEnabled()
+  );
   const [clockSnapshot, setClockSnapshot] = useState<ChessClockSnapshot>(() =>
     game.clock.getSnapshot()
   );
+  const historyCloseTimeoutRef = useRef<number | null>(null);
+  const historyOpenRef = useRef(false);
+  const historyOpenFrameRef = useRef<number | null>(null);
   const spinStartedForRollRef = useRef<readonly PieceType[] | null>(null);
   const botTurnInProgressRef = useRef(false);
   const botTurnAbortControllerRef = useRef<AbortController | null>(null);
@@ -102,6 +111,24 @@ function Board() {
   useEffect(
     () => () => soundManager.stopAll(),
     [game]
+  );
+
+  useEffect(
+    () => soundManager.subscribe(setIsSoundEnabled),
+    []
+  );
+
+  useEffect(
+    () => () => {
+      if (historyCloseTimeoutRef.current !== null) {
+        window.clearTimeout(historyCloseTimeoutRef.current);
+      }
+
+      if (historyOpenFrameRef.current !== null) {
+        window.cancelAnimationFrame(historyOpenFrameRef.current);
+      }
+    },
+    []
   );
 
   useEffect(() => {
@@ -313,6 +340,51 @@ function Board() {
     return () => abortController.abort();
   }, [game, game.winner, hasPlayableMoves, rollPhase]);
 
+  const toggleMoveHistory = () => {
+    if (historyCloseTimeoutRef.current !== null) {
+      window.clearTimeout(historyCloseTimeoutRef.current);
+      historyCloseTimeoutRef.current = null;
+    }
+
+    if (historyOpenFrameRef.current !== null) {
+      window.cancelAnimationFrame(historyOpenFrameRef.current);
+      historyOpenFrameRef.current = null;
+    }
+
+    if (historyOpenRef.current) {
+      historyOpenRef.current = false;
+      setIsMoveHistoryOpen(false);
+      historyCloseTimeoutRef.current = window.setTimeout(() => {
+        setIsMoveHistoryMounted(false);
+        historyCloseTimeoutRef.current = null;
+      }, HISTORY_TRANSITION_MS);
+      return;
+    }
+
+    historyOpenRef.current = true;
+    setIsMoveHistoryMounted(true);
+    historyOpenFrameRef.current = window.requestAnimationFrame(() => {
+      setIsMoveHistoryOpen(true);
+      historyOpenFrameRef.current = null;
+    });
+  };
+
+  const resetMoveHistory = () => {
+    if (historyCloseTimeoutRef.current !== null) {
+      window.clearTimeout(historyCloseTimeoutRef.current);
+      historyCloseTimeoutRef.current = null;
+    }
+
+    if (historyOpenFrameRef.current !== null) {
+      window.cancelAnimationFrame(historyOpenFrameRef.current);
+      historyOpenFrameRef.current = null;
+    }
+
+    historyOpenRef.current = false;
+    setIsMoveHistoryOpen(false);
+    setIsMoveHistoryMounted(false);
+  };
+
   const startNewGame = () => {
     botTurnAbortControllerRef.current?.abort();
     soundManager.stopAll();
@@ -321,6 +393,7 @@ function Board() {
 
     spinStartedForRollRef.current = null;
     botTurnInProgressRef.current = false;
+    resetMoveHistory();
     setIsTurnSkippedMessageVisible(false);
     setClockSnapshot(newGame.clock.getSnapshot());
     setRollAnimation((state) => ({
@@ -420,14 +493,64 @@ function Board() {
   }
 
   return (
-    <div className="game-shell">
+    <div
+      className="game-shell"
+      data-history-mounted={isMoveHistoryMounted}
+      data-history-open={isMoveHistoryOpen}
+    >
       <div className="game-layout">
       <div
         aria-hidden={game.winner ? true : undefined}
         className="turn-panel"
       >
-        <div className="turn-text">
-          {game.currentTurn === "white" ? "White" : "Black"} to move
+        <div className="turn-header">
+          <div className="turn-text">
+            {game.currentTurn === "white" ? "White" : "Black"} to move
+          </div>
+
+          <div className="game-toolbar">
+            <button
+              aria-label={isSoundEnabled ? "Mute sound" : "Enable sound"}
+              aria-pressed={!isSoundEnabled}
+              className="game-toolbar-button"
+              onClick={() => soundManager.toggle()}
+              title={isSoundEnabled ? "Mute sound" : "Enable sound"}
+              type="button"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M4 9v6h4l5 4V5L8 9H4z" />
+                {isSoundEnabled ? (
+                  <path d="M16 8.2a5 5 0 0 1 0 7.6M18.5 5.7a8.5 8.5 0 0 1 0 12.6" />
+                ) : (
+                  <path d="m16.5 9 5 6m0-6-5 6" />
+                )}
+              </svg>
+            </button>
+
+            <button
+              aria-controls="move-history-panel"
+              aria-expanded={isMoveHistoryOpen}
+              aria-label={
+                isMoveHistoryOpen
+                  ? "Close move history"
+                  : "Open move history"
+              }
+              aria-pressed={isMoveHistoryOpen}
+              className="game-toolbar-button history-toggle"
+              onClick={toggleMoveHistory}
+              title={
+                isMoveHistoryOpen
+                  ? "Close move history"
+                  : "Open move history"
+              }
+              type="button"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M7 6h13M7 12h13M7 18h13" />
+                <path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className="roll-section">
@@ -514,9 +637,15 @@ function Board() {
       )}
       </div>
 
-      <div className="move-history-column">
-        <MoveHistoryPanel history={moveHistory} />
-      </div>
+      {isMoveHistoryMounted && (
+        <div
+          aria-hidden={!isMoveHistoryOpen}
+          className="move-history-column"
+          inert={!isMoveHistoryOpen}
+        >
+          <MoveHistoryPanel history={moveHistory} />
+        </div>
+      )}
 
       {game.winner && (
         <GameResultModal
