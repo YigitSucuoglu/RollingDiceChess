@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.8.5
+v0.8.6
 
 ---
 
@@ -39,6 +39,7 @@ v0.8.5
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- GOLD-02 — Prepare Production Gold Piece Assets
 - PIECESET-01B — Replace Classic Unicode Symbols with revised Classic SVG design
 - PIECESET-01 — Rename Piece Theme Architecture to Piece Set
 - BUG-01 — Prevent Automatic Human Roll After Initial No-Move Result
@@ -72,6 +73,7 @@ v0.8.5
 ## Current Sprint
 
 Completed:
+- GOLD-02 — Prepare Production Gold Piece Assets
 - PIECESET-01B — Replace Classic Unicode Symbols with revised Classic SVG design
 - PIECESET-01 — Rename Piece Theme Architecture to Piece Set
 - BUG-01 — Prevent Automatic Human Roll After Initial No-Move Result
@@ -79,7 +81,7 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. PIECESET-02 — Design and Add Premium Gold Piece Set
+1. GOLD-03 — Integrate Gold Piece Set
 
 Roadmap:
 - HOME-01 — Home, Profile and Settings Redesign
@@ -108,7 +110,7 @@ Roadmap:
 - Difficulty UI descriptions: Easy — Random legal moves; Medium — Tactical move choices; Hard — Plans the full turn.
 - Classic uses revised, Unicode-diagram-inspired local SVGs across the Board, Slot, and Result Modal.
 - Retro uses the original local, contrast-outlined SVGs across the Board, Slot, and Result Modal.
-- Premium Gold is not selectable and remains planned for PIECESET-02.
+- Production Gold/Obsidian PNG assets are prepared with real alpha but are not selectable; registry and UI integration remain scoped to GOLD-03.
 - Wood, Marble, and Dark Board Themes are integrated and affect only board squares, surface, frame, and coordinates.
 - Piece Set and Board Theme remain independent; Wood/Marble/Dark each support both Classic and Retro pieces.
 - Central SoundManager provides cached, master-mutable audio with a persistent turn-header toggle.

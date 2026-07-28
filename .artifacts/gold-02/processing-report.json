@@ -1,0 +1,498 @@
+{
+  "canvas": [
+    1024,
+    1280
+  ],
+  "baseline": 1210,
+  "records": [
+    {
+      "source": "src\\design\\Tasar\u0131m\\gold-bishop.png",
+      "source_sha256": "cbf91de3acf3083996857dc996cfa6ed3e5860259f80a93a15ec971bc5a2242d",
+      "output": "white-bishop.png",
+      "source_mode": "RGB",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "native_alpha": false,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_ratio": 0.832443,
+      "edge_alpha_max": 0,
+      "shadow_cleanup_y": 1468,
+      "background_type": "light",
+      "seed_bbox": [
+        169,
+        15,
+        665,
+        1495
+      ],
+      "crop": [
+        197,
+        53,
+        807,
+        1469
+      ],
+      "scale": 0.706215,
+      "translate": [
+        296,
+        210
+      ],
+      "optical_translate_x": 0,
+      "baseline": 1210,
+      "rendered_size": [
+        431,
+        1000
+      ]
+    },
+    {
+      "source": "src\\design\\Tasar\u0131m\\gold-king.png",
+      "source_sha256": "08335a93d2e8b6af31b959198a2dd3ef9c7e3f4e4959e9ca934ea065ab801df9",
+      "output": "white-king.png",
+      "source_mode": "RGBA",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "native_alpha": true,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_ratio": 0.77008,
+      "edge_alpha_max": 0,
+      "shadow_cleanup_y": 712,
+      "background_type": "native-alpha",
+      "seed_bbox": null,
+      "crop": [
+        607,
+        59,
+        930,
+        713
+      ],
+      "scale": 1.697248,
+      "translate": [
+        238,
+        100
+      ],
+      "optical_translate_x": 0,
+      "baseline": 1210,
+      "rendered_size": [
+        548,
+        1110
+      ]
+    },
+    {
+      "source": "src\\design\\Tasar\u0131m\\gold-knight.png",
+      "source_sha256": "9710e76b558cb5b08d6bbbaa3da005cfe2053c6c54369f799a74af99908e7e1c",
+      "output": "white-knight.png",
+      "source_mode": "RGB",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "native_alpha": false,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_ratio": 0.752613,
+      "edge_alpha_max": 0,
+      "shadow_cleanup_y": 981,
+      "background_type": "light",
+      "seed_bbox": [
+        446,
+        22,
+        620,
+        987
+      ],
+      "crop": [
+        496,
+        46,
+        1004,
+        982
+      ],
+      "scale": 0.982906,
+      "translate": [
+        280,
+        290
+      ],
+      "optical_translate_x": 18,
+      "baseline": 1210,
+      "rendered_size": [
+        499,
+        920
+      ]
+    },
+    {
+      "source": "src\\design\\Tasar\u0131m\\gold-pawn.png",
+      "source_sha256": "98522132b20cad02fec1a051093acc0b7cfe290f1b0c586405c33af0fab3482d",
+      "output": "white-pawn.png",
+      "source_mode": "RGB",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "native_alpha": false,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_ratio": 0.83913,
+      "edge_alpha_max": 0,
+      "shadow_cleanup_y": 1208,
+      "background_type": "light",
+      "seed_bbox": [
+        241,
+        38,
+        769,
+        1204
+      ],
+      "crop": [
+        273,
+        69,
+        980,
+        1209
+      ],
+      "scale": 0.684211,
+      "translate": [
+        270,
+        430
+      ],
+      "optical_translate_x": 0,
+      "baseline": 1210,
+      "rendered_size": [
+        484,
+        780
+      ]
+    },
+    {
+      "source": "src\\design\\Tasar\u0131m\\gold-queen.png",
+      "source_sha256": "a40c603b577d43c612accfaf3de6bd663ffa2aa46a7064c7d2e085b87e738bac",
+      "output": "white-queen.png",
+      "source_mode": "RGB",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "native_alpha": false,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_ratio": 0.806182,
+      "edge_alpha_max": 0,
+      "shadow_cleanup_y": 1204,
+      "background_type": "light",
+      "seed_bbox": [
+        329,
+        9,
+        587,
+        1228
+      ],
+      "crop": [
+        368,
+        39,
+        880,
+        1205
+      ],
+      "scale": 0.909091,
+      "translate": [
+        280,
+        150
+      ],
+      "optical_translate_x": 0,
+      "baseline": 1210,
+      "rendered_size": [
+        465,
+        1060
+      ]
+    },
+    {
+      "source": "src\\design\\Tasar\u0131m\\gold-rook.png",
+      "source_sha256": "74ee75ceb257d531a9c3bf9b601a9b3a43c482d28272d1533ee278c619180fce",
+      "output": "white-rook.png",
+      "source_mode": "RGB",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "native_alpha": false,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_ratio": 0.734968,
+      "edge_alpha_max": 0,
+      "shadow_cleanup_y": 1214,
+      "background_type": "light",
+      "seed_bbox": [
+        237,
+        42,
+        765,
+        1210
+      ],
+      "crop": [
+        267,
+        72,
+        971,
+        1215
+      ],
+      "scale": 0.787402,
+      "translate": [
+        235,
+        310
+      ],
+      "optical_translate_x": 0,
+      "baseline": 1210,
+      "rendered_size": [
+        554,
+        900
+      ]
+    },
+    {
+      "source": "src\\design\\Tasar\u0131m\\obsidian-bishop.png",
+      "source_sha256": "6a9946008b4d46879669ab1e41fb6ee98d05c6669aade0c407cbc62810aa69f5",
+      "output": "black-bishop.png",
+      "source_mode": "RGB",
+      "source_size": [
+        1122,
+        1402
+      ],
+      "native_alpha": false,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_ratio": 0.827174,
+      "edge_alpha_max": 0,
+      "shadow_cleanup_y": 1319,
+      "background_type": "pink",
+      "seed_bbox": [
+        223,
+        46,
+        637,
+        1311
+      ],
+      "crop": [
+        282,
+        81,
+        833,
+        1320
+      ],
+      "scale": 0.807103,
+      "translate": [
+        290,
+        210
+      ],
+      "optical_translate_x": 0,
+      "baseline": 1210,
+      "rendered_size": [
+        445,
+        1000
+      ]
+    },
+    {
+      "source": "src\\design\\Tasar\u0131m\\obsidian-king.png",
+      "source_sha256": "b21d6418042627b81e3d1b985536e47d64a51801cfe16397862a89dc6c233bbf",
+      "output": "black-king.png",
+      "source_mode": "RGB",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "native_alpha": false,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_ratio": 0.77439,
+      "edge_alpha_max": 0,
+      "shadow_cleanup_y": 1212,
+      "background_type": "light",
+      "seed_bbox": [
+        304,
+        8,
+        634,
+        1241
+      ],
+      "crop": [
+        350,
+        38,
+        897,
+        1213
+      ],
+      "scale": 0.944681,
+      "translate": [
+        254,
+        100
+      ],
+      "optical_translate_x": 0,
+      "baseline": 1210,
+      "rendered_size": [
+        517,
+        1110
+      ]
+    },
+    {
+      "source": "src\\design\\Tasar\u0131m\\obsidian-knight.png",
+      "source_sha256": "7d0a47f2d11e470df397b90bc07817e065904a7a7fa3c165f91d02a8edd77bbc",
+      "output": "black-knight.png",
+      "source_mode": "RGBA",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "native_alpha": true,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_ratio": 0.739987,
+      "edge_alpha_max": 0,
+      "shadow_cleanup_y": 762,
+      "background_type": "native-alpha",
+      "seed_bbox": null,
+      "crop": [
+        560,
+        63,
+        979,
+        763
+      ],
+      "scale": 1.314286,
+      "translate": [
+        254,
+        290
+      ],
+      "optical_translate_x": 18,
+      "baseline": 1210,
+      "rendered_size": [
+        551,
+        920
+      ]
+    },
+    {
+      "source": "src\\design\\Tasar\u0131m\\obsidian-pawn.png",
+      "source_sha256": "bcf165891a92f94185815c24cd07b82e9cde9c59c4f9d3cf044bd068d69474f5",
+      "output": "black-pawn.png",
+      "source_mode": "RGB",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "native_alpha": false,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_ratio": 0.842792,
+      "edge_alpha_max": 0,
+      "shadow_cleanup_y": 1193,
+      "background_type": "dark",
+      "seed_bbox": [
+        25,
+        1,
+        951,
+        1252
+      ],
+      "crop": [
+        286,
+        89,
+        940,
+        1194
+      ],
+      "scale": 0.705882,
+      "translate": [
+        281,
+        430
+      ],
+      "optical_translate_x": 0,
+      "baseline": 1210,
+      "rendered_size": [
+        462,
+        780
+      ]
+    },
+    {
+      "source": "src\\design\\Tasar\u0131m\\obsidian-queen.png",
+      "source_sha256": "9fb491272291a2e1455a544faba421867f5a4c6d91b636e2a1a437fc9a4a90aa",
+      "output": "black-queen.png",
+      "source_mode": "RGBA",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "native_alpha": true,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_ratio": 0.79928,
+      "edge_alpha_max": 0,
+      "shadow_cleanup_y": 853,
+      "background_type": "native-alpha",
+      "seed_bbox": null,
+      "crop": [
+        576,
+        47,
+        959,
+        854
+      ],
+      "scale": 1.313507,
+      "translate": [
+        260,
+        150
+      ],
+      "optical_translate_x": 0,
+      "baseline": 1210,
+      "rendered_size": [
+        503,
+        1060
+      ]
+    },
+    {
+      "source": "src\\design\\Tasar\u0131m\\obsidian-rook.png",
+      "source_sha256": "5ec8ffb6f5b44adea1718a5934ba19d093affb17bdd6d1f359918ac08d141a25",
+      "output": "black-rook.png",
+      "source_mode": "RGB",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "native_alpha": false,
+      "alpha_range": [
+        0,
+        255
+      ],
+      "transparent_ratio": 0.730134,
+      "edge_alpha_max": 0,
+      "shadow_cleanup_y": 1198,
+      "background_type": "dark",
+      "seed_bbox": [
+        156,
+        71,
+        855,
+        1182
+      ],
+      "crop": [
+        262,
+        104,
+        981,
+        1199
+      ],
+      "scale": 0.821918,
+      "translate": [
+        216,
+        310
+      ],
+      "optical_translate_x": 0,
+      "baseline": 1210,
+      "rendered_size": [
+        591,
+        900
+      ]
+    }
+  ]
+}
