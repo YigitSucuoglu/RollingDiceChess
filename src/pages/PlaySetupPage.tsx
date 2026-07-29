@@ -167,7 +167,7 @@ function PlaySetupPage() {
 
             <section aria-labelledby="piece-set-heading" className="setup-section">
               <h2 id="piece-set-heading">Piece Set</h2>
-              <div className="setup-options two-options">
+              <div className="setup-options three-options">
                 {SELECTABLE_PIECE_SETS.map((set) => (
                   <button
                     aria-pressed={pieceSet === set.id}
@@ -178,7 +178,7 @@ function PlaySetupPage() {
                     onClick={() => setPieceSet(set.id)}
                     type="button"
                   >
-                    {set.label}
+                    {set.displayName}
                   </button>
                 ))}
               </div>

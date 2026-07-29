@@ -1,1 +1,1 @@
-export type PieceSet = "classic" | "retro";
+export type PieceSet = "gold" | "classic" | "retro";

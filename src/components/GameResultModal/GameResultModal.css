@@ -51,6 +51,11 @@
 
     display:block;
     object-fit:contain;
+    transform-origin:center;
+    transform:
+        translateX(var(--piece-translate-x,0))
+        translateY(var(--piece-translate-y,0))
+        scale(var(--piece-scale,1));
 }
 
 .game-result-king-text{

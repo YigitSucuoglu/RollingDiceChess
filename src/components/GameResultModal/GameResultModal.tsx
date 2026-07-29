@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import type { KeyboardEvent } from "react";
 import { resolvePieceVisual } from "../../config/pieceSets";
 import type { GameResultReason, PieceColor } from "../../types/Chess";
@@ -13,6 +13,12 @@ interface GameResultModalProps {
   winner: PieceColor;
 }
 
+type ResultPieceStyle = CSSProperties & {
+  "--piece-scale": number;
+  "--piece-translate-x": string;
+  "--piece-translate-y": string;
+};
+
 function GameResultModal({
   endReason,
   onMainMenu,
@@ -26,7 +32,7 @@ function GameResultModal({
   const endReasonLabel =
     endReason === "timeout" ? `${loser} ran out of time` : "King captured";
   const kingVisual = resolvePieceVisual({
-    context: "slot",
+    context: "result",
     pieceColor: winner,
     pieceType: "king",
     pieceSet,
@@ -79,6 +85,13 @@ function GameResultModal({
             alt={`${winner === "white" ? "White" : "Black"} King`}
             className="game-result-king"
             src={kingVisual.src}
+            style={
+              {
+                "--piece-scale": kingVisual.scale,
+                "--piece-translate-x": `${kingVisual.translateX * 100}%`,
+                "--piece-translate-y": `${kingVisual.translateY * 100}%`,
+              } as ResultPieceStyle
+            }
           />
         ) : (
           <span className="game-result-king game-result-king-text">

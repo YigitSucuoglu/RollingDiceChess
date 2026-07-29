@@ -33,6 +33,12 @@ type ReelStyle = CSSProperties & {
   "--reel-track-height": string;
 };
 
+type ReelPieceStyle = CSSProperties & {
+  "--piece-scale": number;
+  "--piece-translate-x": string;
+  "--piece-translate-y": string;
+};
+
 function SlotReel({
   isSpinning,
   pieceColor,
@@ -46,7 +52,7 @@ function SlotReel({
       REEL_PIECE_TYPES.map((type) => ({
         type,
         visual: resolvePieceVisual({
-          context: "slot",
+          context: "roulette",
           pieceColor,
           pieceType: type,
           pieceSet,
@@ -85,47 +91,56 @@ function SlotReel({
       className={`slot-reel reel-window reel-window-${reelIndex + 1}`}
       role="img"
     >
-      <div
-        aria-hidden="true"
-        className={`reel-track ${isSpinning ? "is-spinning" : ""}`}
-        style={reelStyle}
-      >
-        {trackSymbols.map((symbol, trackIndex) => (
-          <div
-            className={`reel-symbol ${
-              trackIndex === targetTrackIndex ? "is-target" : ""
-            }`}
-            data-piece-type={symbol.type}
-            key={`${trackIndex}-${symbol.type}`}
-          >
-            {symbol.visual.kind === "image" ? (
-              <>
-                <img
-                  alt=""
+      <div className="reel-clip">
+        <div
+          aria-hidden="true"
+          className={`reel-track ${isSpinning ? "is-spinning" : ""}`}
+          style={reelStyle}
+        >
+          {trackSymbols.map((symbol, trackIndex) => (
+            <div
+              className={`reel-symbol ${
+                trackIndex === targetTrackIndex ? "is-target" : ""
+              }`}
+              data-piece-type={symbol.type}
+              key={`${trackIndex}-${symbol.type}`}
+            >
+              {symbol.visual.kind === "image" ? (
+                <>
+                  <img
+                    alt=""
+                    aria-hidden="true"
+                    className="roll-piece-image"
+                    onError={(event) => {
+                      event.currentTarget.hidden = true;
+                      event.currentTarget.nextElementSibling?.classList.add(
+                        "is-visible"
+                      );
+                    }}
+                    src={symbol.visual.src}
+                    style={
+                      {
+                        "--piece-scale": symbol.visual.scale,
+                        "--piece-translate-x": `${symbol.visual.translateX * 100}%`,
+                        "--piece-translate-y": `${symbol.visual.translateY * 100}%`,
+                      } as ReelPieceStyle
+                    }
+                  />
+                  <span aria-hidden="true" className="roll-piece-fallback">
+                    {symbol.visual.fallback}
+                  </span>
+                </>
+              ) : (
+                <span
                   aria-hidden="true"
-                  className="roll-piece-image"
-                  onError={(event) => {
-                    event.currentTarget.hidden = true;
-                    event.currentTarget.nextElementSibling?.classList.add(
-                      "is-visible"
-                    );
-                  }}
-                  src={symbol.visual.src}
-                />
-                <span aria-hidden="true" className="roll-piece-fallback">
-                  {symbol.visual.fallback}
+                  className="roll-piece-fallback is-visible"
+                >
+                  {symbol.visual.value}
                 </span>
-              </>
-            ) : (
-              <span
-                aria-hidden="true"
-                className="roll-piece-fallback is-visible"
-              >
-                {symbol.visual.value}
-              </span>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

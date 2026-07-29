@@ -10,6 +10,18 @@ import classicWhiteKnightUrl from "../assets/pieces/classic/white-knight.svg";
 import classicWhitePawnUrl from "../assets/pieces/classic/white-pawn.svg";
 import classicWhiteQueenUrl from "../assets/pieces/classic/white-queen.svg";
 import classicWhiteRookUrl from "../assets/pieces/classic/white-rook.svg";
+import goldBlackBishopUrl from "../assets/pieces/gold/black-bishop.png";
+import goldBlackKingUrl from "../assets/pieces/gold/black-king.png";
+import goldBlackKnightUrl from "../assets/pieces/gold/black-knight.png";
+import goldBlackPawnUrl from "../assets/pieces/gold/black-pawn.png";
+import goldBlackQueenUrl from "../assets/pieces/gold/black-queen.png";
+import goldBlackRookUrl from "../assets/pieces/gold/black-rook.png";
+import goldWhiteBishopUrl from "../assets/pieces/gold/white-bishop.png";
+import goldWhiteKingUrl from "../assets/pieces/gold/white-king.png";
+import goldWhiteKnightUrl from "../assets/pieces/gold/white-knight.png";
+import goldWhitePawnUrl from "../assets/pieces/gold/white-pawn.png";
+import goldWhiteQueenUrl from "../assets/pieces/gold/white-queen.png";
+import goldWhiteRookUrl from "../assets/pieces/gold/white-rook.png";
 import blackBishopUrl from "../assets/pieces/retro/black-bishop.svg";
 import blackKingUrl from "../assets/pieces/retro/black-king.svg";
 import blackKnightUrl from "../assets/pieces/retro/black-knight.svg";
@@ -25,7 +37,7 @@ import whiteRookUrl from "../assets/pieces/retro/white-rook.svg";
 import type { PieceColor, PieceType } from "../types/Chess";
 import type { PieceSet } from "../types/PieceSet";
 
-export type PieceVisualContext = "board" | "slot";
+export type PieceVisualContext = "board" | "result" | "roulette";
 
 export interface TextPieceVisual {
   readonly kind: "text";
@@ -37,14 +49,27 @@ export interface ImagePieceVisual {
   readonly fallback: string;
   readonly kind: "image";
   readonly label: string;
+  readonly scale: number;
   readonly src: string;
+  readonly translateX: number;
+  readonly translateY: number;
 }
 
 export type PieceVisual = TextPieceVisual | ImagePieceVisual;
 
 export interface PieceSetDefinition {
+  readonly boardAssets: PieceAssetMap;
+  readonly boardScale: PieceScaleMap;
+  readonly boardTranslateY: PieceScaleMap;
+  readonly displayName: string;
   readonly id: PieceSet;
-  readonly label: string;
+  readonly resultAssets: PieceAssetMap;
+  readonly resultScale: PieceScaleMap;
+  readonly resultTranslateY: PieceScaleMap;
+  readonly rouletteAssets: PieceAssetMap;
+  readonly rouletteScale: PieceScaleMap;
+  readonly rouletteTranslateY: PieceScaleMap;
+  readonly translateX: PieceScaleMap;
 }
 
 interface ResolvePieceVisualOptions {
@@ -54,7 +79,13 @@ interface ResolvePieceVisualOptions {
   readonly pieceSet: unknown;
 }
 
-export const DEFAULT_PIECE_SET: PieceSet = "classic";
+type PieceAssetMap = Readonly<
+  Record<PieceColor, Readonly<Record<PieceType, string>>>
+>;
+
+type PieceScaleMap = Readonly<Record<PieceType, number>>;
+
+export const DEFAULT_PIECE_SET: PieceSet = "gold";
 
 const PIECE_LABELS: Readonly<Record<PieceType, string>> = {
   bishop: "Bishop",
@@ -74,9 +105,26 @@ const PIECE_FALLBACK_LABELS: Readonly<Record<PieceType, string>> = {
   rook: "R",
 };
 
-const CLASSIC_PIECE_ASSETS: Readonly<
-  Record<PieceColor, Readonly<Record<PieceType, string>>>
-> = {
+const GOLD_PIECE_ASSETS: PieceAssetMap = {
+  white: {
+    bishop: goldWhiteBishopUrl,
+    king: goldWhiteKingUrl,
+    knight: goldWhiteKnightUrl,
+    pawn: goldWhitePawnUrl,
+    queen: goldWhiteQueenUrl,
+    rook: goldWhiteRookUrl,
+  },
+  black: {
+    bishop: goldBlackBishopUrl,
+    king: goldBlackKingUrl,
+    knight: goldBlackKnightUrl,
+    pawn: goldBlackPawnUrl,
+    queen: goldBlackQueenUrl,
+    rook: goldBlackRookUrl,
+  },
+};
+
+const CLASSIC_PIECE_ASSETS: PieceAssetMap = {
   white: {
     bishop: classicWhiteBishopUrl,
     king: classicWhiteKingUrl,
@@ -95,9 +143,7 @@ const CLASSIC_PIECE_ASSETS: Readonly<
   },
 };
 
-const RETRO_PIECE_ASSETS: Readonly<
-  Record<PieceColor, Readonly<Record<PieceType, string>>>
-> = {
+const RETRO_PIECE_ASSETS: PieceAssetMap = {
   white: {
     bishop: whiteBishopUrl,
     king: whiteKingUrl,
@@ -116,26 +162,128 @@ const RETRO_PIECE_ASSETS: Readonly<
   },
 };
 
+const uniformScale = (scale: number): PieceScaleMap => ({
+  bishop: scale,
+  king: scale,
+  knight: scale,
+  pawn: scale,
+  queen: scale,
+  rook: scale,
+});
+
+const SVG_BOARD_SCALE = uniformScale(0.84);
+
+const SVG_ROULETTE_SCALE: PieceScaleMap = {
+  bishop: 0.76,
+  king: 0.72,
+  knight: 0.8,
+  pawn: 0.84,
+  queen: 0.72,
+  rook: 0.76,
+};
+
+const GOLD_BOARD_SCALE: PieceScaleMap = {
+  bishop: 1.12,
+  king: 1,
+  knight: 1.2,
+  pawn: 1.27,
+  queen: 1.05,
+  rook: 1.2,
+};
+
+const GOLD_ROULETTE_SCALE: PieceScaleMap = {
+  bishop: 1.22,
+  king: 1.15,
+  knight: 1.3,
+  pawn: 1.26,
+  queen: 1.16,
+  rook: 1.25,
+};
+
+const GOLD_BOARD_TRANSLATE_Y: PieceScaleMap = {
+  bishop: -0.04,
+  king: -0.035,
+  knight: -0.06,
+  pawn: -0.11,
+  queen: -0.035,
+  rook: -0.06,
+};
+
+const GOLD_ROULETTE_TRANSLATE_Y: PieceScaleMap = {
+  bishop: -0.025,
+  king: -0.02,
+  knight: -0.03,
+  pawn: -0.03,
+  queen: -0.02,
+  rook: -0.035,
+};
+
+const DEFAULT_TRANSLATE_X: PieceScaleMap = {
+  bishop: 0,
+  king: 0,
+  knight: 0.02,
+  pawn: 0,
+  queen: 0,
+  rook: 0,
+};
+
+const DEFAULT_TRANSLATE_Y = uniformScale(0);
+
 export const PIECE_SET_CATALOG: Readonly<
   Record<PieceSet, PieceSetDefinition>
 > = {
+  gold: {
+    boardAssets: GOLD_PIECE_ASSETS,
+    boardScale: GOLD_BOARD_SCALE,
+    boardTranslateY: GOLD_BOARD_TRANSLATE_Y,
+    displayName: "Gold",
+    id: "gold",
+    resultAssets: GOLD_PIECE_ASSETS,
+    resultScale: uniformScale(1.08),
+    resultTranslateY: DEFAULT_TRANSLATE_Y,
+    rouletteAssets: GOLD_PIECE_ASSETS,
+    rouletteScale: GOLD_ROULETTE_SCALE,
+    rouletteTranslateY: GOLD_ROULETTE_TRANSLATE_Y,
+    translateX: DEFAULT_TRANSLATE_X,
+  },
   classic: {
+    boardAssets: CLASSIC_PIECE_ASSETS,
+    boardScale: SVG_BOARD_SCALE,
+    boardTranslateY: DEFAULT_TRANSLATE_Y,
+    displayName: "Classic",
     id: "classic",
-    label: "Classic",
+    resultAssets: CLASSIC_PIECE_ASSETS,
+    resultScale: uniformScale(1),
+    resultTranslateY: DEFAULT_TRANSLATE_Y,
+    rouletteAssets: CLASSIC_PIECE_ASSETS,
+    rouletteScale: SVG_ROULETTE_SCALE,
+    rouletteTranslateY: DEFAULT_TRANSLATE_Y,
+    translateX: DEFAULT_TRANSLATE_X,
   },
   retro: {
+    boardAssets: RETRO_PIECE_ASSETS,
+    boardScale: SVG_BOARD_SCALE,
+    boardTranslateY: DEFAULT_TRANSLATE_Y,
+    displayName: "Retro",
     id: "retro",
-    label: "Retro",
+    resultAssets: RETRO_PIECE_ASSETS,
+    resultScale: uniformScale(1),
+    resultTranslateY: DEFAULT_TRANSLATE_Y,
+    rouletteAssets: RETRO_PIECE_ASSETS,
+    rouletteScale: SVG_ROULETTE_SCALE,
+    rouletteTranslateY: DEFAULT_TRANSLATE_Y,
+    translateX: DEFAULT_TRANSLATE_X,
   },
 };
 
 export const SELECTABLE_PIECE_SETS: readonly PieceSetDefinition[] = [
+  PIECE_SET_CATALOG.gold,
   PIECE_SET_CATALOG.classic,
   PIECE_SET_CATALOG.retro,
 ];
 
 export function isPieceSet(value: unknown): value is PieceSet {
-  return value === "classic" || value === "retro";
+  return value === "gold" || value === "classic" || value === "retro";
 }
 
 export function normalizePieceSet(value: unknown): PieceSet {
@@ -148,25 +296,45 @@ export function migrateLegacyPieceSet(value: unknown): PieceSet {
   }
 
   if (value === "gold") {
-    return "classic";
+    return "gold";
   }
 
   return DEFAULT_PIECE_SET;
 }
 
 export function resolvePieceVisual({
+  context,
   pieceColor,
   pieceType,
   pieceSet,
 }: ResolvePieceVisualOptions): PieceVisual {
   const visualSet = normalizePieceSet(pieceSet);
-  const assets =
-    visualSet === "classic" ? CLASSIC_PIECE_ASSETS : RETRO_PIECE_ASSETS;
+  const definition = PIECE_SET_CATALOG[visualSet];
+  const assetsByContext: Readonly<Record<PieceVisualContext, PieceAssetMap>> = {
+    board: definition.boardAssets,
+    result: definition.resultAssets,
+    roulette: definition.rouletteAssets,
+  };
+  const scaleByContext: Readonly<Record<PieceVisualContext, PieceScaleMap>> = {
+    board: definition.boardScale,
+    result: definition.resultScale,
+    roulette: definition.rouletteScale,
+  };
+  const translateYByContext: Readonly<
+    Record<PieceVisualContext, PieceScaleMap>
+  > = {
+    board: definition.boardTranslateY,
+    result: definition.resultTranslateY,
+    roulette: definition.rouletteTranslateY,
+  };
 
   return {
     fallback: PIECE_FALLBACK_LABELS[pieceType],
     kind: "image",
     label: PIECE_LABELS[pieceType],
-    src: assets[pieceColor][pieceType],
+    scale: scaleByContext[context][pieceType],
+    src: assetsByContext[context][pieceColor][pieceType],
+    translateX: definition.translateX[pieceType],
+    translateY: translateYByContext[context][pieceType],
   };
 }
