@@ -76,7 +76,7 @@ function PlaySetupPage() {
     <main className="play-setup-page">
       <div className="play-setup-shell">
         <header className="play-setup-header">
-          <p>RollingDiceChess</p>
+          <p>RouletteChess</p>
           <h1>Play Setup</h1>
         </header>
 

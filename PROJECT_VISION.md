@@ -1,8 +1,8 @@
-# RollingDiceChess
+# RouletteChess
 
 ## Project Vision
 
-RollingDiceChess is **not** a classical chess game.
+RouletteChess is **not** a classical chess game.
 
 Chess is only the foundation.
 
@@ -16,7 +16,7 @@ Every architectural decision should prioritize the custom game rules over tradit
 
 ## 1. Rule correctness comes first.
 
-If performance, convenience or code simplicity conflicts with the official RollingDiceChess rules, the rules always win.
+If performance, convenience or code simplicity conflicts with the official RouletteChess rules, the rules always win.
 
 ---
 
@@ -67,7 +67,7 @@ Ask the project owner before implementing.
 
 ---
 
-# RollingDiceChess Rules
+# RouletteChess Rules
 
 ## Turn Rights
 
@@ -241,4 +241,4 @@ Simulation Engine
 
 # Long-Term Goal
 
-The final engine should be deterministic, testable, UI-independent and capable of validating every legal RollingDiceChess turn through simulation.
+The final engine should be deterministic, testable, UI-independent and capable of validating every legal RouletteChess turn through simulation.

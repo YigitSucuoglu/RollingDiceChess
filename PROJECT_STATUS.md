@@ -1,8 +1,8 @@
-# RollingDiceChess - Project Status
+# RouletteChess - Project Status
 
 ## Current Version
 
-v0.8.7
+v0.8.8
 
 ---
 
@@ -39,6 +39,7 @@ v0.8.7
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- HOME-01 — Redesign Home Screen and rebrand product as RouletteChess, including hero asset cleanup, caption cleanup, lever positioning, and profile hierarchy polish
 - GOLD-03 — Integrate Gold Piece Set with board optical alignment and reel clipping
 - GOLD-02 — Prepare Production Gold Piece Assets
 - PIECESET-01B — Replace Classic Unicode Symbols with revised Classic SVG design
@@ -74,6 +75,7 @@ v0.8.7
 ## Current Sprint
 
 Completed:
+- HOME-01 — Redesign Home Screen and rebrand product as RouletteChess, including hero asset cleanup, caption cleanup, lever positioning, and profile hierarchy polish
 - GOLD-03 — Integrate Gold Piece Set with board optical alignment and reel clipping
 - GOLD-02 — Prepare Production Gold Piece Assets
 - PIECESET-01B — Replace Classic Unicode Symbols with revised Classic SVG design
@@ -83,11 +85,10 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. HOME-01 — Home Screen Redesign
+1. HELP-01 — Add How to Play Page
 
 Roadmap:
-- HOME-01 — Home, Profile and Settings Redesign
-- HELP-01 — How to Play
+- HELP-01 — Add How to Play Page
 - SOUND-01B — Sound Asset Replacement and Balancing
 
 ---
