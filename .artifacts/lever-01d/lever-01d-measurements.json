@@ -1,0 +1,331 @@
+[
+  {
+    "board": {
+      "height": 706.390625,
+      "width": 706.390625
+    },
+    "gaps": {
+      "headerToMachine": 10,
+      "leverTopToPanelTop": 54.968656249999995,
+      "machineToRoll": 10
+    },
+    "header": {
+      "height": 36,
+      "width": 680.390625
+    },
+    "lever": {
+      "layerHeight": 48.015625,
+      "layerWidth": 32.015625,
+      "visibleTop": 72.96865625
+    },
+    "machine": {
+      "height": 118.59375,
+      "width": 177.890625
+    },
+    "overflow": {
+      "bodyScrollHeight": 1080,
+      "bodyScrollWidth": 1920,
+      "viewportHeight": 1080,
+      "viewportWidth": 1920
+    },
+    "padding": {
+      "bottom": 7,
+      "left": 12,
+      "right": 12,
+      "top": 6
+    },
+    "panel": {
+      "height": 229.59375,
+      "innerHeight": 214.59375,
+      "innerWidth": 680.390625,
+      "width": 706.390625
+    },
+    "roll": {
+      "height": 40,
+      "width": 112
+    },
+    "viewport": "1920x1080"
+  },
+  {
+    "board": {
+      "height": 548,
+      "width": 548
+    },
+    "gaps": {
+      "headerToMachine": 10,
+      "leverTopToPanelTop": 53.77853125,
+      "machineToRoll": 10
+    },
+    "header": {
+      "height": 36,
+      "width": 522
+    },
+    "lever": {
+      "layerHeight": 40.890625,
+      "layerWidth": 27.265625,
+      "visibleTop": 71.77853125
+    },
+    "machine": {
+      "height": 101,
+      "width": 151.5
+    },
+    "overflow": {
+      "bodyScrollHeight": 900,
+      "bodyScrollWidth": 1600,
+      "viewportHeight": 900,
+      "viewportWidth": 1600
+    },
+    "padding": {
+      "bottom": 7,
+      "left": 12,
+      "right": 12,
+      "top": 6
+    },
+    "panel": {
+      "height": 212,
+      "innerHeight": 197,
+      "innerWidth": 522,
+      "width": 548
+    },
+    "roll": {
+      "height": 40,
+      "width": 112
+    },
+    "viewport": "1600x900"
+  },
+  {
+    "board": {
+      "height": 548,
+      "width": 548
+    },
+    "gaps": {
+      "headerToMachine": 10,
+      "leverTopToPanelTop": 53.77853125,
+      "machineToRoll": 10
+    },
+    "header": {
+      "height": 36,
+      "width": 522
+    },
+    "lever": {
+      "layerHeight": 40.890625,
+      "layerWidth": 27.265625,
+      "visibleTop": 71.77853125
+    },
+    "machine": {
+      "height": 101,
+      "width": 151.5
+    },
+    "overflow": {
+      "bodyScrollHeight": 900,
+      "bodyScrollWidth": 1440,
+      "viewportHeight": 900,
+      "viewportWidth": 1440
+    },
+    "padding": {
+      "bottom": 7,
+      "left": 12,
+      "right": 12,
+      "top": 6
+    },
+    "panel": {
+      "height": 212,
+      "innerHeight": 197,
+      "innerWidth": 522,
+      "width": 548
+    },
+    "roll": {
+      "height": 40,
+      "width": 112
+    },
+    "viewport": "1440x900"
+  },
+  {
+    "board": {
+      "height": 416,
+      "width": 416
+    },
+    "gaps": {
+      "headerToMachine": 8,
+      "leverTopToPanelTop": 52.052156249999996,
+      "machineToRoll": 8
+    },
+    "header": {
+      "height": 36,
+      "width": 390
+    },
+    "lever": {
+      "layerHeight": 42.515625,
+      "layerWidth": 28.34375,
+      "visibleTop": 70.05215625
+    },
+    "machine": {
+      "height": 105,
+      "width": 157.5
+    },
+    "overflow": {
+      "bodyScrollHeight": 768,
+      "bodyScrollWidth": 1366,
+      "viewportHeight": 768,
+      "viewportWidth": 1366
+    },
+    "padding": {
+      "bottom": 7,
+      "left": 12,
+      "right": 12,
+      "top": 6
+    },
+    "panel": {
+      "height": 212,
+      "innerHeight": 197,
+      "innerWidth": 390,
+      "width": 416
+    },
+    "roll": {
+      "height": 40,
+      "width": 112
+    },
+    "viewport": "1366x768"
+  },
+  {
+    "board": {
+      "height": 416,
+      "width": 416
+    },
+    "gaps": {
+      "headerToMachine": 8,
+      "leverTopToPanelTop": 52.052156249999996,
+      "machineToRoll": 8
+    },
+    "header": {
+      "height": 36,
+      "width": 390
+    },
+    "lever": {
+      "layerHeight": 42.515625,
+      "layerWidth": 28.34375,
+      "visibleTop": 70.05215625
+    },
+    "machine": {
+      "height": 105,
+      "width": 157.5
+    },
+    "overflow": {
+      "bodyScrollHeight": 768,
+      "bodyScrollWidth": 1024,
+      "viewportHeight": 768,
+      "viewportWidth": 1024
+    },
+    "padding": {
+      "bottom": 7,
+      "left": 12,
+      "right": 12,
+      "top": 6
+    },
+    "panel": {
+      "height": 212,
+      "innerHeight": 197,
+      "innerWidth": 390,
+      "width": 416
+    },
+    "roll": {
+      "height": 40,
+      "width": 112
+    },
+    "viewport": "1024x768"
+  },
+  {
+    "board": {
+      "height": 720,
+      "width": 714
+    },
+    "gaps": {
+      "headerToMachine": 8,
+      "leverTopToPanelTop": 52.773968749999995,
+      "machineToRoll": 8
+    },
+    "header": {
+      "height": 36,
+      "width": 694
+    },
+    "lever": {
+      "layerHeight": 46.921875,
+      "layerWidth": 31.28125,
+      "visibleTop": 70.77396875
+    },
+    "machine": {
+      "height": 115.875,
+      "width": 173.8125
+    },
+    "overflow": {
+      "bodyScrollHeight": 1024,
+      "bodyScrollWidth": 768,
+      "viewportHeight": 1024,
+      "viewportWidth": 768
+    },
+    "padding": {
+      "bottom": 7,
+      "left": 12,
+      "right": 12,
+      "top": 6
+    },
+    "panel": {
+      "height": 222.875,
+      "innerHeight": 207.875,
+      "innerWidth": 694,
+      "width": 720
+    },
+    "roll": {
+      "height": 40,
+      "width": 112
+    },
+    "viewport": "768x1024"
+  },
+  {
+    "board": {
+      "height": 366,
+      "width": 366
+    },
+    "gaps": {
+      "headerToMachine": 8,
+      "leverTopToPanelTop": 52.463125000000005,
+      "machineToRoll": 8
+    },
+    "header": {
+      "height": 36,
+      "width": 348
+    },
+    "lever": {
+      "layerHeight": 45,
+      "layerWidth": 30,
+      "visibleTop": 70.463125
+    },
+    "machine": {
+      "height": 111.15625,
+      "width": 166.734375
+    },
+    "overflow": {
+      "bodyScrollHeight": 844,
+      "bodyScrollWidth": 390,
+      "viewportHeight": 844,
+      "viewportWidth": 390
+    },
+    "padding": {
+      "bottom": 8,
+      "left": 8,
+      "right": 8,
+      "top": 6
+    },
+    "panel": {
+      "height": 219.15625,
+      "innerHeight": 203.15625,
+      "innerWidth": 348,
+      "width": 366
+    },
+    "roll": {
+      "height": 40,
+      "width": 112
+    },
+    "viewport": "390x844"
+  }
+]

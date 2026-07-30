@@ -6,7 +6,6 @@ import {
   useEffect,
   useRef,
   useState,
-  type CSSProperties,
 } from "react";
 import type { PieceType } from "../../types/Chess";
 import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
@@ -28,14 +27,6 @@ const LOW_TIME_CLOCK_REFRESH_INTERVAL_MS = 75;
 const LOW_TIME_THRESHOLD_MS = 15_000;
 const HISTORY_TRANSITION_MS = 260;
 
-type LeverStyle = CSSProperties & {
-  "--lever-animation-duration": string;
-};
-
-const LEVER_STYLE: LeverStyle = {
-  "--lever-animation-duration": `${ROLL_TIMING.leverAnimationDurationMs}ms`,
-};
-
 type RollPhase = "ready" | "spinning" | "resolved";
 
 interface RollAnimationState {
@@ -50,6 +41,21 @@ const INITIAL_REEL_DISPLAY: readonly PieceType[] = [
   "knight",
   "bishop",
 ];
+const GAME_REEL_SCALE_MULTIPLIERS: Readonly<Record<PieceType, number>> = {
+  bishop: 1.2,
+  king: 1.2,
+  knight: 1.22,
+  pawn: 1.12,
+  queen: 1.22,
+  rook: 1.18,
+};
+const GAME_REEL_TRANSLATE_X: Readonly<Partial<Record<PieceType, number>>> = {
+  king: -0.01,
+  knight: -0.02,
+};
+const GAME_REEL_TRANSLATE_Y: Readonly<Partial<Record<PieceType, number>>> = {
+  king: 0.01,
+};
 const BOARD_INDEXES = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
 function Board() {
@@ -558,19 +564,8 @@ function Board() {
                 <img
                   alt=""
                   aria-hidden="true"
-                  className={`slot-machine-lever ${
-                    rollPhase === "spinning" ? "is-pulling" : ""
-                  }`}
-                  key={`lever-${rollAnimation.spinId}`}
-                  src={SLOT_MACHINE_ASSETS.generated.lever}
-                  style={LEVER_STYLE}
-                />
-
-                <img
-                  alt=""
-                  aria-hidden="true"
                   className="slot-machine-frame-image"
-                  src={SLOT_MACHINE_ASSETS.generated.frame}
+                  src={SLOT_MACHINE_ASSETS.gameAssembly.machine}
                 />
 
                 <div
@@ -588,9 +583,23 @@ function Board() {
                       reelIndex={index}
                       stopAfterMs={ROLL_TIMING.reelStopTimesMs[index]}
                       targetPiece={pieceType}
+                      visualScaleByPiece={GAME_REEL_SCALE_MULTIPLIERS}
+                      visualTranslateXByPiece={GAME_REEL_TRANSLATE_X}
+                      visualTranslateYByPiece={GAME_REEL_TRANSLATE_Y}
                     />
                   ))}
                 </div>
+
+                <span
+                  aria-hidden="true"
+                  className="slot-machine-lever-layer"
+                >
+                  <img
+                    alt=""
+                    className="slot-machine-lever"
+                    src={SLOT_MACHINE_ASSETS.gameAssembly.lever}
+                  />
+                </span>
               </div>
 
               <button

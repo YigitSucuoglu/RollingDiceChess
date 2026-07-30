@@ -208,10 +208,12 @@
 }
 
 .home-machine {
-  --home-lever-anchor-right: -17%;
-  --home-lever-anchor-top: 37%;
-  --home-lever-width: 22%;
-  aspect-ratio: 1.46;
+  --lever-x: 78.7%;
+  --lever-y: -0.5%;
+  --lever-width: 18%;
+  --lever-pivot-x: 50%;
+  --lever-pivot-y: 77.9%;
+  aspect-ratio: 3 / 2;
   filter: drop-shadow(0 2rem 2rem rgba(0, 0, 0, 0.5));
   max-width: 39rem;
   position: relative;
@@ -229,22 +231,20 @@
 }
 
 .home-reel-overlay {
-  display: grid;
-  gap: 5.8%;
-  grid-template-columns: 1.13fr 1fr 1.13fr;
-  height: 51.5%;
-  left: 21.2%;
+  height: 100%;
+  inset: 0;
   position: absolute;
-  top: 24.1%;
-  width: 63.7%;
   z-index: 3;
 }
 
 .home-reel-window {
   align-items: center;
   display: flex;
+  height: 48.2%;
   justify-content: center;
   overflow: hidden;
+  position: absolute;
+  top: 23%;
 }
 
 .home-reel-visual {
@@ -271,28 +271,41 @@
   --home-reel-piece-scale: 139.5%;
   --home-reel-piece-x: 0%;
   --home-reel-piece-y: 16.7%;
+  left: 19.2%;
+  width: 15.2%;
 }
 
 .home-reel-window-knight {
   --home-reel-piece-scale: 145.8%;
-  --home-reel-piece-x: 3%;
-  --home-reel-piece-y: 19%;
+  --home-reel-piece-x: -1%;
+  --home-reel-piece-y: 18%;
+  left: 39.25%;
+  width: 15.7%;
 }
 
 .home-reel-window-king {
   --home-reel-piece-scale: 135%;
-  --home-reel-piece-x: 3%;
-  --home-reel-piece-y: 15.6%;
+  --home-reel-piece-x: -1%;
+  --home-reel-piece-y: 17.6%;
+  left: 59.25%;
+  width: 15.2%;
+}
+
+.home-machine-lever-layer {
+  aspect-ratio: 2 / 3;
+  position: absolute;
+  left: var(--lever-x);
+  top: var(--lever-y);
+  transform-origin: var(--lever-pivot-x) var(--lever-pivot-y);
+  width: var(--lever-width);
+  z-index: 4;
 }
 
 .home-machine-lever {
-  height: auto;
+  display: block;
+  height: 100%;
   object-fit: contain;
-  position: absolute;
-  right: var(--home-lever-anchor-right);
-  top: var(--home-lever-anchor-top);
-  width: var(--home-lever-width);
-  z-index: 4;
+  width: 100%;
 }
 
 .home-hero-caption {
@@ -348,11 +361,7 @@
   .home-action { min-height: 3.15rem; padding-inline: 1rem; }
   .home-hero { width: min(100%, 23rem); }
   .home-machine {
-    --home-lever-anchor-right: -16%;
-    --home-lever-anchor-top: 37%;
-    --home-lever-width: 22%;
-    justify-self: start;
-    width: 88%;
+    width: 100%;
   }
   .home-hero-caption { font-size: 0.55rem; letter-spacing: 0.08em; }
 }

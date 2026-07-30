@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.8.8
+v0.8.9
 
 ---
 
@@ -39,6 +39,7 @@ v0.8.8
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- LEVER-01 — Integrate new slot machine and static lever assets
 - HOME-01 — Redesign Home Screen and rebrand product as RouletteChess, including hero asset cleanup, caption cleanup, lever positioning, and profile hierarchy polish
 - GOLD-03 — Integrate Gold Piece Set with board optical alignment and reel clipping
 - GOLD-02 — Prepare Production Gold Piece Assets
@@ -75,6 +76,7 @@ v0.8.8
 ## Current Sprint
 
 Completed:
+- LEVER-01 — Integrate new slot machine and static lever assets
 - HOME-01 — Redesign Home Screen and rebrand product as RouletteChess, including hero asset cleanup, caption cleanup, lever positioning, and profile hierarchy polish
 - GOLD-03 — Integrate Gold Piece Set with board optical alignment and reel clipping
 - GOLD-02 — Prepare Production Gold Piece Assets
@@ -85,9 +87,10 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. HELP-01 — Add How to Play Page
+1. LEVER-02 — Add pivot-based lever pull animation
 
 Roadmap:
+- LEVER-02 — Add pivot-based lever pull animation
 - HELP-01 — Add How to Play Page
 - SOUND-01B — Sound Asset Replacement and Balancing
 
@@ -100,7 +103,7 @@ Roadmap:
 - Animation must never modify engine state.
 - Winner state overrides the roll display.
 - Piece Set controls board pieces, slot symbols, and result visuals through one central resolver; Board Theme remains independent.
-- The ROLL button is the primary interaction; the lever is decorative animation only.
+- The ROLL button is the primary interaction; the new lever is a separate static visual layer with pivot metadata prepared for LEVER-02.
 - Check and checkmate do not exist; the game ends only when a king is captured.
 - Move history data infrastructure and two-column, three-slot UI are complete.
 - Play Setup stores time control, player side, and Easy/Medium/Hard bot difficulty; Medium is the default and legacy fallback.
@@ -118,7 +121,7 @@ Roadmap:
 - Piece Set and Board Theme remain independent; Wood/Marble/Dark each support both Classic and Retro pieces.
 - Central SoundManager provides cached, master-mutable audio with a persistent turn-header toggle.
 - Supported effects: Roll button, Lever pull, Reel spin, Reel stop, Move, Capture, Turn skipped, Victory, Defeat, and Timeout.
-- Lever audio starts with the animation and follows the shared roll timing config; volume sliders and background music are not included.
+- Lever audio remains tied to the shared roll flow while the visual lever stays static until LEVER-02; volume sliders and background music are not included.
 - Desktop game layout prioritizes a viewport-sized board with a narrow secondary Move History panel.
 - Move History starts closed, releases its layout space, and keeps the centered desktop game layout free of page-level overflow.
 - At narrow breakpoints, Move History stacks below the main game column and remains internally scrollable.

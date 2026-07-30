@@ -22,6 +22,9 @@ interface SlotReelProps {
   reelIndex: number;
   targetPiece: PieceType;
   stopAfterMs: number;
+  visualScaleByPiece?: Readonly<Partial<Record<PieceType, number>>>;
+  visualTranslateXByPiece?: Readonly<Partial<Record<PieceType, number>>>;
+  visualTranslateYByPiece?: Readonly<Partial<Record<PieceType, number>>>;
 }
 
 type ReelStyle = CSSProperties & {
@@ -46,6 +49,9 @@ function SlotReel({
   reelIndex,
   targetPiece,
   stopAfterMs,
+  visualScaleByPiece,
+  visualTranslateXByPiece,
+  visualTranslateYByPiece,
 }: SlotReelProps) {
   const reelSymbols = useMemo(
     () =>
@@ -120,9 +126,21 @@ function SlotReel({
                     src={symbol.visual.src}
                     style={
                       {
-                        "--piece-scale": symbol.visual.scale,
-                        "--piece-translate-x": `${symbol.visual.translateX * 100}%`,
-                        "--piece-translate-y": `${symbol.visual.translateY * 100}%`,
+                        "--piece-scale":
+                          symbol.visual.scale *
+                          (visualScaleByPiece?.[symbol.type] ?? 1),
+                        "--piece-translate-x": `${
+                          (
+                            symbol.visual.translateX +
+                            (visualTranslateXByPiece?.[symbol.type] ?? 0)
+                          ) * 100
+                        }%`,
+                        "--piece-translate-y": `${
+                          (
+                            symbol.visual.translateY +
+                            (visualTranslateYByPiece?.[symbol.type] ?? 0)
+                          ) * 100
+                        }%`,
                       } as ReelPieceStyle
                     }
                   />

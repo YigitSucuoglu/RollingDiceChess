@@ -2,8 +2,7 @@ import { useNavigate } from "react-router-dom";
 import blackKnightUrl from "../assets/pieces/gold/black-knight.png";
 import whiteKingUrl from "../assets/pieces/gold/white-king.png";
 import whiteQueenUrl from "../assets/pieces/gold/white-queen.png";
-import slotMachineFrameUrl from "../assets/slot-machine/generated/slot-machine-frame-transparent.png";
-import slotMachineLeverUrl from "../assets/slot-machine/generated/slot-machine-lever.png";
+import { SLOT_MACHINE_ASSETS } from "../assets/slot-machine";
 import "../styles/HomePage.css";
 
 function HomePage() {
@@ -70,7 +69,12 @@ function HomePage() {
         >
           <div aria-hidden="true" className="home-hero-halo" />
           <div className="home-machine">
-            <img alt="" aria-hidden="true" className="home-machine-frame" src={slotMachineFrameUrl} />
+            <img
+              alt=""
+              aria-hidden="true"
+              className="home-machine-frame"
+              src={SLOT_MACHINE_ASSETS.assembly.machine}
+            />
             <div aria-hidden="true" className="home-reel-overlay">
               <span className="home-reel-window home-reel-window-queen">
                 <span className="home-reel-visual">
@@ -88,7 +92,13 @@ function HomePage() {
                 </span>
               </span>
             </div>
-            <img alt="" aria-hidden="true" className="home-machine-lever" src={slotMachineLeverUrl} />
+            <span aria-hidden="true" className="home-machine-lever-layer">
+              <img
+                alt=""
+                className="home-machine-lever"
+                src={SLOT_MACHINE_ASSETS.assembly.lever}
+              />
+            </span>
           </div>
 
           <p className="home-hero-caption">
