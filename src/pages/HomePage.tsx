@@ -46,7 +46,7 @@ function HomePage() {
               Settings
             </button>
             <button
-              className="home-profile-link"
+              className="home-tertiary-link"
               onClick={() => navigate("/profile")}
               type="button"
             >
@@ -59,6 +59,17 @@ function HomePage() {
                 <path d="M5.75 19c.6-3.45 2.68-5.25 6.25-5.25s5.65 1.8 6.25 5.25" />
               </svg>
               Profile
+            </button>
+            <button
+              className="home-tertiary-link"
+              onClick={() => navigate("/how-to-play")}
+              type="button"
+            >
+              <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
+                <path d="M4.5 5.5A2.5 2.5 0 0 1 7 3h4a2 2 0 0 1 2 2v16a2 2 0 0 0-2-2H7a2.5 2.5 0 0 0-2.5 2.5v-16Z" />
+                <path d="M19.5 5.5A2.5 2.5 0 0 0 17 3h-4v18a2 2 0 0 1 2-2h2a2.5 2.5 0 0 1 2.5 2.5v-16Z" />
+              </svg>
+              How to Play
             </button>
           </nav>
         </section>

@@ -124,7 +124,7 @@
   max-width: 27rem;
 }
 
-.home-action, .home-profile-link { cursor: pointer; font: inherit; }
+.home-action, .home-tertiary-link { cursor: pointer; font: inherit; }
 
 .home-action {
   border-radius: 4px;
@@ -155,7 +155,7 @@
   color: #e8dfcf;
 }
 
-.home-profile-link {
+.home-tertiary-link {
   align-items: center;
   background: transparent;
   border: 1px solid rgba(224, 191, 125, 0.2);
@@ -164,16 +164,16 @@
   display: inline-flex;
   font-size: 0.72rem;
   gap: 0.55rem;
-  grid-column: 1 / -1;
-  justify-self: start;
+  justify-content: center;
   letter-spacing: 0.14em;
   min-height: 2.4rem;
   padding: 0.5rem 0.8rem;
   text-transform: uppercase;
   transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+  width: 100%;
 }
 
-.home-profile-link svg {
+.home-tertiary-link svg {
   height: 1.05rem;
   stroke: currentColor;
   stroke-linecap: round;
@@ -184,7 +184,7 @@
 .home-action:hover { transform: translateY(-2px); }
 .home-action-primary:hover { background: linear-gradient(135deg, #f1cb7b, #c48a39); }
 .home-action-secondary:hover { background: rgba(219, 174, 90, 0.08); border-color: rgba(239, 204, 128, 0.6); }
-.home-profile-link:hover {
+.home-tertiary-link:hover {
   background: rgba(219, 174, 90, 0.06);
   border-color: rgba(239, 204, 128, 0.42);
   color: #eee2cb;
@@ -345,7 +345,6 @@
   .home h1 strong { margin-left: 0; }
   .home-summary { margin-inline: auto; }
   .home-actions { margin-inline: auto; }
-  .home-profile-link { justify-self: center; }
   .home-hero { justify-self: center; max-width: 36rem; width: 100%; }
   .home-footer { left: 50%; transform: translateX(-50%); }
 }
@@ -374,6 +373,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home-action, .home-profile-link { transition: none; }
+  .home-action, .home-tertiary-link { transition: none; }
   .home-action:hover { transform: none; }
 }

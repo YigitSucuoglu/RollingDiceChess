@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.8.9
+v0.9.0
 
 ---
 
@@ -39,6 +39,7 @@ v0.8.9
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- HELP-01 — Add comprehensive How to Play guide
 - LEVER-01 — Integrate new slot machine and static lever assets
 - HOME-01 — Redesign Home Screen and rebrand product as RouletteChess, including hero asset cleanup, caption cleanup, lever positioning, and profile hierarchy polish
 - GOLD-03 — Integrate Gold Piece Set with board optical alignment and reel clipping
@@ -76,6 +77,7 @@ v0.8.9
 ## Current Sprint
 
 Completed:
+- HELP-01 — Add comprehensive How to Play guide
 - LEVER-01 — Integrate new slot machine and static lever assets
 - HOME-01 — Redesign Home Screen and rebrand product as RouletteChess, including hero asset cleanup, caption cleanup, lever positioning, and profile hierarchy polish
 - GOLD-03 — Integrate Gold Piece Set with board optical alignment and reel clipping
@@ -87,12 +89,13 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. LEVER-02 — Add pivot-based lever pull animation
+1. SOUND-01B — Replace and balance production sound assets
 
 Roadmap:
-- LEVER-02 — Add pivot-based lever pull animation
-- HELP-01 — Add How to Play Page
-- SOUND-01B — Sound Asset Replacement and Balancing
+- SOUND-01B — Replace and balance production sound assets
+
+Backlog:
+- FINAL-POLISH — Revisit Game slot machine sizing and reel readability after core features are complete.
 
 ---
 
