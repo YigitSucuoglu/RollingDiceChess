@@ -630,6 +630,12 @@ function Board() {
         style={boardTheme.style}
       >
         {squares}
+
+        {isTurnSkippedMessageVisible && (
+          <div className="turn-skipped-message" role="status">
+            No playable pieces — Turn skipped
+          </div>
+        )}
       </div>
 
       <ChessClockPanel
@@ -638,11 +644,6 @@ function Board() {
         snapshot={clockSnapshot}
       />
 
-      {isTurnSkippedMessageVisible && (
-        <div className="turn-skipped-message" role="status">
-          No playable pieces — Turn skipped
-        </div>
-      )}
       </div>
 
       {isMoveHistoryMounted && (
@@ -661,6 +662,7 @@ function Board() {
           onMainMenu={returnToMainMenu}
           onPlayAgain={startNewGame}
           pieceSet={game.setup.pieceSet}
+          xpProgression={gameManager.getMatchXpProgression(game)!}
           winner={game.winner}
         />
       )}

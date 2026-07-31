@@ -15,8 +15,10 @@ import {
 import type { PlayerProfileRepository } from "./PlayerProfileRepository";
 import {
   calculateLevelProgression,
+  createMatchXpProgressionResult,
   calculateXpReward,
   resolvePlayerTitle,
+  type MatchXpProgressionResult,
   type XpRewardBreakdown,
 } from "./ProfileProgression";
 
@@ -62,6 +64,12 @@ interface MatchSession {
   triplePawnRolls: number;
   tripleKnightRolls: number;
   tripleQueenRolls: number;
+  completionResult: MatchXpProgressionResult | null;
+}
+
+export interface ProfileGameSession {
+  readonly eventSink: GameEventSink;
+  getXpProgressionResult(): MatchXpProgressionResult | null;
 }
 
 function createMatchId(): string {
@@ -202,7 +210,7 @@ export class PlayerProfileService {
     };
   }
 
-  public createGameEventSink(setup: GameSetup): GameEventSink {
+  public createGameSession(setup: GameSetup): ProfileGameSession {
     const session: MatchSession = {
       matchId: createMatchId(),
       startedAtMs: Date.now(),
@@ -217,15 +225,25 @@ export class PlayerProfileService {
       triplePawnRolls: 0,
       tripleKnightRolls: 0,
       tripleQueenRolls: 0,
+      completionResult: null,
     };
 
-    return {
+    const eventSink: GameEventSink = {
       onRoll: (color, roll) => this.recordRoll(session, color, roll),
       onMove: (event) => this.recordMove(session, event),
       onTurnCompleted: (color, movesUsed) =>
         this.recordTurnCompletion(session, color, movesUsed),
       onGameCompleted: (event) => this.completeMatch(session, event),
     };
+
+    return {
+      eventSink,
+      getXpProgressionResult: () => session.completionResult,
+    };
+  }
+
+  public createGameEventSink(setup: GameSetup): GameEventSink {
+    return this.createGameSession(setup).eventSink;
   }
 
   public completeMatch(
@@ -233,6 +251,10 @@ export class PlayerProfileService {
     event: GameCompletedEvent,
     completedAtMs: number = Date.now()
   ): XpRewardBreakdown | null {
+    if (session.completionResult) {
+      return null;
+    }
+
     const profile = this.repository.getProfile();
 
     if (profile.processedMatchIds.includes(session.matchId)) {
@@ -276,12 +298,17 @@ export class PlayerProfileService {
         session.capturesByPiece[pieceType];
     }
 
+    const previousTotalXp = profile.totalXp;
     profile.totalXp += reward.finalXp;
     profile.processedMatchIds = [
       ...profile.processedMatchIds,
       session.matchId,
     ].slice(-MAX_PROCESSED_MATCH_IDS);
     this.repository.saveProfile(profile);
+    session.completionResult = createMatchXpProgressionResult(
+      previousTotalXp,
+      reward.finalXp
+    );
 
     return reward;
   }

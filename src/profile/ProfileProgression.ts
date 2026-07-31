@@ -15,6 +15,27 @@ export interface XpRewardBreakdown {
   readonly finalXp: number;
 }
 
+export interface XpProgressionSnapshot extends LevelProgression {
+  readonly title: string;
+}
+
+export interface XpAnimationSegment {
+  readonly level: number;
+  readonly title: string;
+  readonly fromXp: number;
+  readonly toXp: number;
+  readonly requiredXp: number;
+  readonly completesLevel: boolean;
+}
+
+export interface MatchXpProgressionResult {
+  readonly earnedXp: number;
+  readonly previous: XpProgressionSnapshot;
+  readonly current: XpProgressionSnapshot;
+  readonly segments: readonly XpAnimationSegment[];
+  readonly leveledUp: boolean;
+}
+
 const DIFFICULTY_MULTIPLIERS: Readonly<Record<BotDifficulty, number>> = {
   easy: 0.8,
   medium: 1,
@@ -84,5 +105,50 @@ export function calculateXpReward(input: {
     finalXp: Math.round(
       (resultXp + promotionXp + streakXp) * difficultyMultiplier
     ),
+  };
+}
+
+function createProgressionSnapshot(totalXp: number): XpProgressionSnapshot {
+  const progression = calculateLevelProgression(totalXp);
+
+  return {
+    ...progression,
+    title: resolvePlayerTitle(progression.level),
+  };
+}
+
+export function createMatchXpProgressionResult(
+  previousTotalXp: number,
+  earnedXp: number
+): MatchXpProgressionResult {
+  const safePreviousXp = Math.max(0, previousTotalXp);
+  const safeEarnedXp = Math.max(0, earnedXp);
+  const previous = createProgressionSnapshot(safePreviousXp);
+  const current = createProgressionSnapshot(
+    safePreviousXp + safeEarnedXp
+  );
+  const segments: XpAnimationSegment[] = [];
+
+  for (let level = previous.level; level <= current.level; level++) {
+    const requiredXp = getRequiredXpForLevel(level);
+    const isFirst = level === previous.level;
+    const isLast = level === current.level;
+
+    segments.push({
+      level,
+      title: resolvePlayerTitle(level),
+      fromXp: isFirst ? previous.currentLevelXp : 0,
+      toXp: isLast ? current.currentLevelXp : requiredXp,
+      requiredXp,
+      completesLevel: !isLast,
+    });
+  }
+
+  return {
+    earnedXp: safeEarnedXp,
+    previous,
+    current,
+    segments,
+    leveledUp: current.level > previous.level,
   };
 }

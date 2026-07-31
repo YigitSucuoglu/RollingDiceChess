@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.9.1
+v0.9.2
 
 ---
 
@@ -39,6 +39,7 @@ v0.9.1
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- GAME-UX-01 — Center turn-skipped feedback and add animated result XP progression
 - PROFILE-01 — Add offline player profile, statistics, XP progression and profile page
 - HELP-01 — Add comprehensive How to Play guide
 - LEVER-01 — Integrate new slot machine and static lever assets
@@ -78,6 +79,7 @@ v0.9.1
 ## Current Sprint
 
 Completed:
+- GAME-UX-01 — Center turn-skipped feedback and add animated result XP progression
 - PROFILE-01 — Add offline player profile, statistics, XP progression and profile page
 - HELP-01 — Add comprehensive How to Play guide
 - LEVER-01 — Integrate new slot machine and static lever assets
@@ -135,6 +137,7 @@ Backlog:
 - UI-01A changes layout only; gameplay, bot pacing, clock, and sound behavior remain unchanged.
 - Chess clock engine, timeout result, and perspective-aware dual clock UI are complete.
 - Offline profile data is versioned behind a repository/service boundary; gameplay emits domain events and Profile UI renders a prepared view model.
+- Result UI receives idempotent pre/post-match XP snapshots and service-generated animation segments; turn-skipped feedback is anchored to the board center.
 
 
 ## Future UI Polish

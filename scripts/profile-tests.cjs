@@ -133,6 +133,40 @@ try {
     assert.equal(progression.calculateXpReward(input).finalXp, expected);
   }
 
+  const noLevelUp = progression.createMatchXpProgressionResult(20, 50);
+  assert.equal(noLevelUp.previous.currentLevelXp, 20);
+  assert.equal(noLevelUp.current.currentLevelXp, 70);
+  assert.equal(noLevelUp.segments.length, 1);
+  assert.equal(noLevelUp.segments[0].fromXp, 20);
+  assert.equal(noLevelUp.segments[0].toXp, 70);
+
+  const oneLevelUp = progression.createMatchXpProgressionResult(70, 50);
+  assert.equal(oneLevelUp.current.level, 2);
+  assert.equal(oneLevelUp.current.currentLevelXp, 20);
+  assert.deepEqual(
+    oneLevelUp.segments.map((segment) => [
+      segment.level,
+      segment.fromXp,
+      segment.toXp,
+      segment.requiredXp,
+    ]),
+    [
+      [1, 70, 100, 100],
+      [2, 0, 20, 130],
+    ]
+  );
+
+  const multiLevel = progression.createMatchXpProgressionResult(90, 400);
+  assert.ok(multiLevel.segments.length > 2);
+  assert.equal(
+    multiLevel.segments.at(-1).toXp,
+    multiLevel.current.currentLevelXp
+  );
+  assert.equal(
+    multiLevel.segments.at(-1).requiredXp,
+    multiLevel.current.requiredXp
+  );
+
   const emptyStorage = createMemoryStorage();
   const repository = new LocalStoragePlayerProfileRepository(emptyStorage);
   const defaultProfile = repository.getProfile();
@@ -183,7 +217,8 @@ try {
       incrementSeconds: 0,
     },
   };
-  const sink = service.createGameEventSink(setup);
+  const gameSession = service.createGameSession(setup);
+  const sink = gameSession.eventSink;
   sink.onRoll("white", ["knight", "knight", "pawn"]);
   sink.onRoll("white", ["pawn", "pawn", "pawn"]);
   sink.onRoll("white", ["knight", "knight", "knight"]);
@@ -221,6 +256,10 @@ try {
   assert.equal(completed.statistics.playerTurnsCompleted, 1);
   assert.equal(completed.statistics.threeRightsTurns, 1);
   assert.equal(completed.totalXp, 50);
+  const resultProgression = gameSession.getXpProgressionResult();
+  assert.equal(resultProgression.earnedXp, 50);
+  assert.equal(resultProgression.previous.currentLevelXp, 0);
+  assert.equal(resultProgression.current.currentLevelXp, 50);
 
   const lossSink = service.createGameEventSink(setup);
   lossSink.onMove({

@@ -3,6 +3,8 @@ import type { KeyboardEvent } from "react";
 import { resolvePieceVisual } from "../../config/pieceSets";
 import type { GameResultReason, PieceColor } from "../../types/Chess";
 import type { PieceSet } from "../../types/PieceSet";
+import type { MatchXpProgressionResult } from "../../profile/ProfileProgression";
+import ResultXpProgress from "./ResultXpProgress";
 import "./GameResultModal.css";
 
 interface GameResultModalProps {
@@ -10,6 +12,7 @@ interface GameResultModalProps {
   onMainMenu: () => void;
   onPlayAgain: () => void;
   pieceSet: PieceSet;
+  xpProgression: MatchXpProgressionResult;
   winner: PieceColor;
 }
 
@@ -24,6 +27,7 @@ function GameResultModal({
   onMainMenu,
   onPlayAgain,
   pieceSet,
+  xpProgression,
   winner,
 }: GameResultModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -104,6 +108,8 @@ function GameResultModal({
         </h2>
 
         <p id="game-result-reason">{endReasonLabel}</p>
+
+        <ResultXpProgress progression={xpProgression} />
 
         <div className="game-result-actions">
           <button
