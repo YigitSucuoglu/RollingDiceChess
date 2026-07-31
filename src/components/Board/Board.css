@@ -314,6 +314,7 @@
 }
 
 .slot-machine-lever-layer{
+    --lever-animation-duration:560ms;
     width:auto;
     height:var(--lever-height);
     aspect-ratio:173 / 938;
@@ -328,6 +329,37 @@
         var(--lever-pivot-x)
         var(--lever-pivot-y);
     user-select:none;
+    will-change:transform;
+}
+
+.slot-machine-lever-layer.is-pulling{
+    animation:
+        slot-machine-lever-pull
+        var(--lever-animation-duration)
+        cubic-bezier(.2,.72,.22,1)
+        both;
+}
+
+@keyframes slot-machine-lever-pull{
+    0%{
+        transform:rotate(0deg);
+    }
+
+    38%{
+        transform:rotate(58deg);
+    }
+
+    52%{
+        transform:rotate(58deg);
+    }
+
+    78%{
+        transform:rotate(-5deg);
+    }
+
+    100%{
+        transform:rotate(0deg);
+    }
 }
 
 .slot-machine-lever{
@@ -642,4 +674,21 @@
         transition:none;
     }
 
+    .slot-machine-lever-layer.is-pulling{
+        animation-name:slot-machine-lever-pull-reduced;
+        animation-duration:180ms;
+    }
+
+}
+
+@keyframes slot-machine-lever-pull-reduced{
+    0%,100%{
+        opacity:1;
+        transform:rotate(0deg);
+    }
+
+    50%{
+        opacity:.82;
+        transform:rotate(3deg);
+    }
 }

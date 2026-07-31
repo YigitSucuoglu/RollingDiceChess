@@ -6,6 +6,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
 } from "react";
 import type { PieceType } from "../../types/Chess";
 import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
@@ -58,6 +59,10 @@ const GAME_REEL_TRANSLATE_Y: Readonly<Partial<Record<PieceType, number>>> = {
   king: 0.01,
 };
 const BOARD_INDEXES = [0, 1, 2, 3, 4, 5, 6, 7] as const;
+
+type LeverAnimationStyle = CSSProperties & {
+  "--lever-animation-duration": string;
+};
 
 function Board() {
   const game = gameManager.getGame();
@@ -562,7 +567,10 @@ function Board() {
         </div>
 
         <div className="roll-section">
-              <div className="slot-machine-frame">
+              <div
+                className="slot-machine-frame"
+                data-roll-phase={rollPhase}
+              >
                 <img
                   alt=""
                   aria-hidden="true"
@@ -594,7 +602,15 @@ function Board() {
 
                 <span
                   aria-hidden="true"
-                  className="slot-machine-lever-layer"
+                  className={`slot-machine-lever-layer${
+                    rollPhase === "spinning" ? " is-pulling" : ""
+                  }`}
+                  style={
+                    {
+                      "--lever-animation-duration":
+                        `${ROLL_TIMING.leverAnimationDurationMs}ms`,
+                    } as LeverAnimationStyle
+                  }
                 >
                   <img
                     alt=""

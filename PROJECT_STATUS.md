@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.10.0
+v0.10.1
 
 ---
 
@@ -42,6 +42,7 @@ v0.10.0
 - PROFILE-01 — Add offline player profile, statistics, XP progression and profile page
 - SETTINGS-01 — Add premium settings page
 - I18N-01 — Add English and Turkish localization support
+- LEVER-02 — Add synchronized mechanical lever animation
 - GAME-UX-01 — Center turn-skipped feedback and add animated result XP progression
 - HELP-01 — Add comprehensive How to Play guide
 - LEVER-01 — Integrate new slot machine and static lever assets
@@ -84,6 +85,7 @@ Completed:
 - PROFILE-01 — Add offline player profile, statistics, XP progression and profile page
 - SETTINGS-01 — Add premium settings page
 - I18N-01 — Add English and Turkish localization support
+- LEVER-02 — Add synchronized mechanical lever animation
 - GAME-UX-01 — Center turn-skipped feedback and add animated result XP progression
 - HELP-01 — Add comprehensive How to Play guide
 - LEVER-01 — Integrate new slot machine and static lever assets
@@ -115,7 +117,7 @@ Backlog:
 - Animation must never modify engine state.
 - Winner state overrides the roll display.
 - Piece Set controls board pieces, slot symbols, and result visuals through one central resolver; Board Theme remains independent.
-- The ROLL button is the primary interaction; the new lever is a separate static visual layer with pivot metadata prepared for LEVER-02.
+- The ROLL button is the primary human interaction; the lever remains a separate presentation layer and animates from the shared roll phase without modifying engine state.
 - Check and checkmate do not exist; the game ends only when a king is captured.
 - Move history data infrastructure and two-column, three-slot UI are complete.
 - Play Setup stores time control, player side, and Easy/Medium/Hard bot difficulty; Medium is the default and legacy fallback.
@@ -133,7 +135,7 @@ Backlog:
 - Piece Set and Board Theme remain independent; Wood/Marble/Dark each support both Classic and Retro pieces.
 - Central SoundManager provides cached, master-mutable audio with a persistent turn-header toggle.
 - Supported effects: Roll button, Lever pull, Reel spin, Reel stop, Move, Capture, Turn skipped, Victory, Defeat, and Timeout.
-- Lever audio remains tied to the shared roll flow while the visual lever stays static until LEVER-02; volume sliders and background music are not included.
+- Lever audio and the pivot-based mechanical lever animation are synchronized through the shared roll flow; volume sliders and background music are not included.
 - Desktop game layout prioritizes a viewport-sized board with a narrow secondary Move History panel.
 - Move History starts closed, releases its layout space, and keeps the centered desktop game layout free of page-level overflow.
 - At narrow breakpoints, Move History stacks below the main game column and remains internally scrollable.
