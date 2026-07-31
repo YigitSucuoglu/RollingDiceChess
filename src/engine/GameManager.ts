@@ -1,11 +1,16 @@
 import Game from "./Game";
 import type { GameSetupInput } from "../types/GameSetup";
+import {
+  createDefaultGameSetup,
+  normalizeGameSetup,
+} from "../config/gameSetup";
+import playerProfileService from "../profile/PlayerProfileService";
 
 class GameManager {
   private game: Game;
 
   constructor() {
-    this.game = new Game();
+    this.game = this.createGame();
   }
 
   public getGame(): Game {
@@ -14,7 +19,19 @@ class GameManager {
 
   public newGame(setup?: GameSetupInput): void {
     this.game.dispose();
-    this.game = new Game(setup);
+    this.game = this.createGame(setup);
+  }
+
+  private createGame(setupInput?: GameSetupInput): Game {
+    const setup = normalizeGameSetup(
+      setupInput ?? createDefaultGameSetup()
+    );
+
+    return new Game(
+      setup,
+      undefined,
+      playerProfileService.createGameEventSink(setup)
+    );
   }
 }
 

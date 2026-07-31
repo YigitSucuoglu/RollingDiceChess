@@ -19,6 +19,10 @@ import type { GameSetup, GameSetupInput } from "../types/GameSetup";
 import type { Bot } from "./BotController";
 import BotFactory from "./BotFactory";
 import ChessClock from "./ChessClock";
+import {
+  NULL_GAME_EVENT_SINK,
+  type GameEventSink,
+} from "./GameEvents";
 
 export default class Game {
   public board: ChessBoard;
@@ -53,10 +57,15 @@ export default class Game {
 
   private disposed: boolean;
 
+  private readonly eventSink: GameEventSink;
+
+  private movesUsedThisTurn: number;
+
 
   constructor(
     setupInput: GameSetupInput = createDefaultGameSetup(),
-    bot?: Bot
+    bot?: Bot,
+    eventSink: GameEventSink = NULL_GAME_EVENT_SINK
   ) {
     const setup = normalizeGameSetup(setupInput);
     this.board = new ChessBoard();
@@ -73,6 +82,8 @@ export default class Game {
       bot ?? BotFactory.create(setup.botColor, setup.botDifficulty);
     this.listeners = new Set();
     this.disposed = false;
+    this.eventSink = eventSink;
+    this.movesUsedThisTurn = 0;
     this.clock = new ChessClock(
       setup.timeControl.initialMinutes,
       setup.timeControl.incrementSeconds,
@@ -284,11 +295,22 @@ export default class Game {
     this.lastMove = move;
 
     this.moveHistory.recordMove(move, piece.color, movedPieceType);
+    this.movesUsedThisTurn++;
+    this.eventSink.onMove({
+      color: piece.color,
+      pieceType: movedPieceType,
+      isCapture: move.isCapture,
+      isPromotion: move.isPromotion,
+    });
 
     if (capturedPiece?.type === "king") {
       this.winner = piece.color;
       this.resultReason = "king-captured";
       this.clock.stop();
+      this.eventSink.onGameCompleted({
+        winner: this.winner,
+        reason: this.resultReason,
+      });
     }
 
     this.selectedSquare = null;
@@ -301,6 +323,10 @@ export default class Game {
     const nextResolution = this.getTurnResolution();
 
     if (nextResolution.maxConsumableRights === 0) {
+      this.eventSink.onTurnCompleted(
+        this.currentTurn,
+        this.movesUsedThisTurn
+      );
       this.clock.completeTurn(this.currentTurn);
 
       if (this.winner) {
@@ -321,6 +347,7 @@ export default class Game {
 
     this.currentRoll = roll;
     this.turnRights = rights;
+    this.eventSink.onRoll(this.currentTurn, roll);
   }
 
   private getTurnResolution(): TurnResolution {
@@ -335,6 +362,7 @@ export default class Game {
         ? "black"
         : "white";
     this.moveHistory.startPlayerTurn(this.currentTurn);
+    this.movesUsedThisTurn = 0;
     this.initializeTurnRights();
   }
 
@@ -347,6 +375,10 @@ export default class Game {
     this.resultReason = "timeout";
     this.selectedSquare = null;
     this.possibleMoves = [];
+    this.eventSink.onGameCompleted({
+      winner: this.winner,
+      reason: this.resultReason,
+    });
     this.notifyListeners();
   }
 

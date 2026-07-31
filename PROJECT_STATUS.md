@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.9.0
+v0.9.1
 
 ---
 
@@ -39,6 +39,7 @@ v0.9.0
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- PROFILE-01 — Add offline player profile, statistics, XP progression and profile page
 - HELP-01 — Add comprehensive How to Play guide
 - LEVER-01 — Integrate new slot machine and static lever assets
 - HOME-01 — Redesign Home Screen and rebrand product as RouletteChess, including hero asset cleanup, caption cleanup, lever positioning, and profile hierarchy polish
@@ -77,6 +78,7 @@ v0.9.0
 ## Current Sprint
 
 Completed:
+- PROFILE-01 — Add offline player profile, statistics, XP progression and profile page
 - HELP-01 — Add comprehensive How to Play guide
 - LEVER-01 — Integrate new slot machine and static lever assets
 - HOME-01 — Redesign Home Screen and rebrand product as RouletteChess, including hero asset cleanup, caption cleanup, lever positioning, and profile hierarchy polish
@@ -89,12 +91,14 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. SOUND-01B — Replace and balance production sound assets
+1. SETTINGS-01 — Redesign Settings page
 
 Roadmap:
-- SOUND-01B — Replace and balance production sound assets
+- SETTINGS-01 — Redesign Settings page
+- I18N-01 — Add Turkish language support
 
 Backlog:
+- SOUND-01B — Replace and balance production sound assets
 - FINAL-POLISH — Revisit Game slot machine sizing and reel readability after core features are complete.
 
 ---
@@ -130,6 +134,7 @@ Backlog:
 - At narrow breakpoints, Move History stacks below the main game column and remains internally scrollable.
 - UI-01A changes layout only; gameplay, bot pacing, clock, and sound behavior remain unchanged.
 - Chess clock engine, timeout result, and perspective-aware dual clock UI are complete.
+- Offline profile data is versioned behind a repository/service boundary; gameplay emits domain events and Profile UI renders a prepared view model.
 
 
 ## Future UI Polish
