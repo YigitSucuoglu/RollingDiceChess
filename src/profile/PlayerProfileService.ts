@@ -136,6 +136,11 @@ export class PlayerProfileService {
     return this.repository.getProfile();
   }
 
+  public resetProfile(): PlayerProfileViewModel {
+    this.repository.resetProfile();
+    return this.getViewModel();
+  }
+
   public getViewModel(): PlayerProfileViewModel {
     const profile = this.repository.getProfile();
     const stats = profile.statistics;

@@ -20,6 +20,9 @@ function compileProfileModules() {
     "src/profile/PlayerProfileRepository.ts",
     "src/profile/LocalStoragePlayerProfileRepository.ts",
     "src/profile/PlayerProfileService.ts",
+    "src/settings/AppSettings.ts",
+    "src/settings/AppSettingsRepository.ts",
+    "src/settings/LocalStorageAppSettingsRepository.ts",
   ];
   const compilerArguments = [
       "--ignoreConfig",
@@ -53,10 +56,13 @@ function compileProfileModules() {
   }
 }
 
-function createMemoryStorage(initialValue = null) {
+function createMemoryStorage(
+  initialValue = null,
+  initialKey = "roulettechess.player-profile.v1"
+) {
   const values = new Map();
   if (initialValue !== null) {
-    values.set("roulettechess.player-profile.v1", initialValue);
+    values.set(initialKey, initialValue);
   }
 
   return {
@@ -88,6 +94,16 @@ try {
     outputRoot,
     "profile",
     "PlayerProfileService.js"
+  ));
+  const settingsModel = require(path.join(
+    outputRoot,
+    "settings",
+    "AppSettings.js"
+  ));
+  const { LocalStorageAppSettingsRepository } = require(path.join(
+    outputRoot,
+    "settings",
+    "LocalStorageAppSettingsRepository.js"
   ));
 
   const levelCases = [
@@ -287,7 +303,27 @@ try {
     profileModel.PLAYER_PROFILE_SCHEMA_VERSION,
     1
   );
-  console.log("PROFILE-01 checks passed: progression, rewards, repository, statistics, idempotency.");
+  const resetViewModel = service.resetProfile();
+  assert.equal(resetViewModel.progression.level, 1);
+  assert.equal(service.getProfile().statistics.gamesPlayed, 0);
+
+  const settingsStorage = createMemoryStorage();
+  const settingsRepository = new LocalStorageAppSettingsRepository(
+    settingsStorage
+  );
+  assert.equal(settingsRepository.getSettings().language, "en");
+  settingsRepository.saveSettings({ schemaVersion: 1, language: "tr" });
+  assert.equal(settingsRepository.getSettings().language, "tr");
+  assert.equal(settingsModel.normalizeAppLanguage("unknown"), "en");
+
+  const corruptSettingsRepository =
+    new LocalStorageAppSettingsRepository(createMemoryStorage(
+      "{broken",
+      "roulettechess.settings.v1"
+    ));
+  assert.equal(corruptSettingsRepository.getSettings().language, "en");
+
+  console.log("PROFILE/SETTINGS checks passed: progression, rewards, repositories, reset, statistics, idempotency.");
 } finally {
   fs.rmSync(outputRoot, { recursive: true, force: true });
 }

@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.9.2
+v0.9.3
 
 ---
 
@@ -39,6 +39,7 @@ v0.9.2
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
+- SETTINGS-01 — Add premium settings page
 - GAME-UX-01 — Center turn-skipped feedback and add animated result XP progression
 - PROFILE-01 — Add offline player profile, statistics, XP progression and profile page
 - HELP-01 — Add comprehensive How to Play guide
@@ -79,6 +80,7 @@ v0.9.2
 ## Current Sprint
 
 Completed:
+- SETTINGS-01 — Add premium settings page
 - GAME-UX-01 — Center turn-skipped feedback and add animated result XP progression
 - PROFILE-01 — Add offline player profile, statistics, XP progression and profile page
 - HELP-01 — Add comprehensive How to Play guide
@@ -93,10 +95,9 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. SETTINGS-01 — Redesign Settings page
+1. I18N-01 — Add Turkish language support
 
 Roadmap:
-- SETTINGS-01 — Redesign Settings page
 - I18N-01 — Add Turkish language support
 
 Backlog:
@@ -138,6 +139,7 @@ Backlog:
 - Chess clock engine, timeout result, and perspective-aware dual clock UI are complete.
 - Offline profile data is versioned behind a repository/service boundary; gameplay emits domain events and Profile UI renders a prepared view model.
 - Result UI receives idempotent pre/post-match XP snapshots and service-generated animation segments; turn-skipped feedback is anchored to the board center.
+- Settings exposes only working Sound Effects, language preference, and repository-backed offline profile reset controls.
 
 
 ## Future UI Polish
