@@ -17,15 +17,29 @@ export interface XpRewardBreakdown {
 
 export interface XpProgressionSnapshot extends LevelProgression {
   readonly title: string;
+  readonly titleId: PlayerTitleId;
 }
 
 export interface XpAnimationSegment {
   readonly level: number;
   readonly title: string;
+  readonly titleId: PlayerTitleId;
   readonly fromXp: number;
   readonly toXp: number;
   readonly requiredXp: number;
   readonly completesLevel: boolean;
+}
+
+export type PlayerTitleId = "novice" | "apprentice" | "strategist" | "mastermind" | "grandmaster" | "legend" | "rouletteMaster";
+
+export function resolvePlayerTitleId(level: number): PlayerTitleId {
+  if (level >= 100) return "rouletteMaster";
+  if (level >= 80) return "legend";
+  if (level >= 60) return "grandmaster";
+  if (level >= 40) return "mastermind";
+  if (level >= 20) return "strategist";
+  if (level >= 10) return "apprentice";
+  return "novice";
 }
 
 export interface MatchXpProgressionResult {
@@ -71,13 +85,8 @@ export function calculateLevelProgression(totalXp: number): LevelProgression {
 }
 
 export function resolvePlayerTitle(level: number): string {
-  if (level >= 100) return "Roulette Master";
-  if (level >= 80) return "Legend";
-  if (level >= 60) return "Grandmaster";
-  if (level >= 40) return "Mastermind";
-  if (level >= 20) return "Strategist";
-  if (level >= 10) return "Apprentice";
-  return "Novice";
+  const titles: Record<PlayerTitleId, string> = { novice: "Novice", apprentice: "Apprentice", strategist: "Strategist", mastermind: "Mastermind", grandmaster: "Grandmaster", legend: "Legend", rouletteMaster: "Roulette Master" };
+  return titles[resolvePlayerTitleId(level)];
 }
 
 export function calculateWinStreakBonus(currentWinStreak: number): number {
@@ -114,6 +123,7 @@ function createProgressionSnapshot(totalXp: number): XpProgressionSnapshot {
   return {
     ...progression,
     title: resolvePlayerTitle(progression.level),
+    titleId: resolvePlayerTitleId(progression.level),
   };
 }
 
@@ -137,6 +147,7 @@ export function createMatchXpProgressionResult(
     segments.push({
       level,
       title: resolvePlayerTitle(level),
+      titleId: resolvePlayerTitleId(level),
       fromXp: isFirst ? previous.currentLevelXp : 0,
       toXp: isLast ? current.currentLevelXp : requiredXp,
       requiredXp,

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 interface GuideSectionProps {
   children: ReactNode;
@@ -62,9 +63,10 @@ export function RouletteResultExample({
   caption,
   pieces,
 }: RouletteResultExampleProps) {
+  const { t } = useTranslation();
   return (
     <figure className="roulette-result-example">
-      <div aria-label={`Roulette result: ${pieces.join(", ")}`}>
+      <div aria-label={t("guide.rouletteResult", { pieces: pieces.join(", ") })}>
         {pieces.map((piece, index) => (
           <span key={`${piece}-${index}`}>{piece}</span>
         ))}

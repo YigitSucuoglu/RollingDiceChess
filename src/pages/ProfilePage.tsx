@@ -1,15 +1,13 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import playerProfileService, {
-  type PlayerProfileViewModel,
 } from "../profile/PlayerProfileService";
+import type { AppLanguage } from "../settings/AppSettings";
 import "../styles/ProfilePage.css";
 
 const ACHIEVEMENT_PLACEHOLDERS = [
-  "First Victory",
-  "100 Games",
-  "Capture 100 Kings",
-  "Triple Queen Roll",
+  "firstVictory", "hundredGames", "captureHundredKings", "tripleQueenRoll",
 ] as const;
 
 interface RouletteStatCardProps {
@@ -33,19 +31,19 @@ function RouletteStatCard({
 }
 
 function ProfilePage() {
-  const [profile] = useState<PlayerProfileViewModel>(() =>
-    playerProfileService.getViewModel()
-  );
+  const { t, i18n } = useTranslation();
+  const language: AppLanguage = i18n.resolvedLanguage === "tr" ? "tr" : "en";
+  const profile = useMemo(() => playerProfileService.getViewModel(language), [language]);
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "Profile | RouletteChess";
+    document.title = t("profile.browserTitle");
     window.scrollTo({ left: 0, top: 0, behavior: "auto" });
 
     return () => {
       document.title = previousTitle;
     };
-  }, []);
+  }, [t]);
 
   const { progression, rouletteStats } = profile;
 
@@ -55,17 +53,17 @@ function ProfilePage() {
       <div aria-hidden="true" className="profile-ambient profile-ambient-right" />
 
       <div className="profile-shell">
-        <nav aria-label="Profile navigation" className="profile-nav">
+        <nav aria-label={t("common.navigation.profile")} className="profile-nav">
           <Link className="profile-brand" to="/">RouletteChess</Link>
           <Link className="profile-back-link" to="/">
             <span aria-hidden="true">←</span>
-            Back to Home
+            {t("common.actions.backToHome")}
           </Link>
         </nav>
 
         <header className="profile-heading">
-          <p>Offline player hub</p>
-          <h1>Profile</h1>
+          <p>{t("profile.eyebrow")}</p>
+          <h1>{t("profile.title")}</h1>
         </header>
 
         <section
@@ -77,23 +75,23 @@ function ProfilePage() {
           </div>
 
           <div className="profile-identity-copy">
-            <p className="profile-overline">Player</p>
+            <p className="profile-overline">{t("profile.player")}</p>
             <h2 id="player-identity-title">{profile.displayName}</h2>
             <div className="profile-rank">
-              <span>Level {progression.level}</span>
+              <span>{t("common.level", { level: progression.level })}</span>
               <span aria-hidden="true">◆</span>
-              <strong>{progression.title}</strong>
+              <strong>{t(`titles.${progression.titleId}`)}</strong>
             </div>
-            <p className="profile-joined">Joined {profile.joinedLabel}</p>
+            <p className="profile-joined">{t("profile.joined", { date: profile.joinedLabel })}</p>
           </div>
 
           <div className="profile-progression">
             <div className="profile-progress-header">
-              <span>Level progress</span>
-              <strong>Level {progression.level + 1}</strong>
+              <span>{t("profile.levelProgress")}</span>
+              <strong>{t("common.level", { level: progression.level + 1 })}</strong>
             </div>
             <div
-              aria-label={`Level ${progression.level} experience progress`}
+              aria-label={t("profile.progressLabel", { level: progression.level })}
               aria-valuemax={progression.requiredXp}
               aria-valuemin={0}
               aria-valuenow={progression.currentLevelXp}
@@ -108,7 +106,7 @@ function ProfilePage() {
               />
             </div>
             <p>
-              {progression.currentLevelXp} / {progression.requiredXp} XP
+              {t("common.xpValue", { current: progression.currentLevelXp, required: progression.requiredXp })}
             </p>
           </div>
         </section>
@@ -118,14 +116,14 @@ function ProfilePage() {
           className="profile-section"
         >
           <header className="profile-section-heading">
-            <p>Career overview</p>
-            <h2 id="general-statistics-title">General Statistics</h2>
+            <p>{t("profile.careerOverview")}</p>
+            <h2 id="general-statistics-title">{t("profile.generalStatistics")}</h2>
           </header>
           <div className="profile-general-grid">
             {profile.generalStats.map((stat) => (
               <article className="profile-stat-card" key={stat.label}>
                 <strong>{stat.value}</strong>
-                <p>{stat.label}</p>
+                <p>{t(`profile.stats.${stat.id}`)}</p>
               </article>
             ))}
           </div>
@@ -136,38 +134,38 @@ function ProfilePage() {
           className="profile-section"
         >
           <header className="profile-section-heading">
-            <p>Your roulette signature</p>
+            <p>{t("profile.rouletteSignature")}</p>
             <h2 id="roulette-statistics-title">
-              RouletteChess Statistics
+              {t("profile.rouletteStatistics")}
             </h2>
           </header>
           <div className="profile-roulette-grid">
             <RouletteStatCard
-              label="Most Rolled Piece"
-              value={rouletteStats.mostRolledPiece}
+              label={t("profile.stats.mostRolledPiece")}
+              value={rouletteStats.mostRolledPieceType ? t(`common.pieces.${rouletteStats.mostRolledPieceType}`) : "—"}
             />
             <RouletteStatCard
-              label="Most Played Piece"
-              value={rouletteStats.mostPlayedPiece}
+              label={t("profile.stats.mostPlayedPiece")}
+              value={rouletteStats.mostPlayedPieceType ? t(`common.pieces.${rouletteStats.mostPlayedPieceType}`) : "—"}
             />
             <RouletteStatCard
-              label="Most Successful Piece"
-              value={rouletteStats.mostSuccessfulPiece}
+              label={t("profile.stats.mostSuccessfulPiece")}
+              value={rouletteStats.mostSuccessfulPieceType ? t(`common.pieces.${rouletteStats.mostSuccessfulPieceType}`) : "—"}
             />
             <RouletteStatCard
-              label="Three Rights Used"
+              label={t("profile.stats.threeRightsUsed")}
               value={rouletteStats.threeRightsUsedLabel}
             />
             <RouletteStatCard
-              label="Triple Pawn Rolls"
+              label={t("profile.stats.triplePawnRolls")}
               value={rouletteStats.triplePawnRolls}
             />
             <RouletteStatCard
-              label="Triple Knight Rolls"
+              label={t("profile.stats.tripleKnightRolls")}
               value={rouletteStats.tripleKnightRolls}
             />
             <RouletteStatCard
-              label="Triple Queen Rolls"
+              label={t("profile.stats.tripleQueenRolls")}
               value={rouletteStats.tripleQueenRolls}
             />
           </div>
@@ -178,24 +176,24 @@ function ProfilePage() {
           className="profile-section"
         >
           <header className="profile-section-heading">
-            <p>Future milestones</p>
-            <h2 id="achievements-title">Achievements</h2>
+            <p>{t("profile.futureMilestones")}</p>
+            <h2 id="achievements-title">{t("profile.achievements")}</h2>
           </header>
           <div className="profile-achievements-grid">
             {ACHIEVEMENT_PLACEHOLDERS.map((achievement) => (
               <article className="profile-achievement" key={achievement}>
                 <span aria-hidden="true" className="profile-lock">◇</span>
-                <h3>{achievement}</h3>
-                <p>Coming soon</p>
+                <h3>{t(`profile.achievementNames.${achievement}`)}</h3>
+                <p>{t("common.status.comingSoon")}</p>
               </article>
             ))}
           </div>
         </section>
 
         <footer className="profile-footer">
-          <p>Offline profile data stays on this device.</p>
+          <p>{t("profile.localDataNote")}</p>
           <Link to="/play">
-            Play
+            {t("common.actions.play")}
             <span aria-hidden="true">→</span>
           </Link>
         </footer>

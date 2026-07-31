@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   DEFAULT_TIME_CONTROL,
   TIME_CONTROL_CATEGORIES,
@@ -22,24 +23,18 @@ import "../styles/PlaySetupPage.css";
 
 const BOT_DIFFICULTY_OPTIONS: readonly {
   value: BotDifficulty;
-  label: string;
-  description: string;
 }[] = [
-  { value: "easy", label: "Easy", description: "Random legal moves" },
-  {
-    value: "medium",
-    label: "Medium",
-    description: "Tactical move choices",
-  },
-  { value: "hard", label: "Hard", description: "Plans the full turn" },
+  { value: "easy" }, { value: "medium" }, { value: "hard" },
 ];
 
 function ComingSoon() {
-  return <span className="coming-soon">Coming soon</span>;
+  const { t } = useTranslation();
+  return <span className="coming-soon">{t("common.status.comingSoon")}</span>;
 }
 
 function PlaySetupPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [timeControlId, setTimeControlId] = useState(DEFAULT_TIME_CONTROL.id);
   const [playerColor, setPlayerColor] = useState<PieceColor>("white");
   const [botDifficulty, setBotDifficulty] =
@@ -48,6 +43,8 @@ function PlaySetupPage() {
     useState<PieceSet>(DEFAULT_PIECE_SET);
   const [boardTheme, setBoardTheme] =
     useState<BoardTheme>(DEFAULT_BOARD_THEME);
+
+  useEffect(() => { document.title = t("setup.browserTitle"); }, [t]);
 
   const startGame = () => {
     const timeControl = TIME_CONTROL_OPTIONS.find(
@@ -77,17 +74,17 @@ function PlaySetupPage() {
       <div className="play-setup-shell">
         <header className="play-setup-header">
           <p>RouletteChess</p>
-          <h1>Play Setup</h1>
+          <h1>{t("setup.title")}</h1>
         </header>
 
         <div className="play-setup-grid">
           <section aria-labelledby="time-control-heading" className="setup-card time-control-card">
-            <h2 id="time-control-heading">Time Control</h2>
+            <h2 id="time-control-heading">{t("setup.timeControl")}</h2>
 
             <div className="time-control-groups">
               {TIME_CONTROL_CATEGORIES.map((category) => (
                 <fieldset className="time-control-group" key={category}>
-                  <legend>{category}</legend>
+                  <legend>{t(`common.timeCategories.${category.toLowerCase()}`)}</legend>
 
                   <div className="setup-options time-options">
                     {TIME_CONTROL_OPTIONS.filter(
@@ -112,7 +109,7 @@ function PlaySetupPage() {
 
           <div className="setup-card setup-secondary">
             <fieldset className="setup-section">
-              <legend>Play As</legend>
+              <legend>{t("setup.playAs")}</legend>
               <div className="setup-options two-options">
                 {(["white", "black"] as const).map((color) => (
                   <label className="setup-radio" key={color}>
@@ -123,23 +120,23 @@ function PlaySetupPage() {
                       type="radio"
                       value={color}
                     />
-                    <span>{color}</span>
+                    <span>{t(`common.colors.${color}`)}</span>
                   </label>
                 ))}
               </div>
             </fieldset>
 
             <section aria-labelledby="opponent-heading" className="setup-section">
-              <h2 id="opponent-heading">Opponent</h2>
+              <h2 id="opponent-heading">{t("setup.opponent")}</h2>
               <div className="setup-options three-options">
-                <button aria-pressed="true" className="setup-choice selected" type="button">Bot</button>
-                <button className="setup-choice" disabled type="button">Local<ComingSoon /></button>
-                <button className="setup-choice" disabled type="button">Online<ComingSoon /></button>
+                <button aria-pressed="true" className="setup-choice selected" type="button">{t("setup.bot")}</button>
+                <button className="setup-choice" disabled type="button">{t("setup.local")}<ComingSoon /></button>
+                <button className="setup-choice" disabled type="button">{t("setup.online")}<ComingSoon /></button>
               </div>
             </section>
 
             <fieldset className="setup-section">
-              <legend>Bot Difficulty</legend>
+              <legend>{t("setup.difficulty")}</legend>
               <div className="setup-options difficulty-options">
                 {BOT_DIFFICULTY_OPTIONS.map((option) => (
                   <label
@@ -154,10 +151,10 @@ function PlaySetupPage() {
                       value={option.value}
                     />
                     <span className="difficulty-card">
-                      <strong>{option.label}</strong>
-                      <small>{option.description}</small>
+                      <strong>{t(`common.difficulties.${option.value}`)}</strong>
+                      <small>{t(`setup.descriptions.${option.value}`)}</small>
                       <span aria-hidden="true" className="difficulty-selected">
-                        Selected
+                        {t("common.status.selected")}
                       </span>
                     </span>
                   </label>
@@ -166,7 +163,7 @@ function PlaySetupPage() {
             </fieldset>
 
             <section aria-labelledby="piece-set-heading" className="setup-section">
-              <h2 id="piece-set-heading">Piece Set</h2>
+              <h2 id="piece-set-heading">{t("setup.pieceSet")}</h2>
               <div className="setup-options three-options">
                 {SELECTABLE_PIECE_SETS.map((set) => (
                   <button
@@ -178,14 +175,14 @@ function PlaySetupPage() {
                     onClick={() => setPieceSet(set.id)}
                     type="button"
                   >
-                    {set.displayName}
+                    {t(`common.pieceSets.${set.id}`)}
                   </button>
                 ))}
               </div>
             </section>
 
             <section aria-labelledby="board-theme-heading" className="setup-section">
-              <h2 id="board-theme-heading">Board Theme</h2>
+              <h2 id="board-theme-heading">{t("setup.boardTheme")}</h2>
               <div className="setup-options board-theme-options">
                 {SELECTABLE_BOARD_THEMES.map((theme) => (
                   <button
@@ -205,7 +202,7 @@ function PlaySetupPage() {
                       <i />
                       <i />
                     </span>
-                    {theme.label}
+                    {t(`common.boardThemes.${theme.id}`)}
                   </button>
                 ))}
               </div>
@@ -214,8 +211,8 @@ function PlaySetupPage() {
         </div>
 
         <div className="play-setup-actions">
-          <button className="setup-action primary" onClick={startGame} type="button">Start Game</button>
-          <button className="setup-action secondary" onClick={() => navigate("/")} type="button">Back</button>
+          <button className="setup-action primary" onClick={startGame} type="button">{t("common.actions.startGame")}</button>
+          <button className="setup-action secondary" onClick={() => navigate("/")} type="button">{t("common.actions.back")}</button>
         </div>
       </div>
     </main>

@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useEffect } from "react";
 import blackKnightUrl from "../assets/pieces/gold/black-knight.png";
 import whiteKingUrl from "../assets/pieces/gold/white-king.png";
 import whiteQueenUrl from "../assets/pieces/gold/white-queen.png";
@@ -7,6 +9,8 @@ import "../styles/HomePage.css";
 
 function HomePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  useEffect(() => { document.title = t("home.browserTitle"); }, [t]);
 
   return (
     <main className="home">
@@ -17,25 +21,22 @@ function HomePage() {
         <section aria-labelledby="home-title" className="home-brand">
           <p className="home-eyebrow">
             <span aria-hidden="true" />
-            Strategy meets chance
+            {t("home.eyebrow")}
           </p>
           <h1 id="home-title">
             <span>Roulette</span>
             <strong>Chess</strong>
           </h1>
-          <p className="home-tagline">Spin the pieces. Rewrite the board.</p>
-          <p className="home-summary">
-            Every turn deals three pieces. Read the position, play your rights,
-            and capture the king.
-          </p>
+          <p className="home-tagline">{t("home.tagline")}</p>
+          <p className="home-summary">{t("home.summary")}</p>
 
-          <nav aria-label="Main menu" className="home-actions">
+          <nav aria-label={t("common.navigation.mainMenu")} className="home-actions">
             <button
               className="home-action home-action-primary"
               onClick={() => navigate("/play")}
               type="button"
             >
-              <span>Play</span>
+              <span>{t("common.actions.play")}</span>
               <span aria-hidden="true" className="home-action-arrow">→</span>
             </button>
             <button
@@ -43,7 +44,7 @@ function HomePage() {
               onClick={() => navigate("/settings")}
               type="button"
             >
-              Settings
+              {t("home.settings")}
             </button>
             <button
               className="home-tertiary-link"
@@ -58,7 +59,7 @@ function HomePage() {
                 <circle cx="12" cy="8" r="3.25" />
                 <path d="M5.75 19c.6-3.45 2.68-5.25 6.25-5.25s5.65 1.8 6.25 5.25" />
               </svg>
-              Profile
+              {t("home.profile")}
             </button>
             <button
               className="home-tertiary-link"
@@ -69,13 +70,13 @@ function HomePage() {
                 <path d="M4.5 5.5A2.5 2.5 0 0 1 7 3h4a2 2 0 0 1 2 2v16a2 2 0 0 0-2-2H7a2.5 2.5 0 0 0-2.5 2.5v-16Z" />
                 <path d="M19.5 5.5A2.5 2.5 0 0 0 17 3h-4v18a2 2 0 0 1 2-2h2a2.5 2.5 0 0 1 2.5 2.5v-16Z" />
               </svg>
-              How to Play
+              {t("home.howToPlay")}
             </button>
           </nav>
         </section>
 
         <section
-          aria-label="Roulette machine with Gold and Obsidian chess pieces"
+          aria-label={t("home.heroLabel")}
           className="home-hero"
         >
           <div aria-hidden="true" className="home-hero-halo" />
@@ -114,7 +115,7 @@ function HomePage() {
 
           <p className="home-hero-caption">
             <span aria-hidden="true">◆</span>
-            Three pieces. One turn. Every move matters.
+            {t("home.caption")}
           </p>
         </section>
       </div>

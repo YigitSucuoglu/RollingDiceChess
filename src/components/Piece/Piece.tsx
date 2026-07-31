@@ -3,6 +3,7 @@ import type { Piece as ChessPiece } from "../../types/Chess";
 import type { PieceSet } from "../../types/PieceSet";
 import { resolvePieceVisual } from "../../config/pieceSets";
 import "./Piece.css";
+import { useTranslation } from "react-i18next";
 
 interface PieceProps {
   piece: ChessPiece;
@@ -16,6 +17,7 @@ type PieceStyle = CSSProperties & {
 };
 
 function Piece({ piece, pieceSet }: PieceProps) {
+  const { t } = useTranslation();
   const visual = resolvePieceVisual({
     context: "board",
     pieceColor: piece.color,
@@ -32,7 +34,7 @@ function Piece({ piece, pieceSet }: PieceProps) {
 
     return (
       <img
-        alt={`${piece.color === "white" ? "White" : "Black"} ${visual.label}`}
+        alt={`${t(`common.colors.${piece.color}`)} ${t(`common.pieces.${piece.type}`)}`}
         className="piece piece-image"
         src={visual.src}
         style={pieceStyle}

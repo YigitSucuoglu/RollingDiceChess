@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.9.3
+v0.10.0
 
 ---
 
@@ -39,9 +39,10 @@ v0.9.3
 - CLOCK-01B — Dual Clock UI & Full Game Integration
 
 ### UI
-- SETTINGS-01 — Add premium settings page
-- GAME-UX-01 — Center turn-skipped feedback and add animated result XP progression
 - PROFILE-01 — Add offline player profile, statistics, XP progression and profile page
+- SETTINGS-01 — Add premium settings page
+- I18N-01 — Add English and Turkish localization support
+- GAME-UX-01 — Center turn-skipped feedback and add animated result XP progression
 - HELP-01 — Add comprehensive How to Play guide
 - LEVER-01 — Integrate new slot machine and static lever assets
 - HOME-01 — Redesign Home Screen and rebrand product as RouletteChess, including hero asset cleanup, caption cleanup, lever positioning, and profile hierarchy polish
@@ -80,9 +81,10 @@ v0.9.3
 ## Current Sprint
 
 Completed:
-- SETTINGS-01 — Add premium settings page
-- GAME-UX-01 — Center turn-skipped feedback and add animated result XP progression
 - PROFILE-01 — Add offline player profile, statistics, XP progression and profile page
+- SETTINGS-01 — Add premium settings page
+- I18N-01 — Add English and Turkish localization support
+- GAME-UX-01 — Center turn-skipped feedback and add animated result XP progression
 - HELP-01 — Add comprehensive How to Play guide
 - LEVER-01 — Integrate new slot machine and static lever assets
 - HOME-01 — Redesign Home Screen and rebrand product as RouletteChess, including hero asset cleanup, caption cleanup, lever positioning, and profile hierarchy polish
@@ -95,10 +97,10 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. I18N-01 — Add Turkish language support
+1. Planning
 
 Roadmap:
-- I18N-01 — Add Turkish language support
+- TO BE DECIDED
 
 Backlog:
 - SOUND-01B — Replace and balance production sound assets
@@ -140,6 +142,7 @@ Backlog:
 - Offline profile data is versioned behind a repository/service boundary; gameplay emits domain events and Profile UI renders a prepared view model.
 - Result UI receives idempotent pre/post-match XP snapshots and service-generated animation segments; turn-skipped feedback is anchored to the board center.
 - Settings exposes only working Sound Effects, language preference, and repository-backed offline profile reset controls.
+- English is the source and fallback locale; Turkish can be selected instantly and persists through the existing settings repository.
 
 
 ## Future UI Polish

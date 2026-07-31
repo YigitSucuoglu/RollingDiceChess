@@ -18,6 +18,8 @@ import {
   createMatchXpProgressionResult,
   calculateXpReward,
   resolvePlayerTitle,
+  resolvePlayerTitleId,
+  type PlayerTitleId,
   type MatchXpProgressionResult,
   type XpRewardBreakdown,
 } from "./ProfileProgression";
@@ -31,18 +33,23 @@ export interface PlayerProfileViewModel {
   readonly progression: {
     readonly level: number;
     readonly title: string;
+    readonly titleId: PlayerTitleId;
     readonly currentLevelXp: number;
     readonly requiredXp: number;
     readonly progressPercent: number;
   };
   readonly generalStats: readonly {
     readonly label: string;
+    readonly id: string;
     readonly value: string;
   }[];
   readonly rouletteStats: {
     readonly mostRolledPiece: string;
     readonly mostPlayedPiece: string;
     readonly mostSuccessfulPiece: string;
+    readonly mostRolledPieceType: PieceType | null;
+    readonly mostPlayedPieceType: PieceType | null;
+    readonly mostSuccessfulPieceType: PieceType | null;
     readonly threeRightsUsedLabel: string;
     readonly triplePawnRolls: number;
     readonly tripleKnightRolls: number;
@@ -80,26 +87,20 @@ function createMatchId(): string {
   return `match-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function formatPercentage(value: number): string {
-  const percentage = Math.max(0, value * 100);
-  const rounded =
-    Math.abs(percentage - Math.round(percentage)) < 0.05
-      ? Math.round(percentage).toString()
-      : percentage.toFixed(1);
-
-  return `${rounded}%`;
+function formatPercentage(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 1 }).format(Math.max(0, value));
 }
 
-function formatPlayTime(totalSeconds: number): string {
+function formatPlayTime(totalSeconds: number, language: "en" | "tr"): string {
   const minutes = Math.floor(Math.max(0, totalSeconds) / 60);
 
-  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 60) return language === "tr" ? `${minutes} dk` : `${minutes}m`;
 
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ${minutes % 60}m`;
+  if (hours < 24) return language === "tr" ? `${hours} sa ${minutes % 60} dk` : `${hours}h ${minutes % 60}m`;
 
   const days = Math.floor(hours / 24);
-  return `${days}d ${hours % 24}h`;
+  return language === "tr" ? `${days} gün ${hours % 24} sa` : `${days}d ${hours % 24}h`;
 }
 
 function resolveMostFrequent(counters: PieceCounters): PieceType | null {
@@ -141,7 +142,7 @@ export class PlayerProfileService {
     return this.getViewModel();
   }
 
-  public getViewModel(): PlayerProfileViewModel {
+  public getViewModel(language: "en" | "tr" = "en"): PlayerProfileViewModel {
     const profile = this.repository.getProfile();
     const stats = profile.statistics;
     const progression = calculateLevelProgression(profile.totalXp);
@@ -151,62 +152,71 @@ export class PlayerProfileService {
       .map((part) => part.charAt(0).toUpperCase())
       .join("");
 
+    const locale = language === "tr" ? "tr-TR" : "en-US";
+    const number = (value: number) => new Intl.NumberFormat(locale).format(value);
+    const mostRolledPieceType = resolveMostFrequent(stats.rollsByPiece);
+    const mostPlayedPieceType = resolveMostFrequent(stats.movesByPiece);
+    const mostSuccessfulPieceType = resolveMostFrequent(stats.capturesByPiece);
     return {
       displayName: profile.displayName,
       monogram: monogram || "P",
-      joinedLabel: new Intl.DateTimeFormat("en-US", {
+      joinedLabel: new Intl.DateTimeFormat(locale, {
         month: "long",
         year: "numeric",
       }).format(new Date(profile.createdAt)),
       progression: {
         ...progression,
         title: resolvePlayerTitle(progression.level),
+        titleId: resolvePlayerTitleId(progression.level),
       },
       generalStats: [
-        { label: "Games Played", value: stats.gamesPlayed.toString() },
-        { label: "Wins", value: stats.wins.toString() },
-        { label: "Losses", value: stats.losses.toString() },
+        { id: "gamesPlayed", label: "Games Played", value: number(stats.gamesPlayed) },
+        { id: "wins", label: "Wins", value: number(stats.wins) },
+        { id: "losses", label: "Losses", value: number(stats.losses) },
         {
-          label: "Win Rate",
+          id: "winRate", label: "Win Rate",
           value: formatPercentage(
-            stats.gamesPlayed > 0 ? stats.wins / stats.gamesPlayed : 0
+            stats.gamesPlayed > 0 ? stats.wins / stats.gamesPlayed : 0, locale
           ),
         },
         {
-          label: "Current Win Streak",
-          value: stats.currentWinStreak.toString(),
+          id: "currentWinStreak", label: "Current Win Streak",
+          value: number(stats.currentWinStreak),
         },
         {
-          label: "Best Win Streak",
-          value: stats.bestWinStreak.toString(),
+          id: "bestWinStreak", label: "Best Win Streak",
+          value: number(stats.bestWinStreak),
         },
         {
-          label: "Total Play Time",
-          value: formatPlayTime(stats.totalPlayTimeSeconds),
+          id: "totalPlayTime", label: "Total Play Time",
+          value: formatPlayTime(stats.totalPlayTimeSeconds, language),
         },
         {
-          label: "Kings Captured",
-          value: stats.kingsCaptured.toString(),
+          id: "kingsCaptured", label: "Kings Captured",
+          value: number(stats.kingsCaptured),
         },
         {
-          label: "Roulette Rolls",
-          value: stats.rouletteRolls.toString(),
+          id: "rouletteRolls", label: "Roulette Rolls",
+          value: number(stats.rouletteRolls),
         },
       ],
       rouletteStats: {
         mostRolledPiece: formatPiece(
-          resolveMostFrequent(stats.rollsByPiece)
+          mostRolledPieceType
         ),
         mostPlayedPiece: formatPiece(
-          resolveMostFrequent(stats.movesByPiece)
+          mostPlayedPieceType
         ),
         mostSuccessfulPiece: formatPiece(
-          resolveMostFrequent(stats.capturesByPiece)
+          mostSuccessfulPieceType
         ),
+        mostRolledPieceType,
+        mostPlayedPieceType,
+        mostSuccessfulPieceType,
         threeRightsUsedLabel: formatPercentage(
           stats.playerTurnsCompleted > 0
             ? stats.threeRightsTurns / stats.playerTurnsCompleted
-            : 0
+            : 0, locale
         ),
         triplePawnRolls: stats.triplePawnRolls,
         tripleKnightRolls: stats.tripleKnightRolls,

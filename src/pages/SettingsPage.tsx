@@ -7,6 +7,7 @@ import {
   type MouseEvent,
 } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import appSettingsService, {
   type AppSettingsViewModel,
 } from "../settings/AppSettingsService";
@@ -14,6 +15,7 @@ import type { AppLanguage } from "../settings/AppSettings";
 import "../styles/SettingsPage.css";
 
 function SettingsPage() {
+  const { t } = useTranslation();
   const [settings, setSettings] = useState<AppSettingsViewModel>(() =>
     appSettingsService.getViewModel()
   );
@@ -24,13 +26,13 @@ function SettingsPage() {
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "Settings | RouletteChess";
+    document.title = t("settings.browserTitle");
     window.scrollTo({ left: 0, top: 0, behavior: "auto" });
 
     return () => {
       document.title = previousTitle;
     };
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (isResetDialogOpen) {
@@ -54,7 +56,7 @@ function SettingsPage() {
 
   const confirmReset = () => {
     appSettingsService.resetOfflineProfile();
-    setResetStatus("Offline profile reset complete.");
+    setResetStatus(t("settings.resetComplete"));
     closeResetDialog();
   };
 
@@ -99,18 +101,18 @@ function SettingsPage() {
         className="settings-shell"
         inert={isResetDialogOpen || undefined}
       >
-        <nav aria-label="Settings navigation" className="settings-nav">
+        <nav aria-label={t("common.navigation.settings")} className="settings-nav">
           <Link className="settings-brand" to="/">RouletteChess</Link>
           <Link className="settings-back-link" to="/">
             <span aria-hidden="true">←</span>
-            Back to Home
+            {t("common.actions.backToHome")}
           </Link>
         </nav>
 
         <header className="settings-heading">
-          <p>Experience controls</p>
-          <h1>Settings</h1>
-          <span>Configure your RouletteChess experience.</span>
+          <p>{t("settings.eyebrow")}</p>
+          <h1>{t("settings.title")}</h1>
+          <span>{t("settings.description")}</span>
         </header>
 
         <div className="settings-sections">
@@ -123,26 +125,26 @@ function SettingsPage() {
                 </svg>
               </span>
               <div>
-                <p>Sound controls</p>
-                <h2 id="audio-settings-title">Audio</h2>
+                <p>{t("settings.soundControls")}</p>
+                <h2 id="audio-settings-title">{t("settings.audio")}</h2>
               </div>
             </header>
 
             <div className="settings-row">
               <div>
-                <h3>Sound Effects</h3>
-                <p>Moves, roulette, alerts, and game results.</p>
+                <h3>{t("settings.soundEffects")}</h3>
+                <p>{t("settings.soundDescription")}</p>
               </div>
               <button
                 aria-checked={settings.soundEnabled}
-                aria-label="Sound effects"
+                aria-label={t("settings.soundLabel")}
                 className="settings-switch"
                 onClick={toggleSound}
                 role="switch"
                 type="button"
               >
                 <span aria-hidden="true" />
-                <strong>{settings.soundEnabled ? "On" : "Off"}</strong>
+                <strong>{t(settings.soundEnabled ? "common.status.on" : "common.status.off")}</strong>
               </button>
             </div>
           </section>
@@ -156,15 +158,15 @@ function SettingsPage() {
                 </svg>
               </span>
               <div>
-                <p>Display language</p>
-                <h2 id="language-settings-title">Language</h2>
+                <p>{t("settings.displayLanguage")}</p>
+                <h2 id="language-settings-title">{t("settings.language")}</h2>
               </div>
             </header>
 
             <div className="settings-row settings-language-row">
               <div>
-                <label htmlFor="settings-language">Language</label>
-                <p>Translation support will follow this preference.</p>
+                <label htmlFor="settings-language">{t("settings.language")}</label>
+                <p>{t("settings.languageDescription")}</p>
               </div>
               <div className="settings-select-wrap">
                 <select
@@ -189,15 +191,15 @@ function SettingsPage() {
                 </svg>
               </span>
               <div>
-                <p>Local player data</p>
-                <h2 id="data-settings-title">Data</h2>
+                <p>{t("settings.localPlayerData")}</p>
+                <h2 id="data-settings-title">{t("settings.data")}</h2>
               </div>
             </header>
 
             <div className="settings-row settings-reset-row">
               <div>
-                <h3>Reset Offline Profile</h3>
-                <p>Erase local XP, progression, and all statistics.</p>
+                <h3>{t("settings.resetOfflineProfile")}</h3>
+                <p>{t("settings.resetDescription")}</p>
               </div>
               <button
                 className="settings-reset-button"
@@ -207,7 +209,7 @@ function SettingsPage() {
                 }}
                 type="button"
               >
-                Reset Profile
+                {t("common.actions.resetProfile")}
               </button>
             </div>
             <p aria-live="polite" className="settings-reset-status">
@@ -231,10 +233,10 @@ function SettingsPage() {
             ref={resetDialogRef}
             role="dialog"
           >
-            <p>Confirm reset</p>
-            <h2 id="reset-profile-title">Reset Offline Profile?</h2>
+            <p>{t("settings.dialog.eyebrow")}</p>
+            <h2 id="reset-profile-title">{t("settings.dialog.title")}</h2>
             <span id="reset-profile-description">
-              All local XP, progression, and statistics will be erased. This action cannot be undone.
+              {t("settings.dialog.description")}
             </span>
             <div className="settings-dialog-actions">
               <button
@@ -243,10 +245,10 @@ function SettingsPage() {
                 ref={cancelResetRef}
                 type="button"
               >
-                Cancel
+                {t("common.actions.cancel")}
               </button>
               <button className="danger" onClick={confirmReset} type="button">
-                Reset
+                {t("common.actions.reset")}
               </button>
             </div>
           </div>

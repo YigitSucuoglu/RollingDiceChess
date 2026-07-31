@@ -1,0 +1,75 @@
+{
+  "common": {
+    "actions": { "play": "Oyna", "playAgain": "Tekrar oyna", "mainMenu": "Ana menü", "back": "Geri", "backToHome": "Ana Menüye Dön", "cancel": "İptal", "reset": "Sıfırla", "resetProfile": "Profili Sıfırla", "startGame": "Oyunu Başlat", "roll": "ÇEVİR" },
+    "colors": { "white": "Beyaz", "black": "Siyah" },
+    "pieces": { "pawn": "Piyon", "knight": "At", "bishop": "Fil", "rook": "Kale", "queen": "Vezir", "king": "Şah" },
+    "difficulties": { "easy": "Kolay", "medium": "Orta", "hard": "Zor" },
+    "pieceSets": { "gold": "Altın", "classic": "Klasik", "retro": "Retro" },
+    "boardThemes": { "wood": "Ahşap", "marble": "Mermer", "dark": "Koyu" },
+    "timeCategories": { "bullet": "Mermi", "blitz": "Yıldırım", "rapid": "Hızlı", "classical": "Klasik" },
+    "navigation": { "mainMenu": "Ana menü", "profile": "Profil navigasyonu", "settings": "Ayarlar navigasyonu", "howToPlay": "Nasıl Oynanır navigasyonu" },
+    "status": { "comingSoon": "Yakında", "selected": "Seçildi", "on": "Açık", "off": "Kapalı" },
+    "level": "Seviye {{level}}",
+    "xpValue": "{{current}} / {{required}} XP"
+  },
+  "titles": { "novice": "Acemi", "apprentice": "Çırak", "strategist": "Stratejist", "mastermind": "Oyun Ustası", "grandmaster": "Büyük Usta", "legend": "Efsane", "rouletteMaster": "Rulet Ustası" },
+  "home": {
+    "browserTitle": "RouletteChess", "eyebrow": "Strateji şansla buluşuyor", "tagline": "Taşları çevir. Tahtayı yeniden yaz.",
+    "summary": "Her tur üç taş türü getirir. Konumu oku, haklarını kullan ve rakip şahı yakala.",
+    "settings": "Ayarlar", "profile": "Profil", "howToPlay": "Nasıl Oynanır",
+    "heroLabel": "Altın ve Obsidyen satranç taşları bulunan rulet makinesi", "caption": "Üç taş. Bir tur. Her hamle önemli."
+  },
+  "setup": {
+    "title": "Oyun Ayarları", "timeControl": "Süre Kontrolü", "playAs": "Tarafın", "opponent": "Rakip", "bot": "Bot", "local": "Yerel", "online": "Çevrimiçi", "difficulty": "Bot Zorluğu", "pieceSet": "Taş Seti", "boardTheme": "Tahta Teması",
+    "descriptions": { "easy": "Rastgele yasal hamleler", "medium": "Taktik hamle seçimleri", "hard": "Tüm turu planlar" },
+    "browserTitle": "Oyna | RouletteChess"
+  },
+  "game": {
+    "toMove": "Hamle sırası {{color}}da", "turnSkipped": "Oynanabilir taş yok — Tur atlandı", "muteSound": "Sesi kapat", "enableSound": "Sesi aç", "openHistory": "Hamle geçmişini aç", "closeHistory": "Hamle geçmişini kapat",
+    "clockPlayer": "{{color}} · Sen", "clockBot": "{{color}} · Bot", "you": "Sen", "clockAria": "{{color}} oyuncu saati: {{minutes}} dakika {{seconds}} saniye", "history": "Hamle Geçmişi", "historyEmpty": "Henüz hamle yok", "historyAria": "Hamle geçmişi turları", "movesInTurn": "{{turn}}. turdaki {{color}} hamleleri", "reelSpinning": "{{reel}}. rulet dönüyor", "reelResult": "{{reel}}. rulet: {{piece}}"
+  },
+  "result": {
+    "gameOver": "Oyun bitti", "wins": "{{color}} kazandı", "kingCaptured": "Şah yakalandı", "timeout": "{{color}}ın süresi doldu", "experienceEarned": "Kazanılan deneyim", "progressToward": "Seviye {{level}} için XP ilerlemesi", "nextLevel": "Sonraki seviye", "levelUp": "Seviye atlandı"
+  },
+  "profile": {
+    "browserTitle": "Profil | RouletteChess", "eyebrow": "Çevrimdışı oyuncu merkezi", "title": "Profil", "player": "Oyuncu", "joined": "Katılım: {{date}}", "levelProgress": "Seviye ilerlemesi", "progressLabel": "Seviye {{level}} deneyim ilerlemesi",
+    "careerOverview": "Kariyer özeti", "generalStatistics": "Genel İstatistikler", "rouletteSignature": "Rulet imzan", "rouletteStatistics": "RouletteChess İstatistikleri",
+    "stats": { "gamesPlayed": "Oynanan Maç", "wins": "Galibiyet", "losses": "Mağlubiyet", "winRate": "Galibiyet Oranı", "currentWinStreak": "Mevcut Galibiyet Serisi", "bestWinStreak": "En İyi Galibiyet Serisi", "totalPlayTime": "Toplam Oyun Süresi", "kingsCaptured": "Yakalanan Şahlar", "rouletteRolls": "Rulet Çevirmeleri", "mostRolledPiece": "En Çok Gelen Taş", "mostPlayedPiece": "En Çok Oynanan Taş", "mostSuccessfulPiece": "En Başarılı Taş", "threeRightsUsed": "Üç Hakkın Kullanımı", "triplePawnRolls": "Üçlü Piyon", "tripleKnightRolls": "Üçlü At", "tripleQueenRolls": "Üçlü Vezir" },
+    "futureMilestones": "Gelecek hedefler", "achievements": "Başarımlar", "achievementNames": { "firstVictory": "İlk Zafer", "hundredGames": "100 Maç", "captureHundredKings": "100 Şah Yakala", "tripleQueenRoll": "Üçlü Vezir" },
+    "localDataNote": "Çevrimdışı profil verileri bu cihazda saklanır."
+  },
+  "settings": {
+    "browserTitle": "Ayarlar | RouletteChess", "eyebrow": "Deneyim kontrolleri", "title": "Ayarlar", "description": "RouletteChess deneyimini yapılandır.",
+    "soundControls": "Ses kontrolleri", "audio": "Ses", "soundEffects": "Ses Efektleri", "soundDescription": "Hamle, rulet, uyarı ve oyun sonucu sesleri.", "soundLabel": "Ses efektleri",
+    "displayLanguage": "Görüntüleme dili", "language": "Dil", "languageDescription": "Uygulama genelinde kullanılacak dili seçin.",
+    "localPlayerData": "Yerel oyuncu verileri", "data": "Veriler", "resetOfflineProfile": "Çevrimdışı Profili Sıfırla", "resetDescription": "Yerel XP, ilerleme ve tüm istatistikleri sil.", "resetComplete": "Çevrimdışı profil sıfırlandı.",
+    "dialog": { "eyebrow": "Sıfırlamayı onayla", "title": "Çevrimdışı Profil Sıfırlansın mı?", "description": "XP'niz, ilerlemeniz ve tüm çevrimdışı istatistikleriniz kalıcı olarak silinecek. Bu işlem geri alınamaz." },
+    "languageChanged": "Dil Türkçe olarak değiştirildi."
+  },
+  "guide": {
+    "browserTitle": "Nasıl Oynanır | RouletteChess", "eyebrow": "Kurallar ve strateji", "title": "Nasıl Oynanır", "intro": "RouletteChess kurallarını, hareket haklarını ve rakip şahı nasıl yakalayacağını öğren.", "startHere": "Buradan başla", "fourRules": "Dört Kuralda Oyun",
+    "quick": {
+      "roll": { "title": "Üç Taş Çevir", "description": "Her tur, üç taş türünü belirleyen bir rulet çevirmesiyle başlar." },
+      "rights": { "title": "Haklarını Kullan", "description": "Her sonuç, o taş türü için bir hareket hakkı verir." },
+      "order": { "title": "Sırayı Sen Seç", "description": "Ruletteki sıra hamlelerinin sırasını belirlemez." },
+      "capture": { "title": "Şahı Yakala", "description": "Şah ve mat yoktur. Kazanmak için rakip Şahı yakala." }
+    },
+    "sections": {
+      "objective": { "eyebrow": "Kazanmak", "title": "Amaç", "p1": "Kendi Şahın yakalanmadan önce rakibin Şahını yakala. Bir oyuncu rakip Şahı yakaladığında oyun hemen biter.", "p2": "Şah tehdit altındaki bir karede kalabilir veya böyle bir kareye gidebilir. RouletteChess'te şah, mat veya kendi şahını tehditte bırakma kısıtlaması yoktur.", "highlight": "Şah yok. Mat yok. Rakip Şahı yakala." },
+      "starting": { "eyebrow": "Rulet", "title": "Tura Başlamak", "p1": "İnsan oyuncunun turu başladığında ÇEVİR düğmesine bas. İnsan turları otomatik çevrilmez.", "p2": "Rulet üç taş türü gösterir. Her sonuç o tur için eşleşen bir hareket hakkı verir.", "caption": "Bir At, bir Fil ve bir Piyon hamlesi." },
+      "rights": { "eyebrow": "Seçeneklerin", "title": "Hareket Hakları", "p1": "Bir turda en fazla üç hamle yapabilirsin. Eşleşen türdeki bir taşla yasal hamle yaparak hakkı kullanırsın.", "caption": "Bir yasal Kale, bir Piyon ve bir Fil hamlesi yapabilirsin.", "p2": "Haklar fiziksel taşlara değil taş türlerine aittir. Üç farklı taşı hareket ettirmek zorunda değilsin." },
+      "order": { "eyebrow": "Sıralama", "title": "Hamle Sırasını Seç", "p1": "Ruletin soldan sağa sırası hamle sırasını belirlemez. Kullanılabilir en fazla hakkı koruyan herhangi bir yasal sıralamayı seç.", "p2": "Önce bir yolu açmak sonraki Kale, Fil veya Vezir hakkını kullanılabilir hâle getirebilir." },
+      "duplicates": { "eyebrow": "Tekrarlanan haklar", "title": "Aynı Taş Türleri", "caption": "İki At hakkı ve bir Piyon hakkı.", "p1": "Aynı haklar farklı taşlarda veya ilk hamlesinden sonra tekrar yasal hareket edebilen aynı fiziksel taşta kullanılabilir.", "p2": "Piyon — Piyon — Piyon sonucu, tam sıralama yasalsa bir veya birkaç Piyonla üç Piyon hamlesine izin verebilir." },
+      "maximum": { "eyebrow": "Devam", "title": "Mümkün Olan En Fazla Hakkı Kullan", "p1": "RouletteChess yasal devamları değerlendirir ve yalnızca mevcut konumdan kullanılabilecek en fazla hakkı koruyan seçimlere izin verir.", "items": ["Üç hak kullanılabiliyorsa tur üç hamleden oluşur.", "Yalnızca iki hak kullanılabiliyorsa tur iki hamleden sonra biter.", "Yalnızca bir hak kullanılabiliyorsa tur o hamleden sonra biter.", "Hiçbir hak kullanılamıyorsa tur atlanır."] },
+      "noMoves": { "eyebrow": "Otomatik pas", "title": "Yasal Hamle Olmadığında", "p1": "Gelen taş türlerinin hiçbiri yasal hamle yapamıyorsa tur otomatik atlanmadan önce sonuç yine gösterilir.", "p2": "Bir veya iki hak kullanılabiliyorsa bu hamleleri oyna. Kalan hiçbir hak yasal olarak kullanılamadığında tur biter.", "highlight": "Kullanılamayan hak yalnızca atlanır; oyunu kaybettirmez." },
+      "movement": { "eyebrow": "Tahta", "title": "Satranç Taşlarının Hareketi", "intro": "Taşlar şah tehdidi kısıtlamaları olmadan bilinen hareket düzenlerini kullanır.", "pawn": "İleri gider ve çapraz yakalar. Başlangıç konumundan iki kare ilerleyebilir.", "knight": "L şeklinde hareket eder ve diğer taşların üzerinden atlayabilir.", "bishop": "Açık çaprazlarda istediği kadar kare ilerler.", "rook": "Yatay veya dikey açık hatlarda istediği kadar kare ilerler.", "queen": "Yatay, dikey veya çapraz açık hatlarda hareket eder.", "king": "Her yönde bir kare hareket eder. Tehdit altındaki kare kısıtlaması uygulanmaz." },
+      "special": { "eyebrow": "İleri kurallar", "title": "Özel Hamleler", "castling": "Rok", "castlingText": "Rok için hareket etmemiş bir Şah, aynı renkte hareket etmemiş bir Kale, aralarında boş bir yol ve kullanılabilir Şah hakkı gerekir. Tehdit ve şah kısıtlamaları uygulanmaz. Rok yalnızca Şah hakkını tüketir.", "enPassant": "Geçerken Alma", "enPassantText": "Bir Piyon, rakip Piyonun uygun iki karelik hamlesinden hemen sonra geçerken alabilir. Fırsat, aynı RouletteChess turunda olsa bile sonraki bireysel hamleden sonra sona erer.", "promotion": "Terfi", "promotionText": "Son yataya ulaşan Piyon otomatik olarak Vezire terfi eder. Terfi hamlesi Piyon hakkını harcar; yeni Vezir yalnızca sonraki bir Vezir hakkını kullanabilir." },
+      "victory": { "eyebrow": "Zafer", "title": "Şahı Yakalama ve Zafer", "p1": "Şah uyarısı, mat konumu veya kendi şahını tehditte bırakma kısıtlaması yoktur. Şah tehlikeye gidebilir, tehdit altında kalabilir veya hamle diğer yönlerden yasalsa korunan bir taşı alabilir.", "highlight": "Rakip Şahı yakalamak oyunu hemen bitirir." },
+      "clock": { "eyebrow": "Süre kontrolü", "title": "Satranç Saati", "p1": "Turda en az bir oynanabilir hamle varsa saat rulet sonucu gösterildikten sonra başlar. Rulet animasyonu süreye dahil değildir.", "p2": "Hakları değerlendirirken, sıralarını seçerken ve hamleleri tamamlarken saatin çalışır. Tur bitince seçili ek süre eklenir; rakibin saati ruleti çözüldükten sonra başlayabilir.", "p3": "Yasal hamlesi olmayan tur saati başlamadan atlanır. Çalışan saat sıfıra ulaşırsa o oyuncu kaybeder." },
+      "customization": { "eyebrow": "Görünüm", "title": "Özelleştirme", "pieceSet": "Taş Seti", "pieceText": "Tahta taşlarını, rulet sembollerini ve sonuç ekranı taşlarını değiştirir. Altın, Klasik ve Retro setleri kullanılabilir.", "boardTheme": "Tahta Teması", "boardText": "Tahta karelerini, koordinatları, çerçeveyi ve yüzey stilini değiştirir. Ahşap, Mermer ve Koyu temaları kullanılabilir.", "highlight": "Özelleştirme oyun kurallarını değiştirmez." },
+      "example": { "eyebrow": "Hepsini birleştir", "title": "Tam Tur Örneği", "steps": ["Bir hattı açmak için Piyon oyna.", "Yeni açılan hattan Kaleyi hareket ettir.", "Kalan Piyon hakkıyla bir Piyon hamlesi yap."], "p": "İkinci Piyon hamlesi ilk iki hamleden sonra artık yasal değilse tur Kale ve Piyon hakları kullanıldıktan sonra bitebilir. Kesin sıralama her zaman tahtaya bağlıdır." }
+    },
+    "rememberEyebrow": "Hızlı başvuru", "remember": "Unutma", "reminders": ["Turunun başında üç taş türü çevir.", "Her sonuç bir hareket hakkı verir.", "Hamle sırası senin seçimin.", "Aynı sonuçlar aynı haktan birden fazla verir.", "Mümkün olan en fazla yasal hakkı kullan.", "Bir tur üçten az hamle içerebilir.", "Yasal hamle yoksa tur atlanır.", "Şah veya mat yoktur.", "Kazanmak için rakip Şahı yakala.", "Sürenin bitmesi oyunu kaybettirir."],
+    "ready": "Tahtayı yeniden yazmaya hazır mısın?", "footer": "Taşlarını çevir. Sıralamayı planla.", "rouletteResult": "Rulet sonucu: {{pieces}}"
+  }
+}

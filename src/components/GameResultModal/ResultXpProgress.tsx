@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MatchXpProgressionResult } from "../../profile/ProfileProgression";
+import type { PlayerTitleId } from "../../profile/ProfileProgression";
+import { useTranslation } from "react-i18next";
 
 interface ResultXpProgressProps {
   progression: MatchXpProgressionResult;
@@ -7,7 +9,7 @@ interface ResultXpProgressProps {
 
 interface DisplayProgress {
   level: number;
-  title: string;
+  titleId: PlayerTitleId;
   xp: number;
   requiredXp: number;
   isLevelTransition: boolean;
@@ -25,7 +27,7 @@ function createFinalDisplay(
 ): DisplayProgress {
   return {
     level: progression.current.level,
-    title: progression.current.title,
+    titleId: progression.current.titleId,
     xp: progression.current.currentLevelXp,
     requiredXp: progression.current.requiredXp,
     isLevelTransition: progression.leveledUp,
@@ -33,6 +35,7 @@ function createFinalDisplay(
 }
 
 function ResultXpProgress({ progression }: ResultXpProgressProps) {
+  const { t } = useTranslation();
   const firstSegment = progression.segments[0];
   const prefersReducedMotion =
     typeof window !== "undefined" &&
@@ -42,7 +45,7 @@ function ResultXpProgress({ progression }: ResultXpProgressProps) {
       ? createFinalDisplay(progression)
       : {
           level: firstSegment.level,
-          title: firstSegment.title,
+          titleId: firstSegment.titleId,
           xp: firstSegment.fromXp,
           requiredXp: firstSegment.requiredXp,
           isLevelTransition: false,
@@ -99,7 +102,7 @@ function ResultXpProgress({ progression }: ResultXpProgressProps) {
 
       setDisplay({
         level: segment.level,
-        title: segment.title,
+        titleId: segment.titleId,
         xp: segment.fromXp,
         requiredXp: segment.requiredXp,
         isLevelTransition: false,
@@ -162,25 +165,25 @@ function ResultXpProgress({ progression }: ResultXpProgressProps) {
   );
 
   return (
-    <section aria-label="Experience earned" className="game-result-xp">
+    <section aria-label={t("result.experienceEarned")} className="game-result-xp">
       <div aria-live="polite" className="game-result-earned-xp">
         +{progression.earnedXp} XP
       </div>
 
       <div className="game-result-level-labels">
         <div>
-          <span>Level {display.level}</span>
-          <strong>{display.title}</strong>
+          <span>{t("common.level", { level: display.level })}</span>
+          <strong>{t(`titles.${display.titleId}`)}</strong>
         </div>
         <span aria-hidden="true">→</span>
         <div>
-          <span>Level {display.level + 1}</span>
-          <strong>Next level</strong>
+          <span>{t("common.level", { level: display.level + 1 })}</span>
+          <strong>{t("result.nextLevel")}</strong>
         </div>
       </div>
 
       <div
-        aria-label={`XP progress toward Level ${progression.current.level + 1}`}
+        aria-label={t("result.progressToward", { level: progression.current.level + 1 })}
         aria-valuemax={progression.current.requiredXp}
         aria-valuemin={0}
         aria-valuenow={progression.current.currentLevelXp}
@@ -191,12 +194,12 @@ function ResultXpProgress({ progression }: ResultXpProgressProps) {
       </div>
 
       <div className="game-result-xp-meta">
-        <span>{display.xp} / {display.requiredXp} XP</span>
+        <span>{t("common.xpValue", { current: display.xp, required: display.requiredXp })}</span>
         <span
           aria-hidden={!progression.leveledUp}
           className={display.isLevelTransition ? "is-visible" : ""}
         >
-          Level up
+          {t("result.levelUp")}
         </span>
       </div>
     </section>

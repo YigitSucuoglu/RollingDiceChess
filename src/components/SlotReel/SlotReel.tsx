@@ -3,6 +3,7 @@ import { resolvePieceVisual } from "../../config/pieceSets";
 import type { PieceColor, PieceType } from "../../types/Chess";
 import type { PieceSet } from "../../types/PieceSet";
 import "./SlotReel.css";
+import { useTranslation } from "react-i18next";
 
 const REEL_REPEAT_COUNT = 3;
 
@@ -53,6 +54,7 @@ function SlotReel({
   visualTranslateXByPiece,
   visualTranslateYByPiece,
 }: SlotReelProps) {
+  const { t } = useTranslation();
   const reelSymbols = useMemo(
     () =>
       REEL_PIECE_TYPES.map((type) => ({
@@ -91,8 +93,8 @@ function SlotReel({
     <div
       aria-label={
         isSpinning
-          ? `Reel ${reelIndex + 1} spinning`
-          : `Reel ${reelIndex + 1}: ${targetPiece}`
+          ? t("game.reelSpinning", { reel: reelIndex + 1 })
+          : t("game.reelResult", { reel: reelIndex + 1, piece: t(`common.pieces.${targetPiece}`) })
       }
       className={`slot-reel reel-window reel-window-${reelIndex + 1}`}
       role="img"

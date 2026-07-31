@@ -11,6 +11,7 @@ import {
 } from "./AppSettings";
 import type { AppSettingsRepository } from "./AppSettingsRepository";
 import { LocalStorageAppSettingsRepository } from "./LocalStorageAppSettingsRepository";
+import { applyAppLanguage } from "../i18n";
 
 export interface AppSettingsViewModel {
   readonly soundEnabled: boolean;
@@ -52,6 +53,7 @@ export class AppSettingsService {
       language: normalizeAppLanguage(language),
     };
     this.repository.saveSettings(settings);
+    void applyAppLanguage(settings.language);
     return this.getViewModel();
   }
 

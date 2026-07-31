@@ -8,11 +8,14 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test:profile": "node scripts/profile-tests.cjs",
+    "test:i18n": "node scripts/i18n-tests.cjs",
     "preview": "vite preview"
   },
   "dependencies": {
+    "i18next": "^26.3.6",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-i18next": "^17.0.11",
     "react-router-dom": "^7.18.1"
   },
   "devDependencies": {

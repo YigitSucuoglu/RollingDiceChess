@@ -6,6 +6,7 @@ import type { PieceSet } from "../../types/PieceSet";
 import type { MatchXpProgressionResult } from "../../profile/ProfileProgression";
 import ResultXpProgress from "./ResultXpProgress";
 import "./GameResultModal.css";
+import { useTranslation } from "react-i18next";
 
 interface GameResultModalProps {
   endReason: GameResultReason;
@@ -30,11 +31,12 @@ function GameResultModal({
   xpProgression,
   winner,
 }: GameResultModalProps) {
+  const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   const playAgainRef = useRef<HTMLButtonElement>(null);
-  const loser = winner === "white" ? "Black" : "White";
+  const loser = winner === "white" ? "black" : "white";
   const endReasonLabel =
-    endReason === "timeout" ? `${loser} ran out of time` : "King captured";
+    endReason === "timeout" ? t("result.timeout", { color: t(`common.colors.${loser}`) }) : t("result.kingCaptured");
   const kingVisual = resolvePieceVisual({
     context: "result",
     pieceColor: winner,
@@ -82,11 +84,11 @@ function GameResultModal({
         ref={dialogRef}
         role="dialog"
       >
-        <div className="game-result-eyebrow">Game over</div>
+        <div className="game-result-eyebrow">{t("result.gameOver")}</div>
 
         {kingVisual.kind === "image" ? (
           <img
-            alt={`${winner === "white" ? "White" : "Black"} King`}
+            alt={`${t(`common.colors.${winner}`)} ${t("common.pieces.king")}`}
             className="game-result-king"
             src={kingVisual.src}
             style={
@@ -104,7 +106,7 @@ function GameResultModal({
         )}
 
         <h2 id="game-result-title">
-          {winner === "white" ? "White" : "Black"} wins
+          {t("result.wins", { color: t(`common.colors.${winner}`) })}
         </h2>
 
         <p id="game-result-reason">{endReasonLabel}</p>
@@ -118,7 +120,7 @@ function GameResultModal({
             ref={playAgainRef}
             type="button"
           >
-            Play again
+            {t("common.actions.playAgain")}
           </button>
 
           <button
@@ -126,7 +128,7 @@ function GameResultModal({
             onClick={onMainMenu}
             type="button"
           >
-            Main menu
+            {t("common.actions.mainMenu")}
           </button>
         </div>
       </div>

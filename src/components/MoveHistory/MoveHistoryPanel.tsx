@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { TurnHistory } from "../../engine/MoveHistory";
 import "./MoveHistoryPanel.css";
+import { useTranslation } from "react-i18next";
 
 interface MoveHistoryPanelProps {
   history: readonly TurnHistory[];
@@ -9,6 +10,7 @@ interface MoveHistoryPanelProps {
 const MOVE_SLOTS = [0, 1, 2] as const;
 
 function MoveHistoryPanel({ history }: MoveHistoryPanelProps) {
+  const { t } = useTranslation();
   const rowsRef = useRef<HTMLDivElement>(null);
   const moveCount = history.reduce(
     (total, turn) => total + turn.whiteMoves.length + turn.blackMoves.length,
@@ -39,24 +41,24 @@ function MoveHistoryPanel({ history }: MoveHistoryPanelProps) {
       id="move-history-panel"
     >
       <div className="move-history-header">
-        <h2 id="move-history-title">Move History</h2>
+        <h2 id="move-history-title">{t("game.history")}</h2>
       </div>
 
       <div className="move-history-columns" aria-hidden="true">
         <span />
-        <span>White</span>
-        <span>Black</span>
+        <span>{t("common.colors.white")}</span>
+        <span>{t("common.colors.black")}</span>
       </div>
 
       <div
-        aria-label="Move history turns"
+        aria-label={t("game.historyAria")}
         className="move-history-rows"
         ref={rowsRef}
         role="table"
         tabIndex={0}
       >
         {moveCount === 0 ? (
-          <div className="move-history-empty">No moves yet</div>
+          <div className="move-history-empty">{t("game.historyEmpty")}</div>
         ) : (
           history.map((turn) => (
             <div className="move-history-row" key={turn.turnNumber} role="row">
@@ -66,7 +68,7 @@ function MoveHistoryPanel({ history }: MoveHistoryPanelProps) {
               </div>
 
               <div
-                aria-label={`White moves in turn ${turn.turnNumber}`}
+                aria-label={t("game.movesInTurn", { color: t("common.colors.white"), turn: turn.turnNumber })}
                 className="move-history-moves"
                 role="cell"
               >
@@ -78,7 +80,7 @@ function MoveHistoryPanel({ history }: MoveHistoryPanelProps) {
               </div>
 
               <div
-                aria-label={`Black moves in turn ${turn.turnNumber}`}
+                aria-label={t("game.movesInTurn", { color: t("common.colors.black"), turn: turn.turnNumber })}
                 className="move-history-moves"
                 role="cell"
               >

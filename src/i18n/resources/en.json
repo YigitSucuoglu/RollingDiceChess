@@ -1,0 +1,75 @@
+{
+  "common": {
+    "actions": { "play": "Play", "playAgain": "Play again", "mainMenu": "Main menu", "back": "Back", "backToHome": "Back to Home", "cancel": "Cancel", "reset": "Reset", "resetProfile": "Reset Profile", "startGame": "Start Game", "roll": "ROLL" },
+    "colors": { "white": "White", "black": "Black" },
+    "pieces": { "pawn": "Pawn", "knight": "Knight", "bishop": "Bishop", "rook": "Rook", "queen": "Queen", "king": "King" },
+    "difficulties": { "easy": "Easy", "medium": "Medium", "hard": "Hard" },
+    "pieceSets": { "gold": "Gold", "classic": "Classic", "retro": "Retro" },
+    "boardThemes": { "wood": "Wood", "marble": "Marble", "dark": "Dark" },
+    "timeCategories": { "bullet": "Bullet", "blitz": "Blitz", "rapid": "Rapid", "classical": "Classical" },
+    "navigation": { "mainMenu": "Main menu", "profile": "Profile navigation", "settings": "Settings navigation", "howToPlay": "How to Play navigation" },
+    "status": { "comingSoon": "Coming soon", "selected": "Selected", "on": "On", "off": "Off" },
+    "level": "Level {{level}}",
+    "xpValue": "{{current}} / {{required}} XP"
+  },
+  "titles": { "novice": "Novice", "apprentice": "Apprentice", "strategist": "Strategist", "mastermind": "Mastermind", "grandmaster": "Grandmaster", "legend": "Legend", "rouletteMaster": "Roulette Master" },
+  "home": {
+    "browserTitle": "RouletteChess", "eyebrow": "Strategy meets chance", "tagline": "Spin the pieces. Rewrite the board.",
+    "summary": "Every turn deals three pieces. Read the position, play your rights, and capture the king.",
+    "settings": "Settings", "profile": "Profile", "howToPlay": "How to Play",
+    "heroLabel": "Roulette machine with Gold and Obsidian chess pieces", "caption": "Three pieces. One turn. Every move matters."
+  },
+  "setup": {
+    "title": "Play Setup", "timeControl": "Time Control", "playAs": "Play As", "opponent": "Opponent", "bot": "Bot", "local": "Local", "online": "Online", "difficulty": "Bot Difficulty", "pieceSet": "Piece Set", "boardTheme": "Board Theme",
+    "descriptions": { "easy": "Random legal moves", "medium": "Tactical move choices", "hard": "Plans the full turn" },
+    "browserTitle": "Play | RouletteChess"
+  },
+  "game": {
+    "toMove": "{{color}} to move", "turnSkipped": "No playable pieces — Turn skipped", "muteSound": "Mute sound", "enableSound": "Enable sound", "openHistory": "Open move history", "closeHistory": "Close move history",
+    "clockPlayer": "{{color}} · You", "clockBot": "{{color}} · Bot", "you": "You", "clockAria": "{{color}} player clock: {{minutes}} minutes {{seconds}} seconds", "history": "Move History", "historyEmpty": "No moves yet", "historyAria": "Move history turns", "movesInTurn": "{{color}} moves in turn {{turn}}", "reelSpinning": "Reel {{reel}} spinning", "reelResult": "Reel {{reel}}: {{piece}}"
+  },
+  "result": {
+    "gameOver": "Game over", "wins": "{{color}} wins", "kingCaptured": "King captured", "timeout": "{{color}} ran out of time", "experienceEarned": "Experience earned", "progressToward": "XP progress toward Level {{level}}", "nextLevel": "Next level", "levelUp": "Level up"
+  },
+  "profile": {
+    "browserTitle": "Profile | RouletteChess", "eyebrow": "Offline player hub", "title": "Profile", "player": "Player", "joined": "Joined {{date}}", "levelProgress": "Level progress", "progressLabel": "Level {{level}} experience progress",
+    "careerOverview": "Career overview", "generalStatistics": "General Statistics", "rouletteSignature": "Your roulette signature", "rouletteStatistics": "RouletteChess Statistics",
+    "stats": { "gamesPlayed": "Games Played", "wins": "Wins", "losses": "Losses", "winRate": "Win Rate", "currentWinStreak": "Current Win Streak", "bestWinStreak": "Best Win Streak", "totalPlayTime": "Total Play Time", "kingsCaptured": "Kings Captured", "rouletteRolls": "Roulette Rolls", "mostRolledPiece": "Most Rolled Piece", "mostPlayedPiece": "Most Played Piece", "mostSuccessfulPiece": "Most Successful Piece", "threeRightsUsed": "Three Rights Used", "triplePawnRolls": "Triple Pawn Rolls", "tripleKnightRolls": "Triple Knight Rolls", "tripleQueenRolls": "Triple Queen Rolls" },
+    "futureMilestones": "Future milestones", "achievements": "Achievements", "achievementNames": { "firstVictory": "First Victory", "hundredGames": "100 Games", "captureHundredKings": "Capture 100 Kings", "tripleQueenRoll": "Triple Queen Roll" },
+    "localDataNote": "Offline profile data stays on this device."
+  },
+  "settings": {
+    "browserTitle": "Settings | RouletteChess", "eyebrow": "Experience controls", "title": "Settings", "description": "Configure your RouletteChess experience.",
+    "soundControls": "Sound controls", "audio": "Audio", "soundEffects": "Sound Effects", "soundDescription": "Moves, roulette, alerts, and game results.", "soundLabel": "Sound effects",
+    "displayLanguage": "Display language", "language": "Language", "languageDescription": "Choose the language used throughout the application.",
+    "localPlayerData": "Local player data", "data": "Data", "resetOfflineProfile": "Reset Offline Profile", "resetDescription": "Erase local XP, progression, and all statistics.", "resetComplete": "Offline profile reset complete.",
+    "dialog": { "eyebrow": "Confirm reset", "title": "Reset Offline Profile?", "description": "This will permanently erase your XP, progression, and all offline statistics. This action cannot be undone." },
+    "languageChanged": "Language changed to English."
+  },
+  "guide": {
+    "browserTitle": "How to Play | RouletteChess", "eyebrow": "Rules and strategy", "title": "How to Play", "intro": "Learn the rules of RouletteChess, understand your movement rights, and capture the enemy king.", "startHere": "Start here", "fourRules": "The Game in Four Rules",
+    "quick": {
+      "roll": { "title": "Roll Three Pieces", "description": "Every turn begins with a roulette roll that selects three piece types." },
+      "rights": { "title": "Use Your Rights", "description": "Each result gives you one movement right for that piece type." },
+      "order": { "title": "Choose the Order", "description": "The roulette order does not determine the order of your moves." },
+      "capture": { "title": "Capture the King", "description": "There is no check or checkmate. Capture the opposing King to win." }
+    },
+    "sections": {
+      "objective": { "eyebrow": "Winning", "title": "Objective", "p1": "Capture the opponent's King before your own King is captured. The game ends immediately when a player captures the opposing King.", "p2": "A King may remain in an attacked square or move into one. RouletteChess does not use check, checkmate, or self-check restrictions.", "highlight": "No check. No checkmate. Capture the King." },
+      "starting": { "eyebrow": "The roll", "title": "Starting a Turn", "p1": "At the beginning of a human turn, press ROLL. Human turns are never rolled automatically.", "p2": "The roulette reveals three piece types. Each result grants one matching movement right for that turn.", "caption": "One Knight move, one Bishop move, and one Pawn move." },
+      "rights": { "eyebrow": "Your options", "title": "Movement Rights", "p1": "You may make up to three moves during one turn. Spend a right by making a legal move with a piece of the matching type.", "caption": "You may make one legal Rook move, one Pawn move, and one Bishop move.", "p2": "Rights belong to piece types, not physical pieces. You do not need to move three different pieces." },
+      "order": { "eyebrow": "Sequence", "title": "Choose Your Move Order", "p1": "The left-to-right roulette order does not control your move order. Choose any legal sequence that preserves the greatest number of usable rights.", "p2": "Opening a path first can make a later Rook, Bishop, or Queen right usable." },
+      "duplicates": { "eyebrow": "Repeated rights", "title": "Duplicate Piece Types", "caption": "Two Knight rights and one Pawn right.", "p1": "Duplicate rights may be used on different pieces or on the same physical piece if it can legally move again after its first move.", "p2": "A Pawn — Pawn — Pawn result may permit three Pawn moves, using one or several Pawns, when the full sequence is legal." },
+      "maximum": { "eyebrow": "Continuation", "title": "Use as Many Rights as Possible", "p1": "RouletteChess evaluates legal continuations and only permits choices that preserve the maximum number of rights available from the current position.", "items": ["If three rights can be used, the turn contains three moves.", "If only two can be used, the turn ends after two moves.", "If only one can be used, the turn ends after that move.", "If none can be used, the turn is skipped."] },
+      "noMoves": { "eyebrow": "Automatic pass", "title": "When No Legal Move Exists", "p1": "If none of the rolled piece types has a legal move, the result is still revealed before the turn is skipped automatically.", "p2": "If one or two rights can be used, play those available moves. The turn ends when no remaining rolled right can legally be spent.", "highlight": "An unusable right is simply skipped; it does not lose the game." },
+      "movement": { "eyebrow": "The board", "title": "Chess Piece Movement", "intro": "Pieces use their familiar movement patterns, without check-based restrictions.", "pawn": "Moves forward and captures diagonally. It may move two squares from its starting position.", "knight": "Moves in an L shape and may jump over other pieces.", "bishop": "Moves diagonally across any number of open squares.", "rook": "Moves horizontally or vertically across any number of open squares.", "queen": "Moves horizontally, vertically, or diagonally across open squares.", "king": "Moves one square in any direction. Attacked-square restrictions do not apply." },
+      "special": { "eyebrow": "Advanced rules", "title": "Special Moves", "castling": "Castling", "castlingText": "Castling requires an unmoved King, an unmoved same-color Rook, an empty path between them, and an available King right. Attacked-square and check restrictions do not apply. Castling consumes the King right only.", "enPassant": "En Passant", "enPassantText": "A Pawn may capture en passant immediately after the opposing Pawn's qualifying two-square move. The opportunity expires after the next individual move, even within the same RouletteChess turn.", "promotion": "Promotion", "promotionText": "A Pawn reaching the final rank is promoted automatically to a Queen. The promotion move spends a Pawn right; the new Queen may only spend a later Queen right." },
+      "victory": { "eyebrow": "Victory", "title": "King Capture and Victory", "p1": "There are no check warnings, checkmate positions, or self-check restrictions. A King may move into danger, remain under attack, or capture a protected piece when the move is otherwise legal.", "highlight": "Capturing the opposing King ends the game immediately." },
+      "clock": { "eyebrow": "Time control", "title": "Chess Clock", "p1": "The clock starts after the roulette result is revealed when the turn has at least one playable move. The roll animation itself is not counted.", "p2": "Your clock then runs while you consider the rights, choose their order, and complete the available moves. When the turn ends, the configured increment is added and the opponent's clock can begin after their roll is resolved.", "p3": "A turn with no legal move is skipped without starting its clock. If a running clock reaches zero, that player loses." },
+      "customization": { "eyebrow": "Appearance", "title": "Customization", "pieceSet": "Piece Set", "pieceText": "Changes board pieces, roulette symbols, and result-screen pieces. Available sets are Gold, Classic, and Retro.", "boardTheme": "Board Theme", "boardText": "Changes board squares, coordinates, frame, and surface styling. Available themes are Wood, Marble, and Dark.", "highlight": "Customization never changes gameplay rules." },
+      "example": { "eyebrow": "Putting it together", "title": "Full Turn Example", "steps": ["Move a Pawn to open a file.", "Move the Rook through the newly opened file.", "Move a Pawn using the remaining Pawn right."], "p": "If the second Pawn move is no longer legal after the first two moves, the turn may end after the Rook and Pawn rights are used. The exact sequence always depends on the board." }
+    },
+    "rememberEyebrow": "Quick reference", "remember": "Remember", "reminders": ["Roll three piece types at the start of your turn.", "Each result gives one movement right.", "Move order is your choice.", "Duplicate results give duplicate rights.", "Use as many legal rights as possible.", "A turn may contain fewer than three moves.", "No legal move means the turn is skipped.", "There is no check or checkmate.", "Capture the King to win.", "Running out of time loses the game."],
+    "ready": "Ready to rewrite the board?", "footer": "Spin your pieces. Plan the sequence.", "rouletteResult": "Roulette result: {{pieces}}"
+  }
+}

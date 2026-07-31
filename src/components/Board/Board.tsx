@@ -18,6 +18,7 @@ import { BOARD_THEME_CATALOG } from "../../config/boardThemes";
 import { ROLL_TIMING } from "../../config/rollTiming";
 import soundManager from "../../services/SoundManager";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const AUTOMATIC_ROLL_DELAY_MS = 500;
 const UNPLAYABLE_ROLL_REVIEW_MS = 1200;
@@ -61,6 +62,7 @@ const BOARD_INDEXES = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 function Board() {
   const game = gameManager.getGame();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [, setRefresh] = useState(0);
   const [isMoveHistoryOpen, setIsMoveHistoryOpen] = useState(false);
@@ -511,16 +513,16 @@ function Board() {
       >
         <div className="turn-header">
           <div className="turn-text">
-            {game.currentTurn === "white" ? "White" : "Black"} to move
+            {t("game.toMove", { color: t(`common.colors.${game.currentTurn}`) })}
           </div>
 
           <div className="game-toolbar">
             <button
-              aria-label={isSoundEnabled ? "Mute sound" : "Enable sound"}
+              aria-label={t(isSoundEnabled ? "game.muteSound" : "game.enableSound")}
               aria-pressed={!isSoundEnabled}
               className="game-toolbar-button"
               onClick={() => soundManager.toggle()}
-              title={isSoundEnabled ? "Mute sound" : "Enable sound"}
+              title={t(isSoundEnabled ? "game.muteSound" : "game.enableSound")}
               type="button"
             >
               <svg aria-hidden="true" viewBox="0 0 24 24">
@@ -538,16 +540,16 @@ function Board() {
               aria-expanded={isMoveHistoryOpen}
               aria-label={
                 isMoveHistoryOpen
-                  ? "Close move history"
-                  : "Open move history"
+                  ? t("game.closeHistory")
+                  : t("game.openHistory")
               }
               aria-pressed={isMoveHistoryOpen}
               className="game-toolbar-button history-toggle"
               onClick={toggleMoveHistory}
               title={
                 isMoveHistoryOpen
-                  ? "Close move history"
-                  : "Open move history"
+                  ? t("game.closeHistory")
+                  : t("game.openHistory")
               }
               type="button"
             >
@@ -612,7 +614,7 @@ function Board() {
                 onClick={() => startRoll(true)}
                 type="button"
               >
-                ROLL
+                {t("common.actions.roll")}
               </button>
         </div>
       </div>
@@ -633,7 +635,7 @@ function Board() {
 
         {isTurnSkippedMessageVisible && (
           <div className="turn-skipped-message" role="status">
-            No playable pieces — Turn skipped
+            {t("game.turnSkipped")}
           </div>
         )}
       </div>
