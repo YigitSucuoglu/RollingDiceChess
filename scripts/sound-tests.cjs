@@ -6,18 +6,34 @@ const { spawnSync } = require("node:child_process");
 
 const projectRoot = path.resolve(__dirname, "..");
 const outputRoot = fs.mkdtempSync(path.join(os.tmpdir(), "roulette-sound-"));
-const compiler = path.join(projectRoot, "node_modules", ".bin", "tsc.cmd");
+const compiler = path.join(
+  projectRoot,
+  "node_modules",
+  "typescript",
+  "bin",
+  "tsc"
+);
 
 try {
-  const result = spawnSync(process.env.ComSpec, [
-    "/d", "/s", "/c", compiler,
+  const result = spawnSync(process.execPath, [
+    compiler,
     "--ignoreConfig", "--target", "ES2023", "--module", "commonjs",
     "--moduleResolution", "node", "--ignoreDeprecations", "6.0",
     "--skipLibCheck", "--rootDir", "src", "--outDir", outputRoot,
     "src/types/GameSound.ts", "src/config/sounds.ts", "src/services/SoundManager.ts",
   ], { cwd: projectRoot, encoding: "utf8" });
 
-  if (result.status !== 0) throw new Error(result.stdout + result.stderr);
+  if (result.error) {
+    throw result.error;
+  }
+
+  if (result.status !== 0) {
+    throw new Error(
+      `Sound test TypeScript compilation failed with status ${result.status}` +
+      `${result.signal ? ` (signal ${result.signal})` : ""}\n` +
+      `${result.stdout ?? ""}${result.stderr ?? ""}`
+    );
+  }
 
   const { SoundManager } = require(path.join(outputRoot, "services", "SoundManager.js"));
   const values = new Map();
