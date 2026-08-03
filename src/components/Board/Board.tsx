@@ -453,6 +453,7 @@ function Board() {
       squares.push(
         <div
           key={`${row}-${col}`}
+          data-square={`${String.fromCharCode(97 + col)}${8 - row}`}
           className={`square ${isLight ? "light" : "dark"} ${
             isSelected ? "selected" : ""
           }`}

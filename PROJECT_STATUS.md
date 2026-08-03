@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.11.0
+v0.11.1
 
 ---
 
@@ -20,6 +20,7 @@ v0.11.0
 ## Completed
 
 ### Quality
+- QA-01 — Add critical engine, gameplay and browser regression coverage
 - RELEASE-QUALITY-01 — Add automated validation, production smoke checks and GitHub Actions quality gates
 
 ### Engine
@@ -85,6 +86,7 @@ v0.11.0
 ## Current Sprint
 
 Completed:
+- QA-01 — Add critical engine, gameplay and browser regression coverage
 - RELEASE-QUALITY-01 — Add automated validation, production smoke checks and GitHub Actions quality gates
 - PROFILE-01 — Add offline player profile, statistics, XP progression and profile page
 - SETTINGS-01 — Add premium settings page
@@ -103,10 +105,9 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. QA-01 — Add critical gameplay and browser regression coverage
+1. PERF-01 — Establish production performance and bundle baseline
 
 Roadmap:
-- QA-01 — Critical regression coverage
 - PERF-01 — Performance and bundle baseline
 - DEPLOY-01 — Preview and staging deployment
 - OBS-01 — Error monitoring foundation

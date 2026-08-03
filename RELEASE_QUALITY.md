@@ -6,11 +6,11 @@ This document defines the automated and manual gates required before a RouletteC
 
 | Alan | Mevcut test | Çalıştırılan komut | Durum | Bilinen açık |
 |---|---|---|---|---|
-| Engine rules | Yok | — | Açık | ChessBoard, special moves, king capture and turn-right rules lack an automated suite. |
-| TurnResolver | Yok | — | Açık | Maximum-continuation behavior has no repository test command. |
-| Move generation / execution | Yok | — | Açık | Movement, capture, castling, promotion and en passant need focused regression coverage. |
-| Bot / sequence evaluation | Yok | — | Açık | Easy/Medium/Hard planners, cancellation and sequence scoring are not automatically tested. |
-| Chess clock | Yok | — | Açık | Countdown, increment, turn activation and timeout need automated regression coverage. |
+| Engine rules | Vitest engine suite | `npm run test:unit` | Var | Check/checkmate intentionally do not exist; exhaustive position fuzzing remains open. |
+| TurnResolver | Maximum-continuation fixtures | `npm run test:unit` | Var | Core duplicate/unavailable/castling/terminal invariants are covered; exhaustive DFS property testing remains open. |
+| Move generation / execution | Piece movement and special-move fixtures | `npm run test:unit` | Var | Movement, blockers, capture, castling, promotion and en passant have focused coverage. |
+| Bot / sequence evaluation | Easy/Medium/Hard planner invariants | `npm run test:unit` | Kısmi | Legal/state-safe plans are covered; cancellation timing and every scoring feature remain open. |
+| Chess clock | Deterministic injected clock + fake timers | `npm run test:unit` | Kısmi | Countdown, increment, stop and single timeout are covered; React refresh cadence remains manual. |
 | Profile / XP / repositories | `scripts/profile-tests.cjs` | `npm run test:profile` | Var | Formatting, UI animation and browser integration remain manual. |
 | Settings | Repository/default/reset checks within profile test | `npm run test:profile` | Kısmi | React Settings UI and dialog interaction are not browser-tested. |
 | i18n | EN/TR recursive key/type/empty-value parity | `npm run test:i18n` | Var | Visual overflow and route-by-route translation rendering remain manual. |
@@ -19,6 +19,7 @@ This document defines the automated and manual gates required before a RouletteC
 | ESLint | TypeScript/React Hooks/React Refresh rules | `npm run lint` | Var | CSS and Markdown style are not linted. |
 | Production build | Vite production bundle after typecheck | `npm run build` | Var | Bundle budget/performance baseline is deferred to PERF-01. |
 | Release output | Dynamic dist reference, asset and leakage checks | `npm run test:release-smoke` | Var | It is a filesystem smoke test, not browser E2E. |
+| Browser critical flows | Playwright Chromium | `npm run test:e2e` | Kısmi | Navigation, settings/i18n/reset and deterministic gameplay smoke are covered; visual and full-game coverage remain open. |
 
 The missing gameplay/browser coverage is deliberate backlog for `QA-01 — Critical regression coverage`; this task does not represent those areas as tested.
 
@@ -26,7 +27,10 @@ The missing gameplay/browser coverage is deliberate backlog for `QA-01 — Criti
 
 - `npm run typecheck`: runs `tsc -b --pretty false`. Both application and Vite config project references use `noEmit`, so it produces no production asset bundle.
 - `npm run lint`: runs the existing ESLint configuration.
-- `npm run test`: aggregates every current automatic test: i18n, profile/settings/progression, and sound no-op. Individual `test:*` commands remain available.
+- `npm run test:unit`: runs deterministic Vitest engine/domain regressions.
+- `npm run test`: aggregates i18n, profile/settings/progression, sound no-op and Vitest engine tests.
+- `npm run test:e2e`: runs Chromium Playwright tests against `vite preview`; use `npx playwright install chromium` once if the local browser binary is absent.
+- `npm run test:e2e:headed`: runs the same browser suite visibly for local diagnosis.
 - `npm run build`: runs typecheck and then Vite. This preserves the safety of the standalone build command.
 - `npm run test:release-smoke`: validates an already-generated `dist` directory.
 - `npm run validate`: local mandatory gate in the order typecheck → lint → test → Vite build → release smoke. It invokes Vite directly so typecheck is not repeated through `npm run build`.
@@ -55,13 +59,15 @@ All current static asset imports were audited against on-disk casing during CLEA
 
 `.github/workflows/quality.yml` runs on pushes and pull requests targeting `main`, plus manual `workflow_dispatch`.
 
-The single read-only job:
+The workflow has two read-only jobs. The `validate` job:
 
 1. checks out the repository;
 2. installs Node 24 with npm cache support;
 3. runs `npm ci` from the committed lock file;
 4. runs `npm run validate:ci`;
 5. fails immediately if any gate fails.
+
+The separate `e2e` job installs Chromium and its Linux dependencies, builds the production application and runs Playwright against Vite preview. Screenshots, videos and traces are retained only on failure under `test-results/` and the uploaded `playwright-report` artifact for 7 days.
 
 Node 24 is selected because the local project runs Node 24, `@types/node` is version 24, and Node 24 is the matching LTS line. `package.json` and the lock-file root declare `>=24 <25` to keep local/CI expectations explicit. The workflow has only `contents: read`, uses no secrets, writes nothing to the repository, and performs no deployment.
 
@@ -96,6 +102,12 @@ A release is technically ready only when all of the following are true:
 6. The application version and `PROJECT_STATUS.md` agree.
 
 Failure of any mandatory gate means the release is not ready. The current green gates do not imply full chess/gameplay regression coverage; QA-01 owns that expansion.
+
+## QA-01 deterministic strategy and remaining scope
+
+Engine fixtures construct boards and rights centrally and use the RNG/clock injection already supported by the domain. Browser tests override `Math.random` only inside their isolated page before application startup, producing stable pawn rights without altering production randomness. Assertions wait on semantic roles, attributes and roll phases rather than fixed sleeps. Board squares expose algebraic `data-square` values because the visual cells otherwise have no accessible name.
+
+This is critical regression coverage, not full coverage. Visual comparison, exhaustive resolver graph/property tests, bot cancellation timing, complete-game result UI, XP animation, future real audio playback, Firefox/WebKit and performance budgets remain manual or roadmap work.
 
 ## Future extension
 

@@ -15,7 +15,10 @@
     "test:i18n": "node scripts/i18n-tests.cjs",
     "test:sound": "node scripts/sound-tests.cjs",
     "test:release-smoke": "node scripts/release-smoke-tests.cjs",
-    "test": "npm run test:i18n && npm run test:profile && npm run test:sound",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test": "npm run test:i18n && npm run test:profile && npm run test:sound && npm run test:unit",
     "validate": "npm run typecheck && npm run lint && npm run test && vite build && npm run test:release-smoke",
     "validate:ci": "npm run validate",
     "preview": "vite preview"
@@ -29,6 +32,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
@@ -39,6 +43,7 @@
     "globals": "^17.7.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.62.0",
-    "vite": "^8.1.1"
+    "vite": "^8.1.1",
+    "vitest": "^4.1.10"
   }
 }
