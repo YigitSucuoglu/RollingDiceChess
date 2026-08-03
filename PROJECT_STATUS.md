@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.11.1
+v0.11.2
 
 ---
 
@@ -20,6 +20,7 @@ v0.11.1
 ## Completed
 
 ### Quality
+- PERF-01 — Establish production performance, bundle and runtime baseline
 - QA-01 — Add critical engine, gameplay and browser regression coverage
 - RELEASE-QUALITY-01 — Add automated validation, production smoke checks and GitHub Actions quality gates
 
@@ -86,6 +87,7 @@ v0.11.1
 ## Current Sprint
 
 Completed:
+- PERF-01 — Establish production performance, bundle and runtime baseline
 - QA-01 — Add critical engine, gameplay and browser regression coverage
 - RELEASE-QUALITY-01 — Add automated validation, production smoke checks and GitHub Actions quality gates
 - PROFILE-01 — Add offline player profile, statistics, XP progression and profile page
@@ -105,10 +107,9 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. PERF-01 — Establish production performance and bundle baseline
+1. DEPLOY-01 — Add preview and staging deployment
 
 Roadmap:
-- PERF-01 — Performance and bundle baseline
 - DEPLOY-01 — Preview and staging deployment
 - OBS-01 — Error monitoring foundation
 - ARCH-01 — Platform-neutral and multiplayer-ready core preparation
@@ -117,6 +118,13 @@ Roadmap:
 Backlog:
 - SOUND-01B — Add production sound assets to the preserved sound architecture
 - FINAL-POLISH — Revisit Game slot machine sizing and reel readability after core features are complete.
+
+Performance Backlog:
+- PERF-02 — Optimize Home hero image delivery and LCP
+- ASSET-PERF-01 — Measure and optimize production PNG delivery
+- AI-PERF-01 — Profile Hard bot sequence evaluation latency
+- PERF-03 — Measure route-level lazy loading
+- RENDER-PERF-01 — Profile clock-driven Board renders
 
 ---
 

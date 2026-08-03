@@ -111,4 +111,6 @@ This is critical regression coverage, not full coverage. Visual comparison, exha
 
 ## Future extension
 
+Performance baselines are intentionally separate from release validation. Run `npm run perf` to generate ignored `.performance/` reports; see `PERFORMANCE_BASELINE.md`. The manual `.github/workflows/performance.yml` workflow uploads those reports for 14 days and does not make Lighthouse variability a normal quality-gate failure.
+
 The general `validate` / `validate:ci` names are intentionally workspace-neutral. If the repository later adopts `apps/web`, `apps/server`, `apps/mobile`, or `packages/game-core`, their focused gates can be composed beneath the same top-level contract without changing release automation semantics.

@@ -1,0 +1,42 @@
+import { chromium } from "playwright";
+import { startPreview, stopPreview, writeReports } from "./perf-utils.mjs";
+
+const server = await startPreview();
+const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+let browser;
+try {
+  browser = await chromium.launch(executablePath ? { executablePath } : {});
+  const page = await browser.newPage();
+  const errors = [];
+  page.on("console", (message) => { if (message.type() === "error") errors.push(`console: ${message.text()}`); });
+  page.on("pageerror", (error) => errors.push(`page: ${error.message}`));
+  await page.addInitScript(() => { Math.random = () => 0; });
+  const startHome = performance.now();
+  await page.goto("http://127.0.0.1:4173/", { waitUntil: "load" });
+  await page.getByRole("heading", { level: 1 }).waitFor();
+  const homeInteractiveMs = performance.now() - startHome;
+  const navigation = await page.evaluate(() => performance.getEntriesByType("navigation")[0]?.toJSON() ?? null);
+  await page.goto("http://127.0.0.1:4173/play");
+  const startGame = performance.now();
+  await page.getByRole("button", { name: /start game|oyunu başlat/i }).click();
+  await page.locator(".board").waitFor();
+  const gameReadyMs = performance.now() - startGame;
+  const rollStart = performance.now();
+  await page.getByRole("button", { name: /^roll$|^zar at$/i }).click();
+  await page.locator('[data-roll-phase="spinning"]').waitFor();
+  const spinningStartMs = performance.now() - rollStart;
+  await page.locator('[data-roll-phase="resolved"]').waitFor();
+  const rollResolvedMs = performance.now() - rollStart;
+  const selectStart = performance.now();
+  await page.locator('[data-square="e2"]').click();
+  await page.locator(".move-dot").first().waitFor();
+  const moveHintsMs = performance.now() - selectStart;
+  const commitStart = performance.now();
+  await page.locator('[data-square="e4"]').click();
+  const moveCommitMs = performance.now() - commitStart;
+  if (errors.length) throw new Error(errors.join("\n"));
+  const report = { generatedAt: new Date().toISOString(), browser: await browser.version(), homeInteractiveMs, navigation, gameReadyMs, roll: { spinningStartMs, resolvedMs: rollResolvedMs }, board: { moveHintsMs, moveCommitMs }, errors };
+  const markdown = `# Browser runtime report\n\nBrowser: ${report.browser}\n\n| Measurement | ms |\n|---|---:|\n| Home meaningful UI | ${homeInteractiveMs.toFixed(1)} |\n| Setup → board ready | ${gameReadyMs.toFixed(1)} |\n| Roll → spinning | ${spinningStartMs.toFixed(1)} |\n| Roll → resolved | ${rollResolvedMs.toFixed(1)} |\n| Square select → hints | ${moveHintsMs.toFixed(1)} |\n| Move commit | ${moveCommitMs.toFixed(1)} |\n`;
+  await writeReports("browser", "browser-report", report, markdown);
+  console.log(markdown);
+} finally { await browser?.close(); stopPreview(server); }
