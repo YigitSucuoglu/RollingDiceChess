@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.10.1
+v0.11.0
 
 ---
 
@@ -18,6 +18,9 @@ v0.10.1
 ---
 
 ## Completed
+
+### Quality
+- RELEASE-QUALITY-01 — Add automated validation, production smoke checks and GitHub Actions quality gates
 
 ### Engine
 - Classical chess rules completed
@@ -82,6 +85,7 @@ v0.10.1
 ## Current Sprint
 
 Completed:
+- RELEASE-QUALITY-01 — Add automated validation, production smoke checks and GitHub Actions quality gates
 - PROFILE-01 — Add offline player profile, statistics, XP progression and profile page
 - SETTINGS-01 — Add premium settings page
 - I18N-01 — Add English and Turkish localization support
@@ -99,13 +103,18 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. Planning
+1. QA-01 — Add critical gameplay and browser regression coverage
 
 Roadmap:
-- TO BE DECIDED
+- QA-01 — Critical regression coverage
+- PERF-01 — Performance and bundle baseline
+- DEPLOY-01 — Preview and staging deployment
+- OBS-01 — Error monitoring foundation
+- ARCH-01 — Platform-neutral and multiplayer-ready core preparation
+- RELEASE-01 — Public web beta
 
 Backlog:
-- SOUND-01B — Replace and balance production sound assets
+- SOUND-01B — Add production sound assets to the preserved sound architecture
 - FINAL-POLISH — Revisit Game slot machine sizing and reel readability after core features are complete.
 
 ---

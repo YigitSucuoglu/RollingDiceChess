@@ -3,13 +3,21 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b --pretty false",
+    "build": "npm run typecheck && vite build",
     "lint": "eslint .",
     "test:profile": "node scripts/profile-tests.cjs",
     "test:i18n": "node scripts/i18n-tests.cjs",
     "test:sound": "node scripts/sound-tests.cjs",
+    "test:release-smoke": "node scripts/release-smoke-tests.cjs",
+    "test": "npm run test:i18n && npm run test:profile && npm run test:sound",
+    "validate": "npm run typecheck && npm run lint && npm run test && vite build && npm run test:release-smoke",
+    "validate:ci": "npm run validate",
     "preview": "vite preview"
   },
   "dependencies": {
