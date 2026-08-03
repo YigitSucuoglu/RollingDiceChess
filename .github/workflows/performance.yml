@@ -24,4 +24,5 @@ jobs:
         with:
           name: performance-results
           path: .performance/
+          include-hidden-files: true
           retention-days: 14
