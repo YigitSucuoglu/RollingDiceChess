@@ -1,9 +1,11 @@
 # RouletteChess Sound Assets
 
-All WAV files in this directory are original procedural effects generated for
-RouletteChess from basic synthesized waveforms and deterministic noise. No
-third-party recordings, sample packs, external URLs, or runtime downloads are
-used.
+The temporary procedural WAV effects were removed in CLEANUP-01B.
 
-The short `lever-pull.wav` effect is 240 ms, which fits inside the shared
-300 ms lever-down timing target.
+The sound IDs, `SOUND_CATALOG`, `SoundManager`, master toggle, preference
+persistence, and gameplay call sites remain active. Catalog entries use a
+`null` source until production assets are added; playback is intentionally a
+silent no-op and performs no browser audio or network request.
+
+Future production sound assets should be added here and connected through
+`src/config/sounds.ts` without changing gameplay event call sites.

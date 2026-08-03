@@ -72,6 +72,10 @@ export class SoundManager {
 
     const audio = this.getAudio(soundId);
 
+    if (!audio) {
+      return;
+    }
+
     audio.pause();
     audio.currentTime = 0;
 
@@ -140,7 +144,7 @@ export class SoundManager {
     return () => this.listeners.delete(listener);
   }
 
-  private getAudio(soundId: GameSoundId): AudioHandle {
+  private getAudio(soundId: GameSoundId): AudioHandle | null {
     const cachedAudio = this.audioCache.get(soundId);
 
     if (cachedAudio) {
@@ -148,6 +152,11 @@ export class SoundManager {
     }
 
     const definition = SOUND_CATALOG[soundId];
+
+    if (definition.src === null) {
+      return null;
+    }
+
     const audio = this.audioAdapter.create(definition.src);
 
     audio.loop = definition.loop;

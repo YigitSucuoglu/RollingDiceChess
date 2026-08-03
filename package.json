@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "test:profile": "node scripts/profile-tests.cjs",
     "test:i18n": "node scripts/i18n-tests.cjs",
+    "test:sound": "node scripts/sound-tests.cjs",
     "preview": "vite preview"
   },
   "dependencies": {
