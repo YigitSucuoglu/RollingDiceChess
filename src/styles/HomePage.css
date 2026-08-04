@@ -267,6 +267,11 @@
   width: var(--home-reel-piece-scale);
 }
 
+.home-reel-visual picture,
+.home-machine-lever-layer picture {
+  display: contents;
+}
+
 .home-reel-window-queen {
   --home-reel-piece-scale: 139.5%;
   --home-reel-piece-x: 0%;

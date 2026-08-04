@@ -118,3 +118,27 @@ npm run perf
 ```
 
 When bundled Chromium is unavailable, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to a valid Chrome/Chromium executable. Generated JSON/Markdown and raw Lighthouse JSON are written to ignored `.performance/` subfolders.
+
+## PERF-02 Home image delivery (2026-08-04)
+
+Home previously requested the 1536×1024 machine (2.12 MiB), 1024×1536 lever (1.89 MiB) and three 1024×1280 Gold pieces even though the maximum machine render box is 624×416. Machine was the Lighthouse LCP element. Alpha-bound analysis showed padding was part of the established coordinate system, especially for the lever, so assets were resized without cropping.
+
+Deterministic `sharp` tooling now produces alpha-preserving WebP quality 90/alpha 100 plus optimized PNG fallbacks. Desktop machine candidates are 624×416 and 1248×832; mobile receives a 768×512 candidate. Lever candidates are 112×168/224×336 and Home-only pieces are 160×200/320×400. Master and Game assets remain unchanged.
+
+At 1440×900/DPR1 Chrome selected the 63.1 KiB 624w machine rendered at 528×352. At 390×844/DPR2 it selected the 91.1 KiB mobile candidate rendered at 358×239. Desktop pieces total 27.3 KiB and lever WebP is inlined at 1.8 KiB. No master Home machine request or duplicate machine request occurred.
+
+| Metric | PERF-01 before | PERF-02 after | Change |
+|---|---:|---:|---:|
+| Home desktop transfer | 5.94 MiB | 230 KiB | -96.2% |
+| Home mobile transfer | 5.94 MiB | 314 KiB | -94.8% |
+| Dist raw | 12.93 MiB | 9.85 MiB | -23.8% |
+| Dist gzip | 12.52 MiB | 9.44 MiB | -24.6% |
+| Largest emitted image | 2.12 MiB | 1.81 MiB (Game machine) | -14.5% |
+| Desktop score / LCP | 69 / 33.34 s | 80 / 2.58 s | LCP -92.3% |
+| Mobile score / LCP | 75 / 33.34 s | 95 / 2.90 s | LCP -91.3% |
+| Desktop FCP / TBT / CLS | 1.53 s / 0 ms / 0 | 1.52 s / 0 ms / 0 | no regression |
+| Mobile FCP / TBT / CLS | 1.53 s / 0 ms / 0 | 1.53 s / 0 ms / 0 | no regression |
+
+Machine uses eager loading, synchronous decode, intrinsic dimensions and `fetchPriority="high"`; no preload was added, avoiding duplicate requests. Lever and pieces use asynchronous decode without lazy loading so composition remains atomic. Fixed-viewport visual inspection preserved machine, reels, lever pivot and caption alignment on desktop/mobile with no visible halo.
+
+The baseline budgets are now 11 MB dist gzip, 150 KB main JS gzip, 2.1 MB largest emitted image, 400 KB Home initial transfer, 3.5 s Home mobile LCP and 0.02 CLS. These remain informational.

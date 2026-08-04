@@ -47,13 +47,26 @@ assert.equal(relativeBuildFiles.some((file) => file.toLowerCase().endsWith(".wav
 assert.equal(relativeBuildFiles.some((file) => file.includes(".artifacts") || /(?:screenshot|comparison)/i.test(file)), false, "Cleanup artifacts entered the build");
 
 const requiredSlotPrefixes = [
-  "update-machine-transparent-",
-  "update-lever-transparent-",
   "update-machine-game-trimmed-",
   "update-lever-game-trimmed-",
+  "machine-1x-",
+  "machine-2x-",
+  "machine-mobile-",
+  "machine-fallback-",
 ];
 for (const prefix of requiredSlotPrefixes) {
   assert.ok(relativeBuildFiles.some((file) => path.basename(file).startsWith(prefix)), `Missing active slot asset: ${prefix}*`);
+}
+
+for (const retiredHomeMaster of [
+  "update-machine-transparent-",
+  "update-lever-transparent-",
+]) {
+  assert.equal(
+    relativeBuildFiles.some((file) => path.basename(file).startsWith(retiredHomeMaster)),
+    false,
+    `Home master asset entered production: ${retiredHomeMaster}*`
+  );
 }
 
 const colors = ["white", "black"];

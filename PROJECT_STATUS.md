@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.11.2
+v0.11.3
 
 ---
 
@@ -20,6 +20,7 @@ v0.11.2
 ## Completed
 
 ### Quality
+- PERF-02 — Optimize Home image delivery and LCP without visible quality loss
 - PERF-01 — Establish production performance, bundle and runtime baseline
 - QA-01 — Add critical engine, gameplay and browser regression coverage
 - RELEASE-QUALITY-01 — Add automated validation, production smoke checks and GitHub Actions quality gates
@@ -87,6 +88,7 @@ v0.11.2
 ## Current Sprint
 
 Completed:
+- PERF-02 — Optimize Home image delivery and LCP without visible quality loss
 - PERF-01 — Establish production performance, bundle and runtime baseline
 - QA-01 — Add critical engine, gameplay and browser regression coverage
 - RELEASE-QUALITY-01 — Add automated validation, production smoke checks and GitHub Actions quality gates
@@ -120,8 +122,7 @@ Backlog:
 - FINAL-POLISH — Revisit Game slot machine sizing and reel readability after core features are complete.
 
 Performance Backlog:
-- PERF-02 — Optimize Home hero image delivery and LCP
-- ASSET-PERF-01 — Measure and optimize production PNG delivery
+- ASSET-PERF-01 — Measure and optimize remaining Game and Piece Set PNG delivery
 - AI-PERF-01 — Profile Hard bot sequence evaluation latency
 - PERF-03 — Measure route-level lazy loading
 - RENDER-PERF-01 — Profile clock-driven Board renders

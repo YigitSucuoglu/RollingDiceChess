@@ -16,6 +16,17 @@ try {
   await page.getByRole("heading", { level: 1 }).waitFor();
   const homeInteractiveMs = performance.now() - startHome;
   const navigation = await page.evaluate(() => performance.getEntriesByType("navigation")[0]?.toJSON() ?? null);
+  const desktopImages = await page.evaluate(() => {
+    const machine = document.querySelector(".home-machine-frame");
+    const lever = document.querySelector(".home-machine-lever");
+    const resources = performance.getEntriesByType("resource").filter((entry) => /\.(png|webp)(\?|$)/.test(entry.name)).map((entry) => ({ name: entry.name, transferSize: entry.transferSize }));
+    const describe = (image) => image ? { currentSrc: image.currentSrc, naturalWidth: image.naturalWidth, naturalHeight: image.naturalHeight, renderWidth: image.getBoundingClientRect().width, renderHeight: image.getBoundingClientRect().height } : null;
+    return { machine: describe(machine), lever: describe(lever), resources };
+  });
+  const mobilePage = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+  await mobilePage.goto("http://127.0.0.1:4173/", { waitUntil: "load" });
+  const mobileMachine = await mobilePage.locator(".home-machine-frame").evaluate((image) => ({ currentSrc: image.currentSrc, naturalWidth: image.naturalWidth, naturalHeight: image.naturalHeight, renderWidth: image.getBoundingClientRect().width, renderHeight: image.getBoundingClientRect().height }));
+  await mobilePage.close();
   await page.goto("http://127.0.0.1:4173/play");
   const startGame = performance.now();
   await page.getByRole("button", { name: /start game|oyunu başlat/i }).click();
@@ -35,7 +46,7 @@ try {
   await page.locator('[data-square="e4"]').click();
   const moveCommitMs = performance.now() - commitStart;
   if (errors.length) throw new Error(errors.join("\n"));
-  const report = { generatedAt: new Date().toISOString(), browser: await browser.version(), homeInteractiveMs, navigation, gameReadyMs, roll: { spinningStartMs, resolvedMs: rollResolvedMs }, board: { moveHintsMs, moveCommitMs }, errors };
+  const report = { generatedAt: new Date().toISOString(), browser: await browser.version(), homeInteractiveMs, navigation, homeImages: { desktop: desktopImages, mobileMachine }, gameReadyMs, roll: { spinningStartMs, resolvedMs: rollResolvedMs }, board: { moveHintsMs, moveCommitMs }, errors };
   const markdown = `# Browser runtime report\n\nBrowser: ${report.browser}\n\n| Measurement | ms |\n|---|---:|\n| Home meaningful UI | ${homeInteractiveMs.toFixed(1)} |\n| Setup → board ready | ${gameReadyMs.toFixed(1)} |\n| Roll → spinning | ${spinningStartMs.toFixed(1)} |\n| Roll → resolved | ${rollResolvedMs.toFixed(1)} |\n| Square select → hints | ${moveHintsMs.toFixed(1)} |\n| Move commit | ${moveCommitMs.toFixed(1)} |\n`;
   await writeReports("browser", "browser-report", report, markdown);
   console.log(markdown);

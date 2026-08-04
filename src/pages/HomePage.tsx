@@ -1,10 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
-import blackKnightUrl from "../assets/pieces/gold/black-knight.png";
-import whiteKingUrl from "../assets/pieces/gold/white-king.png";
-import whiteQueenUrl from "../assets/pieces/gold/white-queen.png";
-import { SLOT_MACHINE_ASSETS } from "../assets/slot-machine";
+import { HOME_ASSETS } from "../assets/home";
 import "../styles/HomePage.css";
 
 function HomePage() {
@@ -81,35 +78,56 @@ function HomePage() {
         >
           <div aria-hidden="true" className="home-hero-halo" />
           <div className="home-machine">
-            <img
-              alt=""
-              aria-hidden="true"
-              className="home-machine-frame"
-              src={SLOT_MACHINE_ASSETS.assembly.machine}
-            />
+            <picture>
+              <source media="(max-width: 520px)" srcSet={HOME_ASSETS.machine.mobile} type="image/webp" />
+              <source
+                sizes="(max-height: 800px) and (min-width: 901px) 528px, 624px"
+                srcSet={`${HOME_ASSETS.machine.oneX} 624w, ${HOME_ASSETS.machine.twoX} 1248w`}
+                type="image/webp"
+              />
+              <img
+                alt=""
+                aria-hidden="true"
+                className="home-machine-frame"
+                decoding="sync"
+                fetchPriority="high"
+                height={HOME_ASSETS.machine.height}
+                loading="eager"
+                src={HOME_ASSETS.machine.fallback}
+                width={HOME_ASSETS.machine.width}
+              />
+            </picture>
             <div aria-hidden="true" className="home-reel-overlay">
               <span className="home-reel-window home-reel-window-queen">
                 <span className="home-reel-visual">
-                  <img alt="" src={whiteQueenUrl} />
+                  <picture>
+                    <source srcSet={`${HOME_ASSETS.pieces.whiteQueen.oneX} 1x, ${HOME_ASSETS.pieces.whiteQueen.twoX} 2x`} type="image/webp" />
+                    <img alt="" decoding="async" height={HOME_ASSETS.pieces.whiteQueen.height} src={HOME_ASSETS.pieces.whiteQueen.fallback} width={HOME_ASSETS.pieces.whiteQueen.width} />
+                  </picture>
                 </span>
               </span>
               <span className="home-reel-window home-reel-window-knight">
                 <span className="home-reel-visual">
-                  <img alt="" src={blackKnightUrl} />
+                  <picture>
+                    <source srcSet={`${HOME_ASSETS.pieces.blackKnight.oneX} 1x, ${HOME_ASSETS.pieces.blackKnight.twoX} 2x`} type="image/webp" />
+                    <img alt="" decoding="async" height={HOME_ASSETS.pieces.blackKnight.height} src={HOME_ASSETS.pieces.blackKnight.fallback} width={HOME_ASSETS.pieces.blackKnight.width} />
+                  </picture>
                 </span>
               </span>
               <span className="home-reel-window home-reel-window-king">
                 <span className="home-reel-visual">
-                  <img alt="" src={whiteKingUrl} />
+                  <picture>
+                    <source srcSet={`${HOME_ASSETS.pieces.whiteKing.oneX} 1x, ${HOME_ASSETS.pieces.whiteKing.twoX} 2x`} type="image/webp" />
+                    <img alt="" decoding="async" height={HOME_ASSETS.pieces.whiteKing.height} src={HOME_ASSETS.pieces.whiteKing.fallback} width={HOME_ASSETS.pieces.whiteKing.width} />
+                  </picture>
                 </span>
               </span>
             </div>
             <span aria-hidden="true" className="home-machine-lever-layer">
-              <img
-                alt=""
-                className="home-machine-lever"
-                src={SLOT_MACHINE_ASSETS.assembly.lever}
-              />
+              <picture>
+                <source srcSet={`${HOME_ASSETS.lever.oneX} 1x, ${HOME_ASSETS.lever.twoX} 2x`} type="image/webp" />
+                <img alt="" className="home-machine-lever" decoding="async" height={HOME_ASSETS.lever.height} src={HOME_ASSETS.lever.fallback} width={HOME_ASSETS.lever.width} />
+              </picture>
             </span>
           </div>
 

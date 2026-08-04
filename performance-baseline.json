@@ -1,26 +1,39 @@
 {
-  "version": 1,
-  "measuredAt": "2026-08-03",
+  "version": 2,
+  "measuredAt": "2026-08-04",
   "environment": {
     "node": "v24.18.0",
     "os": "Windows corporate workstation",
     "browser": "Chrome 151.0.7922.71"
   },
+  "history": {
+    "perf01": {
+      "distGzipBytes": 13129728,
+      "largestImageBytes": 2171814,
+      "homeDesktopTransferBytes": 6224320,
+      "homeDesktopLcpMs": 33339,
+      "homeMobileLcpMs": 33342
+    }
+  },
   "baseline": {
-    "distRawBytes": 13556246,
-    "distGzipBytes": 13129728,
-    "mainJsGzipBytes": 121676,
-    "largestImageBytes": 2171814,
-    "homeMobileLcpMs": 33357,
+    "distRawBytes": 10326527,
+    "distGzipBytes": 9895544,
+    "mainJsGzipBytes": 128202,
+    "largestImageBytes": 1856549,
+    "homeDesktopTransferBytes": 235186,
+    "homeMobileTransferBytes": 321102,
+    "homeDesktopLcpMs": 2583,
+    "homeMobileLcpMs": 2901,
     "homeCls": 0,
     "complexResolverP95Ms": 50.602,
     "hardBotP95Ms": 613.653
   },
   "informationalBudgets": {
-    "distGzipBytes": 14500000,
-    "mainJsGzipBytes": 140000,
-    "largestImageBytes": 2400000,
-    "homeMobileLcpMs": 38000,
+    "distGzipBytes": 11000000,
+    "mainJsGzipBytes": 150000,
+    "largestImageBytes": 2100000,
+    "homeInitialTransferBytes": 400000,
+    "homeMobileLcpMs": 3500,
     "homeCls": 0.02,
     "complexResolverP95Ms": 70,
     "hardBotP95Ms": 800
