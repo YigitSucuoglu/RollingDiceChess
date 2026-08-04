@@ -1,4 +1,6 @@
-import { defineConfig, devices } from "@playwright/test";
+import { chromium, defineConfig, devices } from "@playwright/test";
+
+import { resolveBrowserExecutable } from "./scripts/resolve-browser-executable.js";
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL;
 
@@ -12,6 +14,8 @@ const deploymentURL = new URL(baseURL);
 if (deploymentURL.protocol !== "https:") {
   throw new Error("PLAYWRIGHT_BASE_URL must use HTTPS for deployed E2E tests.");
 }
+
+const browserExecutable = resolveBrowserExecutable(chromium.executablePath());
 
 export default defineConfig({
   testDir: "./tests/deployed",
@@ -29,8 +33,8 @@ export default defineConfig({
     name: "deployed-chromium",
     use: {
       ...devices["Desktop Chrome"],
-      launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-        ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+      launchOptions: browserExecutable.executablePath
+        ? { executablePath: browserExecutable.executablePath }
         : undefined,
     },
   }],

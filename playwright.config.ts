@@ -1,4 +1,8 @@
-import { defineConfig, devices } from "@playwright/test";
+import { chromium, defineConfig, devices } from "@playwright/test";
+
+import { resolveBrowserExecutable } from "./scripts/resolve-browser-executable.js";
+
+const browserExecutable = resolveBrowserExecutable(chromium.executablePath());
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -10,7 +14,7 @@ export default defineConfig({
     baseURL: "http://127.0.0.1:4173",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
-    video: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+    video: browserExecutable.executablePath
       ? "off"
       : "retain-on-failure",
   },
@@ -18,8 +22,8 @@ export default defineConfig({
     name: "chromium",
     use: {
       ...devices["Desktop Chrome"],
-      launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-        ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+      launchOptions: browserExecutable.executablePath
+        ? { executablePath: browserExecutable.executablePath }
         : undefined,
     },
   }],
