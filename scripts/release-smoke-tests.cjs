@@ -5,10 +5,19 @@ const path = require("node:path");
 const projectRoot = path.resolve(__dirname, "..");
 const distRoot = path.join(projectRoot, "dist");
 const indexPath = path.join(distRoot, "index.html");
+const vercelConfigPath = path.join(projectRoot, "vercel.json");
 
 assert.ok(fs.existsSync(distRoot), "dist/ does not exist; run the production build first");
 assert.ok(fs.statSync(distRoot).isDirectory(), "dist is not a directory");
 assert.ok(fs.existsSync(indexPath), "dist/index.html is missing");
+assert.ok(fs.existsSync(vercelConfigPath), "vercel.json is missing");
+
+const vercelConfig = JSON.parse(fs.readFileSync(vercelConfigPath, "utf8"));
+assert.equal(vercelConfig.framework, "vite", "Vercel framework must be Vite");
+assert.equal(vercelConfig.installCommand, "npm ci", "Vercel install command must use the lock file");
+assert.equal(vercelConfig.buildCommand, "npm run build", "Unexpected Vercel build command");
+assert.equal(vercelConfig.outputDirectory, "dist", "Vercel output directory must be dist");
+assert.ok(vercelConfig.rewrites?.some((rewrite) => rewrite.destination === "/index.html"), "SPA rewrite is missing");
 
 const indexHtml = fs.readFileSync(indexPath, "utf8");
 assert.ok(indexHtml.trim().length > 0, "dist/index.html is empty");

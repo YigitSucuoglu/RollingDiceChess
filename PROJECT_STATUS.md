@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.11.3
+v0.11.4
 
 ---
 
@@ -20,6 +20,7 @@ v0.11.3
 ## Completed
 
 ### Quality
+- DEPLOY-01A — Prepare Vercel preview and staging deployment
 - PERF-02 — Optimize Home image delivery and LCP without visible quality loss
 - PERF-01 — Establish production performance, bundle and runtime baseline
 - QA-01 — Add critical engine, gameplay and browser regression coverage
@@ -88,6 +89,7 @@ v0.11.3
 ## Current Sprint
 
 Completed:
+- DEPLOY-01A — Prepare Vercel preview and staging deployment
 - PERF-02 — Optimize Home image delivery and LCP without visible quality loss
 - PERF-01 — Establish production performance, bundle and runtime baseline
 - QA-01 — Add critical engine, gameplay and browser regression coverage
@@ -109,10 +111,10 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. DEPLOY-01 — Add preview and staging deployment
+1. DEPLOY-01B — Verify first live Vercel deployment
 
 Roadmap:
-- DEPLOY-01 — Preview and staging deployment
+- DEPLOY-01B — Verify first live Vercel deployment
 - OBS-01 — Error monitoring foundation
 - ARCH-01 — Platform-neutral and multiplayer-ready core preparation
 - RELEASE-01 — Public web beta
