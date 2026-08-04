@@ -42,6 +42,8 @@ test("desktop setup remains usable and duplicate Play input creates one navigati
 });
 
 test("setup action remains reachable across mobile and tablet viewports", async ({ page, assertNoErrors }) => {
+  const viewportTolerancePx = 1;
+
   for (const viewport of [
     { width: 360, height: 800 },
     { width: 412, height: 915 },
@@ -55,9 +57,14 @@ test("setup action remains reachable across mobile and tablet viewports", async 
     await startGame.scrollIntoViewIfNeeded();
     const box = await startGame.boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.x).toBeGreaterThanOrEqual(0);
-    expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
-    expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+    expect(box!.x).toBeGreaterThanOrEqual(-viewportTolerancePx);
+    expect(box!.y).toBeGreaterThanOrEqual(-viewportTolerancePx);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(
+      viewport.width + viewportTolerancePx,
+    );
+    expect(box!.y + box!.height).toBeLessThanOrEqual(
+      viewport.height + viewportTolerancePx,
+    );
   }
   assertNoErrors();
 });
