@@ -20,6 +20,7 @@ v0.11.4
 ## Completed
 
 ### Quality
+- DEPLOY-01B-HF1 — Add first-game asset loading state and restore mobile Play Setup scrolling
 - DEPLOY-01A — Prepare Vercel preview and staging deployment
 - PERF-02 — Optimize Home image delivery and LCP without visible quality loss
 - PERF-01 — Establish production performance, bundle and runtime baseline
@@ -89,6 +90,7 @@ v0.11.4
 ## Current Sprint
 
 Completed:
+- DEPLOY-01B-HF1 — Add first-game asset loading state and restore mobile Play Setup scrolling
 - DEPLOY-01A — Prepare Vercel preview and staging deployment
 - PERF-02 — Optimize Home image delivery and LCP without visible quality loss
 - PERF-01 — Establish production performance, bundle and runtime baseline

@@ -22,7 +22,8 @@
   "setup": {
     "title": "Play Setup", "timeControl": "Time Control", "playAs": "Play As", "opponent": "Opponent", "bot": "Bot", "local": "Local", "online": "Online", "difficulty": "Bot Difficulty", "pieceSet": "Piece Set", "boardTheme": "Board Theme",
     "descriptions": { "easy": "Random legal moves", "medium": "Tactical move choices", "hard": "Plans the full turn" },
-    "browserTitle": "Play | RouletteChess"
+    "browserTitle": "Play | RouletteChess",
+    "loading": { "preparing": "Preparing the game\u2026", "error": "We couldn't prepare the game assets.", "retry": "Retry", "backToSetup": "Back to Setup" }
   },
   "game": {
     "toMove": "{{color}} to move", "turnSkipped": "No playable pieces — Turn skipped", "muteSound": "Mute sound", "enableSound": "Enable sound", "openHistory": "Open move history", "closeHistory": "Close move history",

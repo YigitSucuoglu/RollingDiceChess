@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -19,7 +19,13 @@ import type { PieceColor } from "../types/Chess";
 import type { BotDifficulty, GameSetup } from "../types/GameSetup";
 import type { BoardTheme } from "../types/BoardTheme";
 import type { PieceSet } from "../types/PieceSet";
+import {
+  gameAssetPreloader,
+  getRequiredGameAssetUrls,
+} from "../services/GameAssetPreloader";
 import "../styles/PlaySetupPage.css";
+
+type LaunchState = "idle" | "loading" | "error";
 
 const BOT_DIFFICULTY_OPTIONS: readonly {
   value: BotDifficulty;
@@ -43,10 +49,28 @@ function PlaySetupPage() {
     useState<PieceSet>(DEFAULT_PIECE_SET);
   const [boardTheme, setBoardTheme] =
     useState<BoardTheme>(DEFAULT_BOARD_THEME);
+  const [launchState, setLaunchState] = useState<LaunchState>("idle");
+  const isSubmittingRef = useRef(false);
+  const isMountedRef = useRef(true);
 
   useEffect(() => { document.title = t("setup.browserTitle"); }, [t]);
+  useEffect(() => {
+    document.body.classList.add("play-setup-active");
+    return () => document.body.classList.remove("play-setup-active");
+  }, []);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
+  useEffect(() => {
+    gameAssetPreloader.preload(getRequiredGameAssetUrls(pieceSet)).catch((error: unknown) => {
+      if (import.meta.env.DEV) console.error("Game asset background preload failed.", error);
+    });
+  }, [pieceSet]);
 
-  const startGame = () => {
+  const startGame = async () => {
+    if (isSubmittingRef.current) return;
+
     const timeControl = TIME_CONTROL_OPTIONS.find(
       (option) => option.id === timeControlId
     );
@@ -54,6 +78,9 @@ function PlaySetupPage() {
     if (!timeControl) {
       return;
     }
+
+    isSubmittingRef.current = true;
+    setLaunchState("loading");
 
     const setup: GameSetup = {
       timeControl,
@@ -65,9 +92,55 @@ function PlaySetupPage() {
       botDifficulty,
     };
 
-    gameManager.newGame(setup);
-    navigate("/game");
+    try {
+      await gameAssetPreloader.preload(getRequiredGameAssetUrls(setup.pieceSet));
+      if (!isMountedRef.current) return;
+      gameManager.newGame(setup);
+      navigate("/game");
+    } catch (error: unknown) {
+      if (import.meta.env.DEV) console.error("Critical game asset preload failed.", error);
+      if (isMountedRef.current) {
+        isSubmittingRef.current = false;
+        setLaunchState("error");
+      }
+    }
   };
+
+  const returnToSetup = () => {
+    isSubmittingRef.current = false;
+    setLaunchState("idle");
+  };
+
+  if (launchState !== "idle") {
+    return (
+      <main className="game-preload-page">
+        <section
+          aria-live="polite"
+          className="game-preload-panel"
+          role={launchState === "loading" ? "status" : "alert"}
+        >
+          {launchState === "loading" ? (
+            <>
+              <span aria-hidden="true" className="game-preload-spinner" />
+              <p>{t("setup.loading.preparing")}</p>
+            </>
+          ) : (
+            <>
+              <h1>{t("setup.loading.error")}</h1>
+              <div className="game-preload-actions">
+                <button className="setup-action primary" onClick={() => void startGame()} type="button">
+                  {t("setup.loading.retry")}
+                </button>
+                <button className="setup-action secondary" onClick={returnToSetup} type="button">
+                  {t("setup.loading.backToSetup")}
+                </button>
+              </div>
+            </>
+          )}
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="play-setup-page">
@@ -211,7 +284,7 @@ function PlaySetupPage() {
         </div>
 
         <div className="play-setup-actions">
-          <button className="setup-action primary" onClick={startGame} type="button">{t("common.actions.startGame")}</button>
+          <button className="setup-action primary" onClick={() => void startGame()} type="button">{t("common.actions.startGame")}</button>
           <button className="setup-action secondary" onClick={() => navigate("/")} type="button">{t("common.actions.back")}</button>
         </div>
       </div>

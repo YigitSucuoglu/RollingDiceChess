@@ -22,7 +22,8 @@
   "setup": {
     "title": "Oyun Ayarları", "timeControl": "Süre Kontrolü", "playAs": "Tarafın", "opponent": "Rakip", "bot": "Bot", "local": "Yerel", "online": "Çevrimiçi", "difficulty": "Bot Zorluğu", "pieceSet": "Taş Seti", "boardTheme": "Tahta Teması",
     "descriptions": { "easy": "Rastgele yasal hamleler", "medium": "Taktik hamle seçimleri", "hard": "Tüm turu planlar" },
-    "browserTitle": "Oyna | RouletteChess"
+    "browserTitle": "Oyna | RouletteChess",
+    "loading": { "preparing": "Oyun haz\u0131rlan\u0131yor\u2026", "error": "Oyun g\u00f6rselleri haz\u0131rlanamad\u0131.", "retry": "Tekrar Dene", "backToSetup": "Ayarlara D\u00f6n" }
   },
   "game": {
     "toMove": "Hamle sırası {{color}}da", "turnSkipped": "Oynanabilir taş yok — Tur atlandı", "muteSound": "Sesi kapat", "enableSound": "Sesi aç", "openHistory": "Hamle geçmişini aç", "closeHistory": "Hamle geçmişini kapat",

@@ -1,14 +1,81 @@
 .play-setup-page{
     width:100%;
-    min-height:100%;
-    padding:clamp(18px,3vh,34px) 20px;
-
-    overflow-y:auto;
+    min-height:100vh;
+    min-height:100dvh;
+    padding:clamp(18px,3vh,34px) 20px calc(clamp(18px,3vh,34px) + env(safe-area-inset-bottom));
 
     background:
         radial-gradient(circle at 50% 0,rgba(132,83,26,.2),transparent 38%),
         linear-gradient(180deg,#201c18,#0e0c0a);
     color:#f8edcf;
+}
+
+body.play-setup-active{
+    overflow-x:hidden;
+    overflow-y:auto;
+}
+
+body.play-setup-active #root{
+    height:auto;
+    min-height:100%;
+}
+
+.game-preload-page{
+    width:100%;
+    min-height:100vh;
+    min-height:100dvh;
+    padding:24px;
+
+    display:grid;
+    place-items:center;
+
+    overflow:hidden;
+    background:
+        radial-gradient(circle at 50% 38%,rgba(132,83,26,.2),transparent 34%),
+        linear-gradient(180deg,#201c18,#0e0c0a);
+    color:#f8edcf;
+}
+
+.game-preload-panel{
+    width:min(440px,100%);
+    display:grid;
+    justify-items:center;
+    gap:20px;
+    text-align:center;
+}
+
+.game-preload-panel h1,
+.game-preload-panel p{
+    color:#f4d895;
+    font-size:clamp(18px,4vw,24px);
+    letter-spacing:.08em;
+}
+
+.game-preload-spinner{
+    width:48px;
+    height:48px;
+    border:4px solid rgba(244,216,149,.2);
+    border-top-color:#e1b85f;
+    border-radius:50%;
+    animation:game-preload-spin .8s linear infinite;
+}
+
+.game-preload-actions{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+}
+
+@keyframes game-preload-spin{
+    to{ transform:rotate(1turn); }
+}
+
+@media (prefers-reduced-motion:reduce){
+    .game-preload-spinner{
+        animation:none;
+        border-color:rgba(244,216,149,.3);
+        border-top-color:#e1b85f;
+    }
 }
 
 .play-setup-shell{
@@ -342,5 +409,10 @@
 
     .setup-action{
         width:100%;
+    }
+
+    .game-preload-actions{
+        width:100%;
+        flex-direction:column;
     }
 }
