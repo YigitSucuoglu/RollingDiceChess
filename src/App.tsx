@@ -6,10 +6,12 @@ import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
 import PlaySetupPage from "./pages/PlaySetupPage";
 import HowToPlayPage from "./pages/HowToPlayPage";
+import ObservabilityRouteTracker from "./observability/ObservabilityRouteTracker";
 
 function App() {
   return (
     <BrowserRouter>
+      <ObservabilityRouteTracker />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/how-to-play" element={<HowToPlayPage />} />

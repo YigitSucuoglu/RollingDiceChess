@@ -1,6 +1,10 @@
 import { expect, test } from "./fixtures";
 
 test("critical routes and back navigation render without browser errors", async ({ page, assertNoErrors }) => {
+  const monitoringRequests: string[] = [];
+  page.on("request", (request) => {
+    if (/sentry|ingest/i.test(request.url())) monitoringRequests.push(request.url());
+  });
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Roulette");
   const homeMachine = page.locator(".home-machine-frame");
@@ -24,4 +28,5 @@ test("critical routes and back navigation render without browser errors", async 
   await page.goto("/unknown-route");
   await expect(page.locator("body")).toBeVisible();
   assertNoErrors();
+  expect(monitoringRequests).toEqual([]);
 });

@@ -23,6 +23,7 @@ import {
   gameAssetPreloader,
   getRequiredGameAssetUrls,
 } from "../services/GameAssetPreloader";
+import { captureException } from "../observability/Observability";
 import "../styles/PlaySetupPage.css";
 
 type LaunchState = "idle" | "loading" | "error";
@@ -99,6 +100,11 @@ function PlaySetupPage() {
       navigate("/game");
     } catch (error: unknown) {
       if (import.meta.env.DEV) console.error("Critical game asset preload failed.", error);
+      captureException(error, {
+        area: "game-ui",
+        operation: "critical-asset-preload",
+        route: "/play",
+      });
       if (isMountedRef.current) {
         isSubmittingRef.current = false;
         setLaunchState("error");

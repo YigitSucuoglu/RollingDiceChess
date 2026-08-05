@@ -32,6 +32,9 @@
   "result": {
     "gameOver": "Oyun bitti", "wins": "{{color}} kazandı", "kingCaptured": "Şah yakalandı", "timeout": "{{color}}ın süresi doldu", "experienceEarned": "Kazanılan deneyim", "progressToward": "Seviye {{level}} için XP ilerlemesi", "nextLevel": "Sonraki seviye", "levelUp": "Seviye atlandı"
   },
+  "errors": {
+    "fatal": { "title": "Bir \u015feyler ters gitti", "message": "RouletteChess beklenmeyen bir hatayla kar\u015f\u0131la\u015ft\u0131.", "tryAgain": "Tekrar Dene", "backHome": "Ana Sayfaya D\u00f6n" }
+  },
   "profile": {
     "browserTitle": "Profil | RouletteChess", "eyebrow": "Çevrimdışı oyuncu merkezi", "title": "Profil", "player": "Oyuncu", "joined": "Katılım: {{date}}", "levelProgress": "Seviye ilerlemesi", "progressLabel": "Seviye {{level}} deneyim ilerlemesi",
     "careerOverview": "Kariyer özeti", "generalStatistics": "Genel İstatistikler", "rouletteSignature": "Rulet imzan", "rouletteStatistics": "RouletteChess İstatistikleri",

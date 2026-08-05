@@ -32,6 +32,9 @@
   "result": {
     "gameOver": "Game over", "wins": "{{color}} wins", "kingCaptured": "King captured", "timeout": "{{color}} ran out of time", "experienceEarned": "Experience earned", "progressToward": "XP progress toward Level {{level}}", "nextLevel": "Next level", "levelUp": "Level up"
   },
+  "errors": {
+    "fatal": { "title": "Something went wrong", "message": "RouletteChess encountered an unexpected error.", "tryAgain": "Try Again", "backHome": "Back to Home" }
+  },
   "profile": {
     "browserTitle": "Profile | RouletteChess", "eyebrow": "Offline player hub", "title": "Profile", "player": "Player", "joined": "Joined {{date}}", "levelProgress": "Level progress", "progressLabel": "Level {{level}} experience progress",
     "careerOverview": "Career overview", "generalStatistics": "General Statistics", "rouletteSignature": "Your roulette signature", "rouletteStatistics": "RouletteChess Statistics",

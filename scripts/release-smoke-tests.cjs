@@ -53,6 +53,7 @@ function walkFiles(directory) {
 const buildFiles = walkFiles(distRoot);
 const relativeBuildFiles = buildFiles.map((file) => path.relative(distRoot, file).replaceAll("\\", "/"));
 assert.equal(relativeBuildFiles.some((file) => file.toLowerCase().endsWith(".wav")), false, "Removed WAV assets entered the build");
+assert.equal(relativeBuildFiles.some((file) => file.toLowerCase().endsWith(".map")), false, "Public source maps entered the build");
 assert.equal(relativeBuildFiles.some((file) => file.includes(".artifacts") || /(?:screenshot|comparison)/i.test(file)), false, "Cleanup artifacts entered the build");
 
 const requiredSlotPrefixes = [
@@ -96,7 +97,9 @@ assert.ok(inlineSvgCount >= 24, `Expected embedded Classic/Retro SVG assets; fou
 const inspectableExtensions = new Set([".html", ".js", ".css", ".svg", ".json", ".map"]);
 for (const file of buildFiles.filter((candidate) => inspectableExtensions.has(path.extname(candidate).toLowerCase()))) {
   const contents = fs.readFileSync(file, "utf8");
-  assert.equal(/[A-Za-z]:\\/.test(contents), false, `Absolute Windows path found in ${path.relative(distRoot, file)}`);
+  // Require a directory segment and a second separator so regex source such as
+  // Sentry's `/Id:\d+/` is not mistaken for an absolute Windows filesystem path.
+  assert.equal(/[A-Za-z]:\\[^\\/\r\n]{1,128}\\/.test(contents), false, `Absolute Windows path found in ${path.relative(distRoot, file)}`);
   assert.equal(/(?:^|["'(\s])[A-Za-z]:\//m.test(contents), false, `Forward-slash Windows path found in ${path.relative(distRoot, file)}`);
   assert.equal(/(?:C|D):\/Users\//i.test(contents), false, `Development user path found in ${path.relative(distRoot, file)}`);
 }

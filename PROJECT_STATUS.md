@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.11.4
+v0.11.5
 
 ---
 
@@ -20,6 +20,7 @@ v0.11.4
 ## Completed
 
 ### Quality
+- OBS-01A — Add privacy-safe error boundary and Sentry-ready observability foundation
 - DEPLOY-01B-HF1 — Add first-game asset loading state and restore mobile Play Setup scrolling
 - DEPLOY-01A — Prepare Vercel preview and staging deployment
 - PERF-02 — Optimize Home image delivery and LCP without visible quality loss
@@ -90,6 +91,7 @@ v0.11.4
 ## Current Sprint
 
 Completed:
+- OBS-01A — Add privacy-safe error boundary and Sentry-ready observability foundation
 - DEPLOY-01B-HF1 — Add first-game asset loading state and restore mobile Play Setup scrolling
 - DEPLOY-01A — Prepare Vercel preview and staging deployment
 - PERF-02 — Optimize Home image delivery and LCP without visible quality loss
@@ -113,11 +115,10 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. DEPLOY-01B — Verify first live Vercel deployment
+1. OBS-01B — Configure Sentry and verify live production error reporting
 
 Roadmap:
-- DEPLOY-01B — Verify first live Vercel deployment
-- OBS-01 — Error monitoring foundation
+- OBS-01B — Configure Sentry and verify live production error reporting
 - ARCH-01 — Platform-neutral and multiplayer-ready core preparation
 - RELEASE-01 — Public web beta
 
@@ -126,7 +127,7 @@ Backlog:
 - FINAL-POLISH — Revisit Game slot machine sizing and reel readability after core features are complete.
 
 Performance Backlog:
-- ASSET-PERF-01 — Measure and optimize remaining Game and Piece Set PNG delivery
+- GAME-ASSET-PERF-01 — Measure and optimize remaining Game and Piece Set PNG delivery
 - AI-PERF-01 — Profile Hard bot sequence evaluation latency
 - PERF-03 — Measure route-level lazy loading
 - RENDER-PERF-01 — Profile clock-driven Board renders
@@ -168,6 +169,7 @@ Performance Backlog:
 - Result UI receives idempotent pre/post-match XP snapshots and service-generated animation segments; turn-skipped feedback is anchored to the board center.
 - Settings exposes only working Sound Effects, language preference, and repository-backed offline profile reset controls.
 - English is the source and fallback locale; Turkish can be selected instantly and persists through the existing settings repository.
+- Production observability is centralized, privacy-scrubbed, and a complete no-op without a production DSN; the React error boundary remains functional independently of remote reporting.
 
 
 ## Future UI Polish
