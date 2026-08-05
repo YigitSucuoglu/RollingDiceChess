@@ -32,6 +32,9 @@ export default defineConfig(({ command, mode }) => {
       __DEPLOY_ENVIRONMENT__: JSON.stringify(
         process.env.VITE_DEPLOY_ENV ?? process.env.VERCEL_ENV ?? mode,
       ),
+      __OBSERVABILITY_TEST_MODE__: JSON.stringify(
+        process.env.VITE_OBSERVABILITY_TEST_MODE === 'true',
+      ),
     },
     plugins: [
       react(),

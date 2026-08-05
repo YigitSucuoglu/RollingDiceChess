@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
@@ -7,6 +8,9 @@ import ProfilePage from "./pages/ProfilePage";
 import PlaySetupPage from "./pages/PlaySetupPage";
 import HowToPlayPage from "./pages/HowToPlayPage";
 import ObservabilityRouteTracker from "./observability/ObservabilityRouteTracker";
+const ObservabilityVerificationPage = __OBSERVABILITY_TEST_MODE__
+  ? lazy(() => import("./observability/ObservabilityVerificationPage"))
+  : null;
 
 function App() {
   return (
@@ -19,6 +23,16 @@ function App() {
         <Route path="/game" element={<GamePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        {ObservabilityVerificationPage ? (
+          <Route
+            path="/__observability-test"
+            element={(
+              <Suspense fallback={null}>
+                <ObservabilityVerificationPage />
+              </Suspense>
+            )}
+          />
+        ) : null}
       </Routes>
     </BrowserRouter>
   );

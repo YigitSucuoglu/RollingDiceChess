@@ -27,6 +27,8 @@ test("critical routes and back navigation render without browser errors", async 
   await expect(page).toHaveURL(/\/$/);
   await page.goto("/unknown-route");
   await expect(page.locator("body")).toBeVisible();
+  await page.goto("/__observability-test");
+  await expect(page.getByRole("heading", { name: "OBS-01B live verification" })).toHaveCount(0);
   assertNoErrors();
   expect(monitoringRequests).toEqual([]);
 });
