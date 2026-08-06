@@ -63,14 +63,18 @@ A React Native client can potentially reuse TypeScript domain/application contra
 
 ## Incremental migration and remaining debt
 
-ARCH-01 deliberately migrates session creation and Board subscription first. Board still invokes several `Game` methods directly and owns current bot/roll/skip/clock presentation orchestration. A follow-up should move those intents to `MatchSession.requestAction`, add bot execution/session events, and expose a React session hook without changing timings. The engine folder is the established rule implementation and has not been cosmetically relocated under `domain/`.
+ARCH-01 deliberately migrated session creation and Board subscription first. ARCH-02A now routes player square selection, selection clearing/change, legal-target choice, and move submission through `MatchSession.requestAction`. `LocalBotMatchSession` validates the JSON-safe intent, delegates rules to `Game`, publishes one immutable authoritative snapshot for an accepted action, and returns typed expected rejections without reporting them as errors. Board renders its board, selection, legal hints, and move history from that snapshot and never mutates them optimistically.
+
+The action surface is Promise-based even though the local adapter resolves immediately. A future online adapter can send the same intent, await server acceptance, and publish the returned authoritative snapshot. Board uses a narrow in-flight click guard to prevent duplicate submissions while leaving roll and bot locks unchanged.
+
+Board still obtains the compatibility `Game` instance for roll reveal, skip timing, bot execution, clock orchestration, result/profile integration, and other presentation coordination outside ARCH-02A. `GameManager.getSession()` remains the canonical one-session-per-match path, while `getGame()` is retained for those incremental consumers. The engine folder remains the established rule implementation and has not been cosmetically relocated under `domain/`.
 
 Other follow-ups:
 
-1. Separate durable session lifecycle from roll-animation state through an application coordinator.
-2. Add snapshot restoration/validation before any online transport.
-3. Define server action rejection/reconciliation and monotonic snapshot revision.
-4. Decide authoritative clock timestamp protocol and drift correction.
+1. **ARCH-02B — Move roll lifecycle orchestration behind MatchSession.** Keep presentation animation separate from authoritative roll state.
+2. **ARCH-02C — Move bot orchestration behind MatchSession.** Preserve current bot selection and pacing.
+3. **ARCH-02D — Move clock/turn transition orchestration behind MatchSession.** Define authoritative timestamps before online transport.
+4. Add snapshot restoration/validation, action reconciliation, and monotonic snapshot revision before online transport.
 5. Move profile match-ID/time generation behind injected ports; it is infrastructure and not part of game authority.
 6. Add room/lobby DTOs only alongside an agreed protocol.
 
@@ -78,4 +82,4 @@ No WebSocket, polling, room, authentication, server mock, networking dependency,
 
 ## Architecture guard
 
-`npm run test:architecture` scans domain, application, and engine sources for React/presentation/style imports and direct DOM/storage usage. It also prevents domain contracts from importing engine implementations. The guard is intentionally small and runs within `npm test`.
+`npm run test:architecture` scans domain, application, and engine sources for React/presentation/style imports and direct DOM/storage usage. It prevents domain contracts from importing engine implementations and specifically rejects direct `Game.selectSquare` or `Game.makeMove` calls in Board. This targeted rule does not claim that presentation is fully detached from the compatibility engine. The guard runs within `npm test`.

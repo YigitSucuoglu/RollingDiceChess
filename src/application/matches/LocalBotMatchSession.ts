@@ -34,10 +34,7 @@ export default class LocalBotMatchSession implements MatchSession {
   }
 
   public getSnapshot(): MatchSnapshot {
-    const history = this.game.moveHistory.getSnapshot().flatMap((turn) => [
-      ...turn.whiteMoves,
-      ...turn.blackMoves,
-    ]);
+    const history = this.game.moveHistory.getSnapshot();
 
     return {
       schemaVersion: 1,
@@ -51,7 +48,7 @@ export default class LocalBotMatchSession implements MatchSession {
         : null)),
       currentRoll: [...this.game.currentRoll],
       remainingRights: this.game.turnRights.getSnapshot(),
-      selectableMoves: this.game.getSelectableMoves().map((move) => ({
+      selectableMoves: this.game.possibleMoves.map((move) => ({
         ...move,
         from: { ...move.from },
         to: { ...move.to },
@@ -71,19 +68,47 @@ export default class LocalBotMatchSession implements MatchSession {
   }
 
   public async requestAction(action: MatchAction): Promise<MatchActionResult> {
-    if (this.disposed) return { accepted: false, snapshot: this.getSnapshot() };
+    if (this.disposed) return this.reject("session-disposed");
+
+    if (action.schemaVersion !== 1) return this.reject("invalid-action");
+
+    if (this.game.winner) return this.reject("invalid-action");
+
+    if (
+      (action.type === "SELECT_SQUARE" ||
+        action.type === "CLEAR_SELECTION" ||
+        action.type === "MAKE_MOVE") &&
+      this.game.currentTurn !== this.configuration.playerColor
+    ) {
+      return this.reject("not-active-player");
+    }
 
     let accepted = false;
     switch (action.type) {
-      case "SELECT_SQUARE":
-        this.game.selectSquare(action.row, action.col);
-        accepted = this.game.selectedSquare?.row === action.row &&
-          this.game.selectedSquare.col === action.col;
+      case "SELECT_SQUARE": {
+        if (!this.isPosition(action.position)) return this.reject("invalid-action");
+        const previousSelection = this.game.selectedSquare;
+        this.game.selectSquare(action.position.row, action.position.col);
+        accepted = !this.positionsMatch(previousSelection, this.game.selectedSquare);
+        break;
+      }
+      case "CLEAR_SELECTION":
+        accepted = this.game.clearSelection();
         break;
       case "MAKE_MOVE": {
-        const before = this.game.lastMove;
-        this.game.makeMove(action.move);
-        accepted = this.game.lastMove !== before;
+        if (
+          typeof action.pieceId !== "string" || action.pieceId.length === 0 ||
+          !this.isPosition(action.from) || !this.isPosition(action.to)
+        ) {
+          return this.reject("invalid-action");
+        }
+        const approvedMove = this.game.possibleMoves.find((move) =>
+          move.pieceId === action.pieceId &&
+          this.positionsMatch(move.from, action.from) &&
+          this.positionsMatch(move.to, action.to));
+        if (!approvedMove) return this.reject("illegal-move");
+        this.game.makeMove(approvedMove);
+        accepted = this.game.lastMove === approvedMove;
         break;
       }
       case "SKIP_UNPLAYABLE_TURN":
@@ -94,8 +119,10 @@ export default class LocalBotMatchSession implements MatchSession {
         break;
     }
 
-    if (accepted) this.publish();
-    return { accepted, snapshot: this.getSnapshot() };
+    if (!accepted) return this.reject("invalid-action");
+    const snapshot = this.getSnapshot();
+    this.publish(snapshot);
+    return { accepted: true, snapshot };
   }
 
   public getMatchXpProgression(): MatchXpProgressionResult | null {
@@ -110,9 +137,24 @@ export default class LocalBotMatchSession implements MatchSession {
     this.game.dispose();
   }
 
-  private publish(): void {
+  private publish(snapshot: MatchSnapshot = this.getSnapshot()): void {
     if (this.disposed) return;
-    const snapshot = this.getSnapshot();
     for (const listener of this.listeners) listener(snapshot);
+  }
+
+  private reject(reason: "illegal-move" | "invalid-action" | "not-active-player" | "session-disposed"): MatchActionResult {
+    return { accepted: false, reason, snapshot: this.getSnapshot() };
+  }
+
+  private isPosition(value: Readonly<{ row: number; col: number }>): boolean {
+    return Number.isInteger(value.row) && Number.isInteger(value.col) &&
+      value.row >= 0 && value.row < 8 && value.col >= 0 && value.col < 8;
+  }
+
+  private positionsMatch(
+    first: Readonly<{ row: number; col: number }> | null,
+    second: Readonly<{ row: number; col: number }> | null,
+  ): boolean {
+    return first?.row === second?.row && first?.col === second?.col;
   }
 }

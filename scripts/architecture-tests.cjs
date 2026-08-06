@@ -28,4 +28,17 @@ for (const file of sourceFiles) {
 }
 
 assert.deepEqual(violations, [], `Architecture boundary violations:\n${violations.join("\n")}`);
+
+const boardSource = fs.readFileSync("src/components/Board/Board.tsx", "utf8");
+const migratedBoardMutationViolations = [
+  [/\bgame\.selectSquare\s*\(/, "Board directly calls Game.selectSquare"],
+  [/\bgame\.makeMove\s*\(/, "Board directly calls Game.makeMove"],
+].filter(([pattern]) => pattern.test(boardSource)).map(([, label]) => label);
+
+assert.deepEqual(
+  migratedBoardMutationViolations,
+  [],
+  `Migrated Board action violations:\n${migratedBoardMutationViolations.join("\n")}`,
+);
 console.log(`Architecture boundaries passed: ${sourceFiles.length} domain/application/engine files checked.`);
+console.log("Board selection and move mutations are routed through MatchSession.");

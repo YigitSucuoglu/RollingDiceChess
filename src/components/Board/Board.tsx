@@ -15,6 +15,7 @@ import GameResultModal from "../GameResultModal/GameResultModal";
 import MoveHistoryPanel from "../MoveHistory/MoveHistoryPanel";
 import ChessClockPanel from "../ChessClock/ChessClockPanel";
 import type { ChessClockSnapshot } from "../../engine/ChessClock";
+import type { MatchSnapshot } from "../../domain/contracts/MatchContracts";
 import { BOARD_THEME_CATALOG } from "../../config/boardThemes";
 import { ROLL_TIMING } from "../../config/rollTiming";
 import soundManager from "../../services/SoundManager";
@@ -71,6 +72,9 @@ function Board() {
   const { t } = useTranslation();
 
   const [, setRefresh] = useState(0);
+  const [matchSnapshot, setMatchSnapshot] = useState<MatchSnapshot>(() =>
+    session.getSnapshot()
+  );
   const [isMoveHistoryOpen, setIsMoveHistoryOpen] = useState(false);
   const [isMoveHistoryMounted, setIsMoveHistoryMounted] = useState(false);
   const [isSoundEnabled, setIsSoundEnabled] = useState(
@@ -85,6 +89,7 @@ function Board() {
   const spinStartedForRollRef = useRef<readonly PieceType[] | null>(null);
   const botTurnInProgressRef = useRef(false);
   const botTurnAbortControllerRef = useRef<AbortController | null>(null);
+  const playerActionInFlightRef = useRef(false);
   const lastSoundedMoveRef = useRef({ game, timestamp: 0 });
   const resultSoundGameRef = useRef<object | null>(null);
   const [isTurnSkippedMessageVisible, setIsTurnSkippedMessageVisible] =
@@ -114,11 +119,11 @@ function Board() {
     !hasPlayableMoves ||
     isTurnSkippedMessageVisible ||
     rollPhase !== "resolved";
-  const moveHistory = game.moveHistory.getSnapshot();
+  const moveHistory = matchSnapshot.moveHistory;
   const boardTheme = BOARD_THEME_CATALOG[game.setup.boardTheme];
 
   useEffect(
-    () => session.subscribe(() => setRefresh((value) => value + 1)),
+    () => session.subscribe(setMatchSnapshot),
     [session]
   );
 
@@ -340,7 +345,7 @@ function Board() {
 
     void game
       .playBotTurn(
-        () => setRefresh((value) => value + 1),
+        () => setMatchSnapshot(session.getSnapshot()),
         abortController.signal
       )
       .finally(() => {
@@ -348,11 +353,12 @@ function Board() {
           botTurnAbortControllerRef.current = null;
         }
         botTurnInProgressRef.current = false;
+        setMatchSnapshot(session.getSnapshot());
         setRefresh((value) => value + 1);
       });
 
     return () => abortController.abort();
-  }, [game, game.winner, hasPlayableMoves, rollPhase]);
+  }, [game, game.winner, hasPlayableMoves, rollPhase, session]);
 
   const toggleMoveHistory = () => {
     if (historyCloseTimeoutRef.current !== null) {
@@ -403,6 +409,7 @@ function Board() {
     botTurnAbortControllerRef.current?.abort();
     soundManager.stopAll();
     gameManager.newGame(game.setup);
+    const newSession = gameManager.getSession();
     const newGame = gameManager.getGame();
 
     spinStartedForRollRef.current = null;
@@ -410,6 +417,7 @@ function Board() {
     resetMoveHistory();
     setIsTurnSkippedMessageVisible(false);
     setClockSnapshot(newGame.clock.getSnapshot());
+    setMatchSnapshot(newSession.getSnapshot());
     setRollAnimation((state) => ({
       displayedRoll: INITIAL_REEL_DISPLAY,
       phase: "ready",
@@ -439,13 +447,13 @@ function Board() {
     for (let displayCol = 0; displayCol < 8; displayCol++) {
       const row = displayIndexes[displayRow];
       const col = displayIndexes[displayCol];
-      const piece = game.board.squares[row][col];
+      const piece = matchSnapshot.board[row][col];
 
       const isSelected =
-        game.selectedSquare?.row === row &&
-        game.selectedSquare?.col === col;
+        matchSnapshot.selectedSquare?.row === row &&
+        matchSnapshot.selectedSquare?.col === col;
 
-      const isPossibleMove = game.possibleMoves.some(
+      const isPossibleMove = matchSnapshot.selectableMoves.some(
         (move) => move.to.row === row && move.to.col === col
       );
 
@@ -459,26 +467,33 @@ function Board() {
             isSelected ? "selected" : ""
           }`}
           onClick={() => {
-            if (isInputLocked) {
+            if (isInputLocked || playerActionInFlightRef.current) {
               return;
             }
 
-            const move = game.possibleMoves.find(
+            const move = matchSnapshot.selectableMoves.find(
               (m) => m.to.row === row && m.to.col === col
             );
+            const action = move
+              ? {
+                  schemaVersion: 1 as const,
+                  type: "MAKE_MOVE" as const,
+                  pieceId: move.pieceId,
+                  from: { ...move.from },
+                  to: { ...move.to },
+                }
+              : {
+                  schemaVersion: 1 as const,
+                  type: "SELECT_SQUARE" as const,
+                  position: { row, col },
+                };
 
-            if (move) {
-
-              game.makeMove(move);
-
-              setRefresh((v) => v + 1);
-
-              return;
-            }
-
-            game.selectSquare(row, col);
-
-            setRefresh((v) => v + 1);
+            playerActionInFlightRef.current = true;
+            void session.requestAction(action)
+              .then((result) => setMatchSnapshot(result.snapshot))
+              .finally(() => {
+                playerActionInFlightRef.current = false;
+              });
           }}
         >
           {piece && <Piece piece={piece} pieceSet={game.setup.pieceSet} />}

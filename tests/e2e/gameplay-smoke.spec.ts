@@ -10,9 +10,16 @@ test("deterministic human roll animates, resolves and records a legal move", asy
   await expect(page.locator(".slot-machine-lever-layer")).toHaveClass(/is-pulling/);
   await expect(page.locator(".slot-machine-frame")).toHaveAttribute("data-roll-phase", "spinning");
   await expect(page.locator(".slot-machine-frame")).toHaveAttribute("data-roll-phase", "resolved", { timeout: 3_000 });
+  await expect(page.locator(".chess-clock.is-active")).toHaveCount(1);
 
-  await page.locator('[data-square="e2"]').click();
-  await page.locator('[data-square="e4"]').click();
+  const e2 = page.locator('[data-square="e2"]');
+  const e4 = page.locator('[data-square="e4"]');
+  await e2.click();
+  await expect(e2).toHaveClass(/selected/);
+  await expect(page.locator(".move-dot")).not.toHaveCount(0);
+  await e4.dblclick();
+  await expect(e4.locator(".piece")).toBeVisible();
+  await expect(e2.locator(".piece")).toHaveCount(0);
   await page.locator('[data-square="e4"]').click();
   await page.locator('[data-square="e5"]').click();
   await page.locator('[data-square="e5"]').click();

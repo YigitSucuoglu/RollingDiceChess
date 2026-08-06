@@ -79,6 +79,12 @@ export interface MatchHistoryEntry {
   readonly timestamp: number;
 }
 
+export interface MatchTurnHistory {
+  readonly turnNumber: number;
+  readonly whiteMoves: readonly MatchHistoryEntry[];
+  readonly blackMoves: readonly MatchHistoryEntry[];
+}
+
 export interface MatchSnapshot {
   readonly schemaVersion: typeof MATCH_SNAPSHOT_SCHEMA_VERSION;
   readonly mode: GameMode;
@@ -94,19 +100,35 @@ export interface MatchSnapshot {
   readonly clock: MatchClockSnapshot;
   readonly winner: PieceColor | null;
   readonly resultReason: GameResultReason | null;
-  readonly moveHistory: readonly MatchHistoryEntry[];
+  readonly moveHistory: readonly MatchTurnHistory[];
 }
 
 export type MatchAction =
-  | { readonly schemaVersion: 1; readonly type: "SELECT_SQUARE"; readonly row: number; readonly col: number }
-  | { readonly schemaVersion: 1; readonly type: "MAKE_MOVE"; readonly move: Move }
+  | { readonly schemaVersion: 1; readonly type: "SELECT_SQUARE"; readonly position: Readonly<Position> }
+  | { readonly schemaVersion: 1; readonly type: "CLEAR_SELECTION" }
+  | {
+      readonly schemaVersion: 1;
+      readonly type: "MAKE_MOVE";
+      readonly pieceId: string;
+      readonly from: Readonly<Position>;
+      readonly to: Readonly<Position>;
+    }
   | { readonly schemaVersion: 1; readonly type: "SKIP_UNPLAYABLE_TURN" }
   | { readonly schemaVersion: 1; readonly type: "START_CLOCK" };
 
-export interface MatchActionResult {
-  readonly accepted: boolean;
-  readonly snapshot: MatchSnapshot;
-}
+export type MatchActionRejectionReason =
+  | "illegal-move"
+  | "invalid-action"
+  | "not-active-player"
+  | "session-disposed";
+
+export type MatchActionResult =
+  | { readonly accepted: true; readonly snapshot: MatchSnapshot }
+  | {
+      readonly accepted: false;
+      readonly reason: MatchActionRejectionReason;
+      readonly snapshot: MatchSnapshot;
+    };
 
 export type MatchListener = (snapshot: MatchSnapshot) => void;
 export type Unsubscribe = () => void;

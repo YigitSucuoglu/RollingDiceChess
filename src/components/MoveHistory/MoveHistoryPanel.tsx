@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
-import type { TurnHistory } from "../../engine/MoveHistory";
+import type { MatchTurnHistory } from "../../domain/contracts/MatchContracts";
 import "./MoveHistoryPanel.css";
 import { useTranslation } from "react-i18next";
 
 interface MoveHistoryPanelProps {
-  history: readonly TurnHistory[];
+  history: readonly MatchTurnHistory[];
 }
 
 const MOVE_SLOTS = [0, 1, 2] as const;

@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.11.6
+v0.11.7
 
 ---
 
@@ -30,6 +30,7 @@ v0.11.6
 - RELEASE-QUALITY-01 — Add automated validation, production smoke checks and GitHub Actions quality gates
 
 ### Engine
+- ARCH-02A — Route Board selection and move intents through MatchSession
 - ARCH-01 — Prepare local match architecture for future server-authoritative multiplayer and mobile clients
 - Classical chess rules completed
 - TurnResolver completed
@@ -93,6 +94,7 @@ v0.11.6
 ## Current Sprint
 
 Completed:
+- ARCH-02A — Route Board selection and move intents through MatchSession
 - ARCH-01 — Prepare local match architecture for future server-authoritative multiplayer and mobile clients
 - OBS-01B — Configure and verify live production error reporting
 - OBS-01A — Add privacy-safe error boundary and Sentry-ready observability foundation
@@ -119,13 +121,15 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. RELEASE-01 — Prepare RouletteChess public web beta
+1. ARCH-02B — Move roll lifecycle orchestration behind MatchSession
 
 Roadmap:
+- ARCH-02B — Move roll lifecycle orchestration behind MatchSession
+- ARCH-02C — Move bot orchestration behind MatchSession
+- ARCH-02D — Move clock/turn transition orchestration behind MatchSession
 - RELEASE-01 — Public web beta
 
 Backlog:
-- ARCH-02 — Migrate remaining Board roll, bot, clock, and move orchestration to MatchSession actions
 - SOUND-01B — Add production sound assets to the preserved sound architecture
 - FINAL-POLISH — Revisit Game slot machine sizing and reel readability after core features are complete.
 
@@ -175,6 +179,7 @@ Performance Backlog:
 - Production observability is centralized, privacy-scrubbed, and a complete no-op without a production DSN; the React error boundary remains functional independently of remote reporting.
 - OBS-01B live verification confirmed handled and Error Boundary events in production, matching environment/release metadata, and original-source resolution through uploaded source maps; the temporary Production test flag was removed and the application was redeployed.
 - Local bot matches are assembled through a versioned MatchSession boundary and explicit platform adapters; future online sessions must use a separate server-authoritative adapter rather than local client authority.
+- Board selection, legal-target hints, and player move submission now flow through MatchSession actions and immutable snapshots; roll, bot, and clock orchestration remain intentionally incremental.
 
 
 ## Future UI Polish

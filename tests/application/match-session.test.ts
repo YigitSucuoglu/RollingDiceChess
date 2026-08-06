@@ -46,14 +46,19 @@ describe("LocalBotMatchSession", () => {
     const selection = await session.requestAction({
       schemaVersion: 1,
       type: "SELECT_SQUARE",
-      row: 6,
-      col: 0,
+      position: { row: 6, col: 0 },
     });
     expect(selection.accepted).toBe(true);
     const move = selection.snapshot.selectableMoves.find(
       (candidate) => candidate.from.row === 6 && candidate.from.col === 0,
     )!;
-    const result = await session.requestAction({ schemaVersion: 1, type: "MAKE_MOVE", move });
+    const result = await session.requestAction({
+      schemaVersion: 1,
+      type: "MAKE_MOVE",
+      pieceId: move.pieceId,
+      from: move.from,
+      to: move.to,
+    });
     expect(result.accepted).toBe(true);
     expect(session.game.board.squares[move.to.row][move.to.col]?.type).toBe("pawn");
     expect(listener).toHaveBeenCalledTimes(2);

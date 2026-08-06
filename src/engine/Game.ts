@@ -146,6 +146,15 @@ export default class Game {
     this.selectedSquare = { row, col };
     this.possibleMoves = approvedMoves;
   }
+
+  public clearSelection(): boolean {
+    if (this.selectedSquare === null && this.possibleMoves.length === 0) {
+      return false;
+    }
+    this.selectedSquare = null;
+    this.possibleMoves = [];
+    return true;
+  }
   
   public currentTurn: PieceColor = "white";
 
