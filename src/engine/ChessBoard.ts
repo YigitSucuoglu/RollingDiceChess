@@ -1,10 +1,16 @@
 import type { Piece } from "../types/Chess";
+import type { IdGenerator } from "../domain/contracts/PlatformPorts";
 
 export default class ChessBoard {
 
   public squares: (Piece | null)[][];
 
-  constructor() {
+  private readonly idGenerator: IdGenerator;
+
+  constructor(idGenerator?: IdGenerator) {
+
+    let nextPieceId = 0;
+    this.idGenerator = idGenerator ?? { nextId: () => `piece-${++nextPieceId}` };
 
     this.squares = Array.from(
       { length: 8 },
@@ -36,7 +42,7 @@ export default class ChessBoard {
     col: number
   ): Piece {
     return {
-      id: crypto.randomUUID(),
+      id: this.idGenerator.nextId(),
       type,
       color,
       hasMoved: false,

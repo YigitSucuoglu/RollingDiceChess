@@ -23,6 +23,14 @@ import {
   NULL_GAME_EVENT_SINK,
   type GameEventSink,
 } from "./GameEvents";
+import type { IdGenerator, RandomSource, Scheduler, TimeSource } from "../domain/contracts/PlatformPorts";
+
+export interface GameDependencies {
+  readonly idGenerator?: IdGenerator;
+  readonly random?: RandomSource;
+  readonly scheduler?: Scheduler;
+  readonly timeSource?: TimeSource;
+}
 
 export default class Game {
   public board: ChessBoard;
@@ -65,21 +73,22 @@ export default class Game {
   constructor(
     setupInput: GameSetupInput = createDefaultGameSetup(),
     bot?: Bot,
-    eventSink: GameEventSink = NULL_GAME_EVENT_SINK
+    eventSink: GameEventSink = NULL_GAME_EVENT_SINK,
+    dependencies: GameDependencies = {},
   ) {
     const setup = normalizeGameSetup(setupInput);
-    this.board = new ChessBoard();
+    this.board = new ChessBoard(dependencies.idGenerator);
     this.selectedSquare = null;
     this.possibleMoves = [];
     this.lastMove = null;
     this.winner = null;
     this.resultReason = null;
     this.turnResolver = new TurnResolver();
-    this.diceEngine = new DiceEngine();
+    this.diceEngine = new DiceEngine(dependencies.random);
     this.moveHistory = new MoveHistory();
     this.setup = setup;
     this.bot =
-      bot ?? BotFactory.create(setup.botColor, setup.botDifficulty);
+      bot ?? BotFactory.create(setup.botColor, setup.botDifficulty, dependencies.random);
     this.listeners = new Set();
     this.disposed = false;
     this.eventSink = eventSink;
@@ -87,7 +96,9 @@ export default class Game {
     this.clock = new ChessClock(
       setup.timeControl.initialMinutes,
       setup.timeControl.incrementSeconds,
-      (timedOutColor) => this.handleTimeout(timedOutColor)
+      (timedOutColor) => this.handleTimeout(timedOutColor),
+      dependencies.timeSource?.now,
+      dependencies.scheduler,
     );
     this.initializeTurnRights();
   }

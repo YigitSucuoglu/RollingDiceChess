@@ -1,0 +1,119 @@
+import type {
+  GameResultReason,
+  Move,
+  Piece,
+  PieceColor,
+  PieceType,
+  Position,
+} from "../../types/Chess";
+import type { BoardTheme } from "../../types/BoardTheme";
+import type { BotDifficulty } from "../../types/GameSetup";
+import type { PieceSet } from "../../types/PieceSet";
+
+export const MATCH_CONFIGURATION_SCHEMA_VERSION = 1;
+export const MATCH_SNAPSHOT_SCHEMA_VERSION = 1;
+export const MATCH_ACTION_SCHEMA_VERSION = 1;
+
+export type GameMode = "bot" | "online";
+export type ConnectionState =
+  | "local"
+  | "connecting"
+  | "connected"
+  | "reconnecting"
+  | "disconnected";
+
+export interface MatchTimeControl {
+  readonly id: string;
+  readonly initialMs: number;
+  readonly incrementMs: number;
+}
+
+interface MatchConfigurationBase {
+  readonly schemaVersion: typeof MATCH_CONFIGURATION_SCHEMA_VERSION;
+  readonly playerColor: PieceColor;
+  readonly timeControl: MatchTimeControl;
+  readonly pieceSet: PieceSet;
+  readonly boardTheme: BoardTheme;
+}
+
+export interface LocalBotMatchConfiguration extends MatchConfigurationBase {
+  readonly mode: "bot";
+  readonly botColor: PieceColor;
+  readonly botDifficulty: BotDifficulty;
+}
+
+export interface OnlineMatchConfiguration extends MatchConfigurationBase {
+  readonly mode: "online";
+  readonly authoritativeMatchId: string;
+}
+
+export type MatchConfiguration =
+  | LocalBotMatchConfiguration
+  | OnlineMatchConfiguration;
+
+export interface MatchPieceSnapshot extends Piece {
+  readonly initialPosition: Readonly<Position>;
+}
+
+export interface MatchClockSnapshot {
+  readonly whiteRemainingMs: number;
+  readonly blackRemainingMs: number;
+  readonly activeColor: PieceColor | null;
+  readonly isRunning: boolean;
+  readonly timedOutColor: PieceColor | null;
+  readonly incrementMs: number;
+}
+
+export interface MatchHistoryEntry {
+  readonly turnNumber: number;
+  readonly player: PieceColor;
+  readonly moveIndex: number;
+  readonly notation: string;
+  readonly piece: PieceType;
+  readonly from: Readonly<Position>;
+  readonly to: Readonly<Position>;
+  readonly capture: boolean;
+  readonly promotion: boolean;
+  readonly castle: boolean;
+  readonly enPassant: boolean;
+  readonly timestamp: number;
+}
+
+export interface MatchSnapshot {
+  readonly schemaVersion: typeof MATCH_SNAPSHOT_SCHEMA_VERSION;
+  readonly mode: GameMode;
+  readonly authority: "local" | "server";
+  readonly connection: ConnectionState;
+  readonly lifecycle: "active" | "completed";
+  readonly currentPlayer: PieceColor;
+  readonly board: readonly (readonly (MatchPieceSnapshot | null)[])[];
+  readonly currentRoll: readonly [PieceType, PieceType, PieceType];
+  readonly remainingRights: Readonly<Record<PieceType, number>>;
+  readonly selectableMoves: readonly Move[];
+  readonly selectedSquare: Readonly<Position> | null;
+  readonly clock: MatchClockSnapshot;
+  readonly winner: PieceColor | null;
+  readonly resultReason: GameResultReason | null;
+  readonly moveHistory: readonly MatchHistoryEntry[];
+}
+
+export type MatchAction =
+  | { readonly schemaVersion: 1; readonly type: "SELECT_SQUARE"; readonly row: number; readonly col: number }
+  | { readonly schemaVersion: 1; readonly type: "MAKE_MOVE"; readonly move: Move }
+  | { readonly schemaVersion: 1; readonly type: "SKIP_UNPLAYABLE_TURN" }
+  | { readonly schemaVersion: 1; readonly type: "START_CLOCK" };
+
+export interface MatchActionResult {
+  readonly accepted: boolean;
+  readonly snapshot: MatchSnapshot;
+}
+
+export type MatchListener = (snapshot: MatchSnapshot) => void;
+export type Unsubscribe = () => void;
+
+export interface MatchSession {
+  getSnapshot(): MatchSnapshot;
+  subscribe(listener: MatchListener): Unsubscribe;
+  requestAction(action: MatchAction): Promise<MatchActionResult>;
+  dispose(): void;
+}

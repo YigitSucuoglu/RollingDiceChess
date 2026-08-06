@@ -6,7 +6,7 @@ import {
   TIME_CONTROL_CATEGORIES,
   TIME_CONTROL_OPTIONS,
 } from "../config/gameSetup";
-import gameManager from "../engine/GameManager";
+import gameManager from "../bootstrap/GameManager";
 import {
   DEFAULT_PIECE_SET,
   SELECTABLE_PIECE_SETS,

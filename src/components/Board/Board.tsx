@@ -1,5 +1,5 @@
 import "./Board.css";
-import gameManager from "../../engine/GameManager";
+import gameManager from "../../bootstrap/GameManager";
 import Piece from "../Piece/Piece";
 import {
   useCallback,
@@ -65,6 +65,7 @@ type LeverAnimationStyle = CSSProperties & {
 };
 
 function Board() {
+  const session = gameManager.getSession();
   const game = gameManager.getGame();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -117,8 +118,8 @@ function Board() {
   const boardTheme = BOARD_THEME_CATALOG[game.setup.boardTheme];
 
   useEffect(
-    () => game.subscribe(() => setRefresh((value) => value + 1)),
-    [game]
+    () => session.subscribe(() => setRefresh((value) => value + 1)),
+    [session]
   );
 
   useEffect(

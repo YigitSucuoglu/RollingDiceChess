@@ -14,6 +14,7 @@
     "test:profile": "node scripts/profile-tests.cjs",
     "test:i18n": "node scripts/i18n-tests.cjs",
     "test:sound": "node scripts/sound-tests.cjs",
+    "test:architecture": "node scripts/architecture-tests.cjs",
     "test:release-smoke": "node scripts/release-smoke-tests.cjs",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
@@ -25,7 +26,7 @@
     "perf:browser": "npm run build && node scripts/perf-browser.mjs",
     "perf": "npm run perf:bundle && npm run perf:engine && npm run perf:lighthouse && npm run perf:browser",
     "assets:home": "node scripts/optimize-home-assets.mjs",
-    "test": "npm run test:i18n && npm run test:profile && npm run test:sound && npm run test:unit",
+    "test": "npm run test:i18n && npm run test:profile && npm run test:sound && npm run test:architecture && npm run test:unit",
     "validate": "npm run typecheck && npm run lint && npm run test && vite build && npm run test:release-smoke",
     "validate:ci": "npm run validate",
     "preview": "vite preview"

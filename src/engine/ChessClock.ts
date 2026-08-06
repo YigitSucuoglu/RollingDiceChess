@@ -1,4 +1,5 @@
 import type { PieceColor } from "../types/Chess";
+import type { Scheduler } from "../domain/contracts/PlatformPorts";
 
 export interface ChessClockSnapshot {
   readonly whiteRemainingMs: number;
@@ -21,13 +22,15 @@ export default class ChessClock {
 
   private readonly onTimeout: TimeoutHandler;
 
+  private readonly scheduler: Scheduler;
+
   private activeColor: PieceColor | null;
 
   private activeSinceMs: number | null;
 
   private timedOutColor: PieceColor | null;
 
-  private timeoutId: ReturnType<typeof globalThis.setTimeout> | null;
+  private timeoutId: unknown | null;
 
   private isDisposed: boolean;
 
@@ -35,7 +38,11 @@ export default class ChessClock {
     initialMinutes: number,
     incrementSeconds: number,
     onTimeout: TimeoutHandler,
-    now: ClockNow = Date.now
+    now: ClockNow = Date.now,
+    scheduler: Scheduler = {
+      setTimeout: (callback, delayMs) => globalThis.setTimeout(callback, delayMs),
+      clearTimeout: (handle) => globalThis.clearTimeout(handle as ReturnType<typeof globalThis.setTimeout>),
+    },
   ) {
     if (initialMinutes < 0 || incrementSeconds < 0) {
       throw new RangeError("Clock values cannot be negative.");
@@ -50,6 +57,7 @@ export default class ChessClock {
     this.incrementMs = incrementSeconds * 1000;
     this.now = now;
     this.onTimeout = onTimeout;
+    this.scheduler = scheduler;
     this.activeColor = null;
     this.activeSinceMs = null;
     this.timedOutColor = null;
@@ -175,7 +183,7 @@ export default class ChessClock {
     }
 
     this.clearScheduledTimeout();
-    this.timeoutId = globalThis.setTimeout(() => {
+    this.timeoutId = this.scheduler.setTimeout(() => {
       this.timeoutId = null;
       this.settleElapsedTime();
 
@@ -200,7 +208,7 @@ export default class ChessClock {
 
   private clearScheduledTimeout(): void {
     if (this.timeoutId !== null) {
-      globalThis.clearTimeout(this.timeoutId);
+      this.scheduler.clearTimeout(this.timeoutId);
       this.timeoutId = null;
     }
   }

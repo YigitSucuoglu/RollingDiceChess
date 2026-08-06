@@ -1,5 +1,6 @@
 import type { PieceType } from "../types/Chess";
 import TurnRights from "./TurnRights";
+import type { RandomSource } from "../domain/contracts/PlatformPorts";
 
 const PIECE_TYPES: readonly PieceType[] = [
   "pawn",
@@ -13,8 +14,8 @@ const PIECE_TYPES: readonly PieceType[] = [
 export default class DiceEngine {
   private readonly random: () => number;
 
-  constructor(random: () => number = Math.random) {
-    this.random = random;
+  constructor(random?: RandomSource) {
+    this.random = random ?? Math.random;
   }
 
   public roll(): readonly [PieceType, PieceType, PieceType] {
