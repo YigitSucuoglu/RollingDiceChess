@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
 import GamePage from "./pages/GamePage";
@@ -33,6 +33,7 @@ function App() {
             )}
           />
         ) : null}
+        <Route path="*" element={<Navigate replace to="/" />} />
       </Routes>
     </BrowserRouter>
   );

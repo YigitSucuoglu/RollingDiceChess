@@ -20,6 +20,7 @@ v0.11.5
 ## Completed
 
 ### Quality
+- OBS-01B — Configure and verify live production error reporting
 - OBS-01A — Add privacy-safe error boundary and Sentry-ready observability foundation
 - DEPLOY-01B-HF1 — Add first-game asset loading state and restore mobile Play Setup scrolling
 - DEPLOY-01A — Prepare Vercel preview and staging deployment
@@ -91,6 +92,7 @@ v0.11.5
 ## Current Sprint
 
 Completed:
+- OBS-01B — Configure and verify live production error reporting
 - OBS-01A — Add privacy-safe error boundary and Sentry-ready observability foundation
 - DEPLOY-01B-HF1 — Add first-game asset loading state and restore mobile Play Setup scrolling
 - DEPLOY-01A — Prepare Vercel preview and staging deployment
@@ -115,10 +117,9 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. OBS-01B — Configure Sentry and verify live production error reporting
+1. ARCH-01 — Prepare the application architecture for future multiplayer and mobile clients
 
 Roadmap:
-- OBS-01B — Configure Sentry and verify live production error reporting
 - ARCH-01 — Platform-neutral and multiplayer-ready core preparation
 - RELEASE-01 — Public web beta
 
@@ -170,6 +171,7 @@ Performance Backlog:
 - Settings exposes only working Sound Effects, language preference, and repository-backed offline profile reset controls.
 - English is the source and fallback locale; Turkish can be selected instantly and persists through the existing settings repository.
 - Production observability is centralized, privacy-scrubbed, and a complete no-op without a production DSN; the React error boundary remains functional independently of remote reporting.
+- OBS-01B live verification confirmed handled and Error Boundary events in production, matching environment/release metadata, and original-source resolution through uploaded source maps; the temporary Production test flag was removed and the application was redeployed.
 
 
 ## Future UI Polish

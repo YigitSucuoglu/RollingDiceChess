@@ -16,7 +16,7 @@ test("critical routes and back navigation render without browser errors", async 
   expect(await page.evaluate(() => performance.getEntriesByType("resource").some((entry) => entry.name.includes("update-machine-transparent")))).toBe(false);
   const homeTitle = await page.title();
 
-  for (const path of ["/play", "/how-to-play", "/profile", "/settings"]) {
+  for (const path of ["/play", "/game", "/how-to-play", "/profile", "/settings"]) {
     await page.goto(path);
     await expect(page.locator("main")).toBeVisible();
     expect(await page.title()).not.toBe(homeTitle);
@@ -26,9 +26,15 @@ test("critical routes and back navigation render without browser errors", async 
   await page.getByRole("link", { name: /home|ana sayfa/i }).click();
   await expect(page).toHaveURL(/\/$/);
   await page.goto("/unknown-route");
-  await expect(page.locator("body")).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Roulette");
   await page.goto("/__observability-test");
-  await expect(page.getByRole("heading", { name: "OBS-01B live verification" })).toHaveCount(0);
+  if (process.env.VITE_OBSERVABILITY_TEST_MODE === "true") {
+    await expect(page.getByRole("heading", { name: "OBS-01B live verification" })).toBeVisible();
+  } else {
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Roulette");
+  }
   assertNoErrors();
   expect(monitoringRequests).toEqual([]);
 });
