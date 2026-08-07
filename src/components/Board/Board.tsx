@@ -13,7 +13,6 @@ import SlotReel from "../SlotReel/SlotReel";
 import GameResultModal from "../GameResultModal/GameResultModal";
 import MoveHistoryPanel from "../MoveHistory/MoveHistoryPanel";
 import ChessClockPanel from "../ChessClock/ChessClockPanel";
-import type { ChessClockSnapshot } from "../../engine/ChessClock";
 import type { MatchSnapshot } from "../../domain/contracts/MatchContracts";
 import { BOARD_THEME_CATALOG } from "../../config/boardThemes";
 import { ROLL_TIMING } from "../../config/rollTiming";
@@ -21,11 +20,6 @@ import soundManager from "../../services/SoundManager";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-const UNPLAYABLE_ROLL_REVIEW_MS = 1200;
-const TURN_SKIPPED_MESSAGE_MS = 1000;
-const CLOCK_REFRESH_INTERVAL_MS = 250;
-const LOW_TIME_CLOCK_REFRESH_INTERVAL_MS = 75;
-const LOW_TIME_THRESHOLD_MS = 15_000;
 const HISTORY_TRANSITION_MS = 260;
 
 const GAME_REEL_SCALE_MULTIPLIERS: Readonly<Record<PieceType, number>> = {
@@ -51,7 +45,6 @@ type LeverAnimationStyle = CSSProperties & {
 
 function Board() {
   const session = gameManager.getSession();
-  const game = gameManager.getGame();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -64,28 +57,18 @@ function Board() {
   const [isSoundEnabled, setIsSoundEnabled] = useState(
     soundManager.isEnabled()
   );
-  const [clockSnapshot, setClockSnapshot] = useState<ChessClockSnapshot>(() =>
-    game.clock.getSnapshot()
-  );
   const historyCloseTimeoutRef = useRef<number | null>(null);
   const historyOpenRef = useRef(false);
   const historyOpenFrameRef = useRef<number | null>(null);
-  const rollSoundRef = useRef({ game, spinning: 0, resolved: 0 });
+  const rollSoundRef = useRef({ session, spinning: 0, resolved: 0 });
   const playerActionInFlightRef = useRef(false);
-  const lastSoundedMoveRef = useRef({ game, timestamp: 0 });
+  const lastSoundedMoveRef = useRef({ session, timestamp: 0 });
   const resultSoundGameRef = useRef<object | null>(null);
-  const [isTurnSkippedMessageVisible, setIsTurnSkippedMessageVisible] =
-    useState(false);
+  const lastSkipSoundSequenceRef = useRef(0);
   const rollPhase = matchSnapshot.roll.phase;
-  const hasPlayableMoves = game.hasPlayableMoves();
-  const isInputLocked =
-    game.winner !== null ||
-    matchSnapshot.currentPlayer !== game.setup.playerColor ||
-    !hasPlayableMoves ||
-    isTurnSkippedMessageVisible ||
-    rollPhase !== "resolved";
+  const isInputLocked = !matchSnapshot.capabilities.canSelect;
   const moveHistory = matchSnapshot.moveHistory;
-  const boardTheme = BOARD_THEME_CATALOG[game.setup.boardTheme];
+  const boardTheme = BOARD_THEME_CATALOG[session.configuration.boardTheme];
 
   useEffect(
     () => session.subscribe(setMatchSnapshot),
@@ -94,7 +77,7 @@ function Board() {
 
   useEffect(
     () => () => soundManager.stopAll(),
-    [game]
+    [session]
   );
 
   useEffect(
@@ -116,8 +99,8 @@ function Board() {
   );
 
   useEffect(() => {
-    if (lastSoundedMoveRef.current.game !== game) {
-      lastSoundedMoveRef.current = { game, timestamp: 0 };
+    if (lastSoundedMoveRef.current.session !== session) {
+      lastSoundedMoveRef.current = { session, timestamp: 0 };
     }
 
     const newMoves = moveHistory
@@ -131,71 +114,28 @@ function Board() {
       soundManager.play(move.capture ? "capture" : "move");
       lastSoundedMoveRef.current.timestamp = move.timestamp;
     }
-  }, [game, moveHistory]);
+  }, [session, moveHistory]);
 
   useEffect(() => {
-    if (!game.winner || resultSoundGameRef.current === game) {
+    if (!matchSnapshot.winner || resultSoundGameRef.current === session) {
       return;
     }
 
-    resultSoundGameRef.current = game;
+    resultSoundGameRef.current = session;
     soundManager.stop("reel-spin");
 
-    if (game.resultReason === "timeout") {
+    if (matchSnapshot.resultReason === "timeout") {
       soundManager.play("timeout");
-    } else if (game.winner === game.setup.playerColor) {
+    } else if (matchSnapshot.winner === session.configuration.playerColor) {
       soundManager.play("victory");
     } else {
       soundManager.play("defeat");
     }
-  }, [game, game.resultReason, game.winner]);
+  }, [matchSnapshot.resultReason, matchSnapshot.winner, session]);
 
   useEffect(() => {
-    let isCancelled = false;
-    let timeoutId: number | undefined;
-
-    const refreshClock = () => {
-      const snapshot = game.clock.getSnapshot();
-
-      if (isCancelled) {
-        return;
-      }
-
-      setClockSnapshot(snapshot);
-
-      if (game.winner) {
-        return;
-      }
-
-      const activeRemainingMs =
-        snapshot.activeColor === "white"
-          ? snapshot.whiteRemainingMs
-          : snapshot.activeColor === "black"
-            ? snapshot.blackRemainingMs
-            : null;
-      const refreshInterval =
-        activeRemainingMs !== null &&
-        activeRemainingMs <= LOW_TIME_THRESHOLD_MS
-          ? LOW_TIME_CLOCK_REFRESH_INTERVAL_MS
-          : CLOCK_REFRESH_INTERVAL_MS;
-
-      timeoutId = window.setTimeout(refreshClock, refreshInterval);
-    };
-
-    refreshClock();
-
-    return () => {
-      isCancelled = true;
-
-      if (timeoutId !== undefined) {
-        window.clearTimeout(timeoutId);
-      }
-    };
-  }, [game]);
-
-  useEffect(() => {
-    if (rollSoundRef.current.game !== game) {
-      rollSoundRef.current = { game, spinning: 0, resolved: 0 };
+    if (rollSoundRef.current.session !== session) {
+      rollSoundRef.current = { session, spinning: 0, resolved: 0 };
     }
     const { phase, sequence, trigger } = matchSnapshot.roll;
     if (phase === "spinning" && rollSoundRef.current.spinning !== sequence) {
@@ -209,43 +149,17 @@ function Board() {
       soundManager.stop("reel-spin");
       soundManager.play("reel-stop");
     }
-  }, [game, matchSnapshot.roll]);
+  }, [session, matchSnapshot.roll]);
 
   useEffect(() => {
-    if (game.winner || hasPlayableMoves || rollPhase !== "resolved") {
-      return;
-    }
-
-    const turnRoll = game.currentRoll;
-    let skipTimeoutId: number | undefined;
-    const reviewTimeoutId = window.setTimeout(() => {
-      if (game.winner || game.currentRoll !== turnRoll) {
-        return;
-      }
-
+    if (
+      matchSnapshot.skip.phase === "message" &&
+      lastSkipSoundSequenceRef.current !== matchSnapshot.skip.sequence
+    ) {
+      lastSkipSoundSequenceRef.current = matchSnapshot.skip.sequence;
       soundManager.play("turn-skipped");
-      setIsTurnSkippedMessageVisible(true);
-      skipTimeoutId = window.setTimeout(() => {
-        if (!game.winner && game.currentRoll === turnRoll) {
-          void session.requestAction({
-            schemaVersion: 1,
-            type: "SKIP_UNPLAYABLE_TURN",
-          });
-        }
-
-        setIsTurnSkippedMessageVisible(false);
-        setRefresh((value) => value + 1);
-      }, TURN_SKIPPED_MESSAGE_MS);
-    }, UNPLAYABLE_ROLL_REVIEW_MS);
-
-    return () => {
-      window.clearTimeout(reviewTimeoutId);
-
-      if (skipTimeoutId !== undefined) {
-        window.clearTimeout(skipTimeoutId);
-      }
-    };
-  }, [game, game.winner, hasPlayableMoves, rollPhase, session]);
+    }
+  }, [matchSnapshot.skip.phase, matchSnapshot.skip.sequence]);
 
   const toggleMoveHistory = () => {
     if (historyCloseTimeoutRef.current !== null) {
@@ -294,26 +208,22 @@ function Board() {
 
   const startNewGame = () => {
     soundManager.stopAll();
-    gameManager.newGame(game.setup);
+    gameManager.restartGame();
     const newSession = gameManager.getSession();
-    const newGame = gameManager.getGame();
 
     resetMoveHistory();
-    setIsTurnSkippedMessageVisible(false);
-    setClockSnapshot(newGame.clock.getSnapshot());
     setMatchSnapshot(newSession.getSnapshot());
     setRefresh((value) => value + 1);
   };
 
   const returnToMainMenu = () => {
     soundManager.stopAll();
-    setIsTurnSkippedMessageVisible(false);
     gameManager.newGame();
     navigate("/");
   };
 
   const squares = [];
-  const playerColor = game.setup.playerColor;
+  const playerColor = session.configuration.playerColor;
   const opponentColor = playerColor === "white" ? "black" : "white";
   const displayIndexes =
     playerColor === "black"
@@ -373,7 +283,7 @@ function Board() {
               });
           }}
         >
-          {piece && <Piece piece={piece} pieceSet={game.setup.pieceSet} />}
+          {piece && <Piece piece={piece} pieceSet={session.configuration.pieceSet} />}
 
           {isPossibleMove && <div className="move-dot" />}
 
@@ -407,7 +317,7 @@ function Board() {
     >
       <div className="game-layout">
       <div
-        aria-hidden={game.winner ? true : undefined}
+        aria-hidden={matchSnapshot.winner ? true : undefined}
         className="turn-panel"
       >
         <div className="turn-header">
@@ -483,7 +393,7 @@ function Board() {
                       key={`${matchSnapshot.roll.sequence}-${index}`}
                       isSpinning={rollPhase === "spinning"}
                       pieceColor={matchSnapshot.currentPlayer}
-                      pieceSet={game.setup.pieceSet}
+                      pieceSet={session.configuration.pieceSet}
                       reelIndex={index}
                       stopAfterMs={ROLL_TIMING.reelStopTimesMs[index]}
                       targetPiece={pieceType}
@@ -533,18 +443,18 @@ function Board() {
       <ChessClockPanel
         color={opponentColor}
         isPlayer={false}
-        snapshot={clockSnapshot}
+        snapshot={matchSnapshot.clock}
       />
 
       <div
-        aria-hidden={game.winner ? true : undefined}
+        aria-hidden={matchSnapshot.winner ? true : undefined}
         className="board"
         data-board-theme={boardTheme.id}
         style={boardTheme.style}
       >
         {squares}
 
-        {isTurnSkippedMessageVisible && (
+        {matchSnapshot.skip.phase === "message" && (
           <div className="turn-skipped-message" role="status">
             {t("game.turnSkipped")}
           </div>
@@ -554,7 +464,7 @@ function Board() {
       <ChessClockPanel
         color={playerColor}
         isPlayer
-        snapshot={clockSnapshot}
+        snapshot={matchSnapshot.clock}
       />
 
       </div>
@@ -569,14 +479,14 @@ function Board() {
         </div>
       )}
 
-      {game.winner && (
+      {matchSnapshot.winner && (
         <GameResultModal
-          endReason={game.resultReason ?? "king-captured"}
+          endReason={matchSnapshot.resultReason ?? "king-captured"}
           onMainMenu={returnToMainMenu}
           onPlayAgain={startNewGame}
-          pieceSet={game.setup.pieceSet}
-          xpProgression={gameManager.getMatchXpProgression(game)!}
-          winner={game.winner}
+          pieceSet={session.configuration.pieceSet}
+          xpProgression={gameManager.getMatchXpProgression()!}
+          winner={matchSnapshot.winner}
         />
       )}
     </div>

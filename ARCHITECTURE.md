@@ -61,7 +61,7 @@ Existing `GameEventSink` events are domain/application facts: roll generated, mo
 
 A React Native client can potentially reuse TypeScript domain/application contracts and rule code while reimplementing navigation, storage, sound, assets, and presentation adapters. Flutter cannot import this TypeScript directly; it can reuse the versioned contracts/protocol as a specification while the server-authoritative game core remains canonical. No mobile framework decision is made here.
 
-## Incremental migration and remaining debt
+## Completed MatchSession migration
 
 ARCH-01 deliberately migrated session creation and Board subscription first. ARCH-02A routes player selection and moves through `MatchSession.requestAction`. ARCH-02B moved the roll lifecycle into `LocalBotMatchSession`. ARCH-02C moves the remaining local bot-turn orchestration out of Board: the session detects bot control, owns the single 500 ms start schedule, starts the shared automatic reveal, invokes the existing Game/Bot planner path after resolve, publishes committed move snapshots, and recognizes the following human turn.
 
@@ -69,17 +69,28 @@ The DiceEngine-generated `Game.currentRoll` remains authoritative and is not reg
 
 The session uses a generation token, one pending scheduler handle, and one AbortController. Disposal/replacement cancels pacing, roll resolve, and bot execution; Game's disposed guard prevents an uncooperative stale planner from committing. Expected cancellation is silent. A future OnlineMatchSession can simply publish authoritative snapshots—Board contains no bot/online orchestration branch.
 
-Board still obtains compatibility `Game` access for clock display polling, skip/review presentation timing, result/profile UI, playable-move checks, and current-roll identity used by the skip flow. No-move notification timing remains presentation-owned for now, but its eventual skip intent goes through the session so a subsequent bot lifecycle is recognized.
+ARCH-02D completes the gameplay-orchestration migration. `LocalBotMatchSession` owns clock snapshot refresh, resolved-roll clock handoff, no-playable-roll review and message timing, automatic skip progression, controller/capability calculation, timeout cancellation, and next-lifecycle scheduling. `Game` remains the rule authority that applies elapsed time, increment, legal turn completion, timeout winner, and the actual turn switch; the session coordinates when those rules run and publishes their immutable result.
+
+`Board` no longer obtains the compatibility `Game`, polls `ChessClock`, calls skip/clock methods, compares roll identities, or owns gameplay transition timers. It renders `MatchSnapshot`, submits selection/move/manual-roll intents, and owns only CSS reel/lever animation, snapshot-driven sounds, responsive layout, navigation, history-panel transitions, and translations.
+
+```text
+Board (render + intents + effects)
+          ↓              ↑ immutable MatchSnapshot
+MatchSession (clock/roll/bot/skip/transition orchestration)
+          ↓
+Game + ChessClock + TurnResolver (rules and authoritative mutation)
+```
+
+The snapshot includes controller identity, playable state, skip phase/sequence, and interaction capabilities alongside board, roll, clock, history, selection, winner, and result. A future `OnlineMatchSession` can publish the same complete DTO from server snapshots; Board contains no local bot, clock, or skip ownership branch.
 
 Other follow-ups:
 
-1. **ARCH-02D — Move clock, skip, and turn-transition orchestration behind MatchSession.** Define authoritative timestamps before online transport. After this slice Board should primarily render snapshots and submit user intents.
-2. Add snapshot restoration/validation, action reconciliation, and monotonic snapshot revision before online transport.
-3. Move profile match-ID/time generation behind injected ports; it is infrastructure and not part of game authority.
-4. Add room/lobby DTOs only alongside an agreed protocol.
+1. Add snapshot restoration/validation, action reconciliation, monotonic revision, and authoritative timestamps before online transport.
+2. Move profile match-ID/time generation behind injected ports; it is infrastructure and not part of game authority.
+3. Add room/lobby DTOs only alongside an agreed protocol.
 
 No WebSocket, polling, room, authentication, server mock, networking dependency, multiplayer UI, or mobile UI is included.
 
 ## Architecture guard
 
-`npm run test:architecture` scans domain, application, and engine sources for React/presentation/style imports and direct DOM/storage usage. Targeted Board rules reject direct selection/move mutation, DiceEngine and BotFactory access, canonical roll/bot state or start timers, bot execution/reveal decisions, and resolved-phase clock starts. This does not claim that presentation is fully detached from the compatibility engine before ARCH-02D.
+`npm run test:architecture` scans domain, application, and engine sources for React/presentation/style imports and direct DOM/storage usage. Targeted Board rules reject direct selection/move mutation, DiceEngine and BotFactory access, canonical roll/bot state or timers, compatibility Game access, clock polling/start intents, and skip progression/timers.

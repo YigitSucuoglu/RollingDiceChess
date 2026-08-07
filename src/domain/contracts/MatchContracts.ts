@@ -95,6 +95,20 @@ export interface MatchRollSnapshot {
   readonly canStartManualRoll: boolean;
 }
 
+export type MatchController = "human" | "bot";
+export type MatchSkipPhase = "none" | "reviewing" | "message";
+
+export interface MatchSkipSnapshot {
+  readonly phase: MatchSkipPhase;
+  readonly sequence: number;
+}
+
+export interface MatchCapabilities {
+  readonly canSelect: boolean;
+  readonly canMove: boolean;
+  readonly canStartManualRoll: boolean;
+}
+
 export interface MatchSnapshot {
   readonly schemaVersion: typeof MATCH_SNAPSHOT_SCHEMA_VERSION;
   readonly mode: GameMode;
@@ -102,9 +116,13 @@ export interface MatchSnapshot {
   readonly connection: ConnectionState;
   readonly lifecycle: "active" | "completed";
   readonly currentPlayer: PieceColor;
+  readonly controller: MatchController;
   readonly board: readonly (readonly (MatchPieceSnapshot | null)[])[];
   readonly currentRoll: readonly [PieceType, PieceType, PieceType];
   readonly roll: MatchRollSnapshot;
+  readonly skip: MatchSkipSnapshot;
+  readonly capabilities: MatchCapabilities;
+  readonly hasPlayableMoves: boolean;
   readonly remainingRights: Readonly<Record<PieceType, number>>;
   readonly selectableMoves: readonly Move[];
   readonly selectedSquare: Readonly<Position> | null;
@@ -124,9 +142,7 @@ export type MatchAction =
       readonly from: Readonly<Position>;
       readonly to: Readonly<Position>;
     }
-  | { readonly schemaVersion: 1; readonly type: "START_MANUAL_ROLL" }
-  | { readonly schemaVersion: 1; readonly type: "SKIP_UNPLAYABLE_TURN" }
-  | { readonly schemaVersion: 1; readonly type: "START_CLOCK" };
+  | { readonly schemaVersion: 1; readonly type: "START_MANUAL_ROLL" };
 
 export type MatchActionRejectionReason =
   | "illegal-move"

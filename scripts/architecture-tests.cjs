@@ -42,6 +42,11 @@ const migratedBoardMutationViolations = [
   [/\bstartAutomaticRollReveal\s*\(/, "Board decides when bot roll reveal starts"],
   [/\bbotTurnInProgressRef\b|\bbotTurnAbortControllerRef\b/, "Board owns bot lifecycle guards"],
   [/\bAUTOMATIC_ROLL_DELAY_MS\b|\bBOT_START_DELAY_MS\b/, "Board owns bot-start pacing"],
+  [/\bgameManager\.getGame\s*\(/, "Board accesses the compatibility Game instance"],
+  [/\bgame\.clock\b/, "Board accesses the mutable Game clock"],
+  [/\bSKIP_UNPLAYABLE_TURN\b|\bskipUnplayableTurn\s*\(/, "Board owns skip progression"],
+  [/\bUNPLAYABLE_ROLL_REVIEW_MS\b|\bTURN_SKIPPED_MESSAGE_MS\b/, "Board owns skip timers"],
+  [/\bSTART_CLOCK\b/, "Board owns clock start intent"],
 ].filter(([pattern]) => pattern.test(boardSource)).map(([, label]) => label);
 
 assert.deepEqual(
@@ -50,4 +55,4 @@ assert.deepEqual(
   `Migrated Board action violations:\n${migratedBoardMutationViolations.join("\n")}`,
 );
 console.log(`Architecture boundaries passed: ${sourceFiles.length} domain/application/engine files checked.`);
-console.log("Board selection and move mutations are routed through MatchSession.");
+console.log("Board gameplay orchestration is routed through MatchSession snapshots and actions.");

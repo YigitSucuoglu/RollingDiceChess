@@ -14,6 +14,11 @@ import { ROLL_TIMING } from "../../config/rollTiming";
 
 const INITIAL_VISIBLE_ROLL = ["pawn", "knight", "bishop"] as const;
 const BOT_START_DELAY_MS = 500;
+const UNPLAYABLE_ROLL_REVIEW_MS = 1_200;
+const TURN_SKIPPED_MESSAGE_MS = 1_000;
+const CLOCK_REFRESH_INTERVAL_MS = 250;
+const LOW_TIME_CLOCK_REFRESH_INTERVAL_MS = 75;
+const LOW_TIME_THRESHOLD_MS = 15_000;
 
 interface LocalBotMatchSessionDependencies {
   readonly scheduler: Scheduler;
@@ -58,6 +63,14 @@ export default class LocalBotMatchSession implements MatchSession {
 
   private botLifecycleGeneration = 0;
 
+  private skipPhase: "none" | "reviewing" | "message" = "none";
+
+  private skipSequence = 0;
+
+  private skipTimeout: unknown | null = null;
+
+  private clockRefreshTimeout: unknown | null = null;
+
   public constructor(
     game: Game,
     configuration: LocalBotMatchConfiguration,
@@ -71,13 +84,17 @@ export default class LocalBotMatchSession implements MatchSession {
     this.rollDurationMs = dependencies.rollDurationMs ?? ROLL_TIMING.durationMs;
     this.botStartDelayMs = dependencies.botStartDelayMs ?? BOT_START_DELAY_MS;
     this.observedRoll = game.currentRoll;
-    this.unsubscribeGame = game.subscribe(() => this.publish());
+    this.unsubscribeGame = game.subscribe(() => this.handleGameNotification());
     this.ensureBotLifecycle();
   }
 
   public getSnapshot(): MatchSnapshot {
     this.synchronizeRollTurn();
     const history = this.game.moveHistory.getSnapshot();
+    const hasPlayableMoves = this.game.hasPlayableMoves();
+    const isHumanTurn = this.game.currentTurn === this.configuration.playerColor;
+    const canAct = !this.disposed && !this.game.winner && isHumanTurn &&
+      hasPlayableMoves && this.skipPhase === "none" && this.rollPhase === "resolved";
 
     return {
       schemaVersion: 1,
@@ -86,6 +103,7 @@ export default class LocalBotMatchSession implements MatchSession {
       connection: "local",
       lifecycle: this.game.winner ? "completed" : "active",
       currentPlayer: this.game.currentTurn,
+      controller: isHumanTurn ? "human" : "bot",
       board: this.game.board.squares.map((row) => row.map((piece) => piece
         ? { ...piece, initialPosition: { ...piece.initialPosition } }
         : null)),
@@ -97,6 +115,13 @@ export default class LocalBotMatchSession implements MatchSession {
         trigger: this.rollTrigger,
         canStartManualRoll: this.canStartManualRoll(),
       },
+      skip: { phase: this.skipPhase, sequence: this.skipSequence },
+      capabilities: {
+        canSelect: canAct,
+        canMove: canAct,
+        canStartManualRoll: this.canStartManualRoll(),
+      },
+      hasPlayableMoves,
       remainingRights: this.game.turnRights.getSnapshot(),
       selectableMoves: this.game.possibleMoves.map((move) => ({
         ...move,
@@ -165,12 +190,6 @@ export default class LocalBotMatchSession implements MatchSession {
         accepted = this.game.lastMove === approvedMove;
         break;
       }
-      case "SKIP_UNPLAYABLE_TURN":
-        accepted = this.game.skipUnplayableTurn();
-        break;
-      case "START_CLOCK":
-        accepted = this.game.startClockForCurrentTurn();
-        break;
     }
 
     if (!accepted) return this.reject("invalid-action");
@@ -189,6 +208,8 @@ export default class LocalBotMatchSession implements MatchSession {
     this.disposed = true;
     this.clearRollTimeout();
     this.clearBotStartTimeout();
+    this.clearSkipTimeout();
+    this.clearClockRefreshTimeout();
     this.botLifecycleGeneration++;
     this.botAbortController?.abort();
     this.botAbortController = null;
@@ -230,6 +251,8 @@ export default class LocalBotMatchSession implements MatchSession {
       this.rollPhase = "resolved";
       this.game.startClockForCurrentTurn();
       this.publish();
+      this.synchronizeClockRefresh();
+      this.ensureSkipLifecycle();
       if (this.game.isBotTurn() && this.game.hasPlayableMoves()) {
         this.runBotTurn(this.botLifecycleGeneration);
       }
@@ -250,6 +273,8 @@ export default class LocalBotMatchSession implements MatchSession {
     this.observedRoll = this.game.currentRoll;
     this.rollPhase = "ready";
     this.rollTrigger = null;
+    this.skipPhase = "none";
+    this.clearSkipTimeout();
   }
 
   private clearRollTimeout(): void {
@@ -282,6 +307,8 @@ export default class LocalBotMatchSession implements MatchSession {
       () => {
         if (this.isCurrentGeneration(generation) && !abortController.signal.aborted) {
           this.publish();
+          this.synchronizeClockRefresh();
+          this.ensureSkipLifecycle();
         }
       },
       abortController.signal,
@@ -304,6 +331,83 @@ export default class LocalBotMatchSession implements MatchSession {
     if (this.botStartTimeout === null) return;
     this.scheduler.clearTimeout(this.botStartTimeout);
     this.botStartTimeout = null;
+  }
+
+  private ensureSkipLifecycle(): void {
+    if (
+      this.disposed || this.game.winner || this.rollPhase !== "resolved" ||
+      this.game.hasPlayableMoves() || this.skipPhase !== "none" || this.skipTimeout !== null
+    ) return;
+
+    const turnRoll = this.game.currentRoll;
+    this.skipPhase = "reviewing";
+    this.publish();
+    this.skipTimeout = this.scheduler.setTimeout(() => {
+      this.skipTimeout = null;
+      if (!this.isSameActiveRoll(turnRoll)) return;
+      this.skipPhase = "message";
+      this.skipSequence++;
+      this.publish();
+      this.skipTimeout = this.scheduler.setTimeout(() => {
+        this.skipTimeout = null;
+        if (!this.isSameActiveRoll(turnRoll)) return;
+        if (!this.game.skipUnplayableTurn()) return;
+        this.skipPhase = "none";
+        this.synchronizeRollTurn();
+        this.publish();
+        this.ensureBotLifecycle();
+      }, TURN_SKIPPED_MESSAGE_MS);
+    }, UNPLAYABLE_ROLL_REVIEW_MS);
+  }
+
+  private isSameActiveRoll(turnRoll: Game["currentRoll"]): boolean {
+    return !this.disposed && !this.game.winner && this.game.currentRoll === turnRoll;
+  }
+
+  private clearSkipTimeout(): void {
+    if (this.skipTimeout === null) return;
+    this.scheduler.clearTimeout(this.skipTimeout);
+    this.skipTimeout = null;
+  }
+
+  private synchronizeClockRefresh(): void {
+    if (this.disposed || this.game.winner) {
+      this.clearClockRefreshTimeout();
+      return;
+    }
+    const clock = this.game.clock.getSnapshot();
+    if (!clock.isRunning || this.clockRefreshTimeout !== null) return;
+    const activeRemainingMs = clock.activeColor === "white"
+      ? clock.whiteRemainingMs
+      : clock.activeColor === "black" ? clock.blackRemainingMs : null;
+    const delayMs = activeRemainingMs !== null && activeRemainingMs <= LOW_TIME_THRESHOLD_MS
+      ? LOW_TIME_CLOCK_REFRESH_INTERVAL_MS
+      : CLOCK_REFRESH_INTERVAL_MS;
+    this.clockRefreshTimeout = this.scheduler.setTimeout(() => {
+      this.clockRefreshTimeout = null;
+      if (this.disposed) return;
+      this.publish();
+      this.synchronizeClockRefresh();
+    }, delayMs);
+  }
+
+  private clearClockRefreshTimeout(): void {
+    if (this.clockRefreshTimeout === null) return;
+    this.scheduler.clearTimeout(this.clockRefreshTimeout);
+    this.clockRefreshTimeout = null;
+  }
+
+  private handleGameNotification(): void {
+    if (this.game.winner) {
+      this.clearRollTimeout();
+      this.clearBotStartTimeout();
+      this.clearSkipTimeout();
+      this.clearClockRefreshTimeout();
+      this.botLifecycleGeneration++;
+      this.botAbortController?.abort();
+      this.botAbortController = null;
+    }
+    this.publish();
   }
 
   private isPosition(value: Readonly<{ row: number; col: number }>): boolean {

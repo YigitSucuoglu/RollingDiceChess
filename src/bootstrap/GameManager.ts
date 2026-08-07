@@ -25,6 +25,10 @@ class GameManager {
     this.session = this.createSession(setup);
   }
 
+  public restartGame(): void {
+    this.newGame(this.session.game.setup);
+  }
+
   public getMatchXpProgression(game: Game = this.session.game): MatchXpProgressionResult | null {
     return game === this.session.game ? this.session.getMatchXpProgression() : null;
   }

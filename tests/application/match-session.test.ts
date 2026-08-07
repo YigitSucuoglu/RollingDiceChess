@@ -6,18 +6,23 @@ import type { Scheduler } from "../../src/domain/contracts/PlatformPorts";
 import Game from "../../src/engine/Game";
 import { toLocalBotMatchConfiguration } from "../../src/infrastructure/local/createLocalBotMatchSession";
 
-function createSession(scheduler?: Scheduler): LocalBotMatchSession {
+const NOOP_SCHEDULER: Scheduler = { setTimeout: () => 0, clearTimeout: () => undefined };
+
+function createSession(
+  clockScheduler?: Scheduler,
+  sessionScheduler: Scheduler = NOOP_SCHEDULER,
+): LocalBotMatchSession {
   const setup = createDefaultGameSetup();
   const game = new Game(setup, undefined, undefined, {
     random: () => 0,
-    scheduler,
+    scheduler: clockScheduler,
     timeSource: { now: () => 0 },
   });
   return new LocalBotMatchSession(
     game,
     toLocalBotMatchConfiguration(setup),
     undefined,
-    { scheduler: { setTimeout: () => 0, clearTimeout: () => undefined } },
+    { scheduler: sessionScheduler },
   );
 }
 
@@ -72,18 +77,24 @@ describe("LocalBotMatchSession", () => {
     session.dispose();
   });
 
-  it("starts the authoritative local clock only through an explicit action and cancels it on dispose", async () => {
+  it("starts the authoritative clock when the shared reveal resolves and cancels it on dispose", async () => {
     const clearTimeout = vi.fn();
-    const scheduler: Scheduler = {
+    const clockScheduler: Scheduler = {
       setTimeout: vi.fn(() => "clock-timeout"),
       clearTimeout,
     };
-    const session = createSession(scheduler);
+    let resolveRoll: (() => void) | undefined;
+    const sessionScheduler: Scheduler = {
+      setTimeout: vi.fn((callback) => { resolveRoll = callback; return "roll-timeout"; }),
+      clearTimeout: vi.fn(),
+    };
+    const session = createSession(clockScheduler, sessionScheduler);
     session.game.turnRights.set("pawn", 1);
     expect(session.getSnapshot().clock.isRunning).toBe(false);
-    const result = await session.requestAction({ schemaVersion: 1, type: "START_CLOCK" });
+    const result = await session.requestAction({ schemaVersion: 1, type: "START_MANUAL_ROLL" });
     expect(result.accepted).toBe(true);
-    expect(result.snapshot.clock.activeColor).toBe("white");
+    resolveRoll?.();
+    expect(session.getSnapshot().clock.activeColor).toBe("white");
     session.dispose();
     expect(clearTimeout).toHaveBeenCalledWith("clock-timeout");
   });
@@ -94,7 +105,7 @@ describe("LocalBotMatchSession", () => {
     first.game.board.squares[6][0] = null;
     expect(second.game.board.squares[6][0]?.type).toBe("pawn");
     first.dispose();
-    const result = await first.requestAction({ schemaVersion: 1, type: "START_CLOCK" });
+    const result = await first.requestAction({ schemaVersion: 1, type: "START_MANUAL_ROLL" });
     expect(result.accepted).toBe(false);
     second.dispose();
   });

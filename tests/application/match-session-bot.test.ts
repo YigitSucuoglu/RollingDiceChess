@@ -120,16 +120,33 @@ describe("session-owned bot lifecycle", () => {
     expect(game.board.squares.map((row) => row.map((piece) => piece?.id ?? null))).toEqual(before);
   });
 
-  it("keeps no-move skip compatible and does not invoke the planner", async () => {
+  it("owns no-move review, message and automatic transition without invoking the planner", async () => {
     const bot = createCompletingBot();
     const { game, scheduler, session } = createBotSession(bot);
     game.board.squares = Array.from({ length: 8 }, () => Array<Piece | null>(8).fill(null));
     scheduler.runNext();
     scheduler.runNext();
     expect(bot.playTurn).not.toHaveBeenCalled();
-    const skipped = await session.requestAction({ schemaVersion: 1, type: "SKIP_UNPLAYABLE_TURN" });
-    expect(skipped.accepted).toBe(true);
+    expect(session.getSnapshot().skip.phase).toBe("reviewing");
+    scheduler.runNext();
+    expect(session.getSnapshot().skip.phase).toBe("message");
+    scheduler.runNext();
     expect(game.currentTurn).toBe("black");
+    expect(session.getSnapshot().skip.phase).toBe("none");
     session.dispose();
+  });
+
+  it("cancels a pending skip transition on dispose and cannot advance twice", () => {
+    const { game, scheduler, session } = createBotSession(createCompletingBot());
+    game.board.squares = Array.from({ length: 8 }, () => Array<Piece | null>(8).fill(null));
+    scheduler.runNext();
+    scheduler.runNext();
+    expect(session.getSnapshot().skip.phase).toBe("reviewing");
+    const turnBeforeDispose = game.currentTurn;
+    session.dispose();
+    expect(scheduler.pendingCount).toBe(0);
+    scheduler.runNext();
+    scheduler.runNext();
+    expect(game.currentTurn).toBe(turnBeforeDispose);
   });
 });

@@ -30,6 +30,7 @@ v0.11.7
 - RELEASE-QUALITY-01 — Add automated validation, production smoke checks and GitHub Actions quality gates
 
 ### Engine
+- ARCH-02D — Move clock, skip and turn-transition orchestration behind MatchSession
 - ARCH-02C — Move bot turn orchestration behind MatchSession
 - ARCH-02B — Move manual roll lifecycle orchestration behind MatchSession
 - ARCH-02A — Route Board selection and move intents through MatchSession
@@ -96,6 +97,7 @@ v0.11.7
 ## Current Sprint
 
 Completed:
+- ARCH-02D — Move clock, skip and turn-transition orchestration behind MatchSession
 - ARCH-02C — Move bot turn orchestration behind MatchSession
 - ARCH-02B — Move manual roll lifecycle orchestration behind MatchSession
 - ARCH-02A — Route Board selection and move intents through MatchSession
@@ -125,10 +127,9 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. ARCH-02D — Move clock, skip, and turn-transition orchestration behind MatchSession
+1. RELEASE-01 — Prepare RouletteChess public web beta
 
 Roadmap:
-- ARCH-02D — Move clock, skip, and turn-transition orchestration behind MatchSession
 - RELEASE-01 — Public web beta
 
 Backlog:
@@ -184,6 +185,7 @@ Performance Backlog:
 - Board selection, legal-target hints, and player move submission now flow through MatchSession actions and immutable snapshots; roll, bot, and clock orchestration remain intentionally incremental.
 - Manual roll ready/spinning/resolved lifecycle, duplicate protection, and resolved-phase clock handoff are session-owned; reel, lever, and sound effects remain presentation-owned.
 - Bot detection, 500 ms start pacing, automatic reveal, planner execution, move publication, and cancellation are session-owned; Board only renders their snapshot effects.
+- Clock snapshot refresh, no-playable-turn review/message/transition timing, timeout cleanup, controller identity, and interaction capabilities are session-owned; Board renders immutable lifecycle facts and presentation effects only.
 
 
 ## Future UI Polish
