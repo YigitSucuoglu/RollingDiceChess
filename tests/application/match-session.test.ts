@@ -13,7 +13,12 @@ function createSession(scheduler?: Scheduler): LocalBotMatchSession {
     scheduler,
     timeSource: { now: () => 0 },
   });
-  return new LocalBotMatchSession(game, toLocalBotMatchConfiguration(setup));
+  return new LocalBotMatchSession(
+    game,
+    toLocalBotMatchConfiguration(setup),
+    undefined,
+    { scheduler: { setTimeout: () => 0, clearTimeout: () => undefined } },
+  );
 }
 
 describe("LocalBotMatchSession", () => {

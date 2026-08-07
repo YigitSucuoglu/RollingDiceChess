@@ -6,9 +6,10 @@ test("deterministic human roll animates, resolves and records a legal move", asy
   await expect(page.locator(".board")).toBeVisible();
   const roll = page.getByRole("button", { name: /^roll$|^zar at$/i });
   await expect(roll).toBeEnabled();
-  await roll.click();
+  await roll.dblclick();
   await expect(page.locator(".slot-machine-lever-layer")).toHaveClass(/is-pulling/);
   await expect(page.locator(".slot-machine-frame")).toHaveAttribute("data-roll-phase", "spinning");
+  await expect(page.locator(".chess-clock.is-active")).toHaveCount(0);
   await expect(page.locator(".slot-machine-frame")).toHaveAttribute("data-roll-phase", "resolved", { timeout: 3_000 });
   await expect(page.locator(".chess-clock.is-active")).toHaveCount(1);
 

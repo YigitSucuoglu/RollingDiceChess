@@ -30,5 +30,10 @@ export function createLocalBotMatchSession(setup: GameSetup): LocalBotMatchSessi
     scheduler: systemScheduler,
     timeSource: systemTimeSource,
   });
-  return new LocalBotMatchSession(game, toLocalBotMatchConfiguration(setup), profileSession.getXpProgressionResult);
+  return new LocalBotMatchSession(
+    game,
+    toLocalBotMatchConfiguration(setup),
+    profileSession.getXpProgressionResult,
+    { scheduler: systemScheduler },
+  );
 }

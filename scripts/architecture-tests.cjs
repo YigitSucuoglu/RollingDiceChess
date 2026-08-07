@@ -33,6 +33,10 @@ const boardSource = fs.readFileSync("src/components/Board/Board.tsx", "utf8");
 const migratedBoardMutationViolations = [
   [/\bgame\.selectSquare\s*\(/, "Board directly calls Game.selectSquare"],
   [/\bgame\.makeMove\s*\(/, "Board directly calls Game.makeMove"],
+  [/\bgame\.startClockForCurrentTurn\s*\(/, "Board starts the clock from roll resolution"],
+  [/\bsetRollAnimation\b|\brollAnimation\b/, "Board owns canonical roll lifecycle state"],
+  [/\bROLL_TIMING\.durationMs\b/, "Board owns the roll-resolution timeout"],
+  [/\bDiceEngine\b/, "Board accesses DiceEngine"],
 ].filter(([pattern]) => pattern.test(boardSource)).map(([, label]) => label);
 
 assert.deepEqual(

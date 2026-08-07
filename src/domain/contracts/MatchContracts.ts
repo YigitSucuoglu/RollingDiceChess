@@ -85,6 +85,16 @@ export interface MatchTurnHistory {
   readonly blackMoves: readonly MatchHistoryEntry[];
 }
 
+export type MatchRollPhase = "ready" | "spinning" | "resolved";
+
+export interface MatchRollSnapshot {
+  readonly phase: MatchRollPhase;
+  readonly visibleRoll: readonly [PieceType, PieceType, PieceType];
+  readonly sequence: number;
+  readonly trigger: "manual" | "automatic" | null;
+  readonly canStartManualRoll: boolean;
+}
+
 export interface MatchSnapshot {
   readonly schemaVersion: typeof MATCH_SNAPSHOT_SCHEMA_VERSION;
   readonly mode: GameMode;
@@ -94,6 +104,7 @@ export interface MatchSnapshot {
   readonly currentPlayer: PieceColor;
   readonly board: readonly (readonly (MatchPieceSnapshot | null)[])[];
   readonly currentRoll: readonly [PieceType, PieceType, PieceType];
+  readonly roll: MatchRollSnapshot;
   readonly remainingRights: Readonly<Record<PieceType, number>>;
   readonly selectableMoves: readonly Move[];
   readonly selectedSquare: Readonly<Position> | null;
@@ -113,6 +124,7 @@ export type MatchAction =
       readonly from: Readonly<Position>;
       readonly to: Readonly<Position>;
     }
+  | { readonly schemaVersion: 1; readonly type: "START_MANUAL_ROLL" }
   | { readonly schemaVersion: 1; readonly type: "SKIP_UNPLAYABLE_TURN" }
   | { readonly schemaVersion: 1; readonly type: "START_CLOCK" };
 
@@ -120,6 +132,10 @@ export type MatchActionRejectionReason =
   | "illegal-move"
   | "invalid-action"
   | "not-active-player"
+  | "roll-in-progress"
+  | "roll-not-allowed"
+  | "not-human-turn"
+  | "game-over"
   | "session-disposed";
 
 export type MatchActionResult =

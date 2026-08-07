@@ -2,7 +2,6 @@ import "./Board.css";
 import gameManager from "../../bootstrap/GameManager";
 import Piece from "../Piece/Piece";
 import {
-  useCallback,
   useEffect,
   useRef,
   useState,
@@ -30,20 +29,6 @@ const LOW_TIME_CLOCK_REFRESH_INTERVAL_MS = 75;
 const LOW_TIME_THRESHOLD_MS = 15_000;
 const HISTORY_TRANSITION_MS = 260;
 
-type RollPhase = "ready" | "spinning" | "resolved";
-
-interface RollAnimationState {
-  displayedRoll: readonly PieceType[];
-  phase: RollPhase;
-  roll: readonly PieceType[];
-  spinId: number;
-}
-
-const INITIAL_REEL_DISPLAY: readonly PieceType[] = [
-  "pawn",
-  "knight",
-  "bishop",
-];
 const GAME_REEL_SCALE_MULTIPLIERS: Readonly<Record<PieceType, number>> = {
   bishop: 1.2,
   king: 1.2,
@@ -86,7 +71,7 @@ function Board() {
   const historyCloseTimeoutRef = useRef<number | null>(null);
   const historyOpenRef = useRef(false);
   const historyOpenFrameRef = useRef<number | null>(null);
-  const spinStartedForRollRef = useRef<readonly PieceType[] | null>(null);
+  const rollSoundRef = useRef({ game, spinning: 0, resolved: 0 });
   const botTurnInProgressRef = useRef(false);
   const botTurnAbortControllerRef = useRef<AbortController | null>(null);
   const playerActionInFlightRef = useRef(false);
@@ -94,24 +79,7 @@ function Board() {
   const resultSoundGameRef = useRef<object | null>(null);
   const [isTurnSkippedMessageVisible, setIsTurnSkippedMessageVisible] =
     useState(false);
-  const [rollAnimation, setRollAnimation] = useState<RollAnimationState>({
-    displayedRoll: INITIAL_REEL_DISPLAY,
-    phase: "ready",
-    roll: game.currentRoll,
-    spinId: 0,
-  });
-
-  if (rollAnimation.roll !== game.currentRoll) {
-    setRollAnimation({
-      displayedRoll: rollAnimation.displayedRoll,
-      phase: "ready",
-      roll: game.currentRoll,
-      spinId: rollAnimation.spinId,
-    });
-  }
-
-  const rollPhase =
-    rollAnimation.roll === game.currentRoll ? rollAnimation.phase : "ready";
+  const rollPhase = matchSnapshot.roll.phase;
   const hasPlayableMoves = game.hasPlayableMoves();
   const isInputLocked =
     game.winner !== null ||
@@ -229,49 +197,22 @@ function Board() {
   }, [game]);
 
   useEffect(() => {
-    if (rollAnimation.phase !== "spinning") {
-      return;
+    if (rollSoundRef.current.game !== game) {
+      rollSoundRef.current = { game, spinning: 0, resolved: 0 };
     }
-
-    const timeoutId = window.setTimeout(() => {
-      if (game.winner) {
-        return;
-      }
-
-      setRollAnimation((state) => ({ ...state, phase: "resolved" }));
+    const { phase, sequence, trigger } = matchSnapshot.roll;
+    if (phase === "spinning" && rollSoundRef.current.spinning !== sequence) {
+      rollSoundRef.current.spinning = sequence;
+      if (trigger === "manual") soundManager.play("roll-button");
+      soundManager.play("lever-pull");
+      soundManager.play("reel-spin");
+    }
+    if (phase === "resolved" && rollSoundRef.current.resolved !== sequence) {
+      rollSoundRef.current.resolved = sequence;
       soundManager.stop("reel-spin");
       soundManager.play("reel-stop");
-    }, ROLL_TIMING.durationMs);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-      soundManager.stop("reel-spin");
-    };
-  }, [game.winner, rollAnimation.phase, rollAnimation.spinId]);
-
-  const startRoll = useCallback((withButtonFeedback = false) => {
-    if (
-      game.winner !== null ||
-      rollPhase !== "ready" ||
-      spinStartedForRollRef.current === game.currentRoll
-    ) {
-      return;
     }
-
-    if (withButtonFeedback) {
-      soundManager.play("roll-button");
-    }
-
-    soundManager.play("lever-pull");
-    soundManager.play("reel-spin");
-    spinStartedForRollRef.current = game.currentRoll;
-    setRollAnimation((state) => ({
-      ...state,
-      displayedRoll: game.currentRoll,
-      phase: "spinning",
-      spinId: state.spinId + 1,
-    }));
-  }, [game, rollPhase, setRollAnimation]);
+  }, [game, matchSnapshot.roll]);
 
   useEffect(() => {
     if (
@@ -282,10 +223,13 @@ function Board() {
       return;
     }
 
-    const timeoutId = window.setTimeout(startRoll, AUTOMATIC_ROLL_DELAY_MS);
+    const timeoutId = window.setTimeout(
+      () => session.startAutomaticRollReveal(),
+      AUTOMATIC_ROLL_DELAY_MS,
+    );
 
     return () => window.clearTimeout(timeoutId);
-  }, [game, game.winner, rollPhase, startRoll]);
+  }, [game, game.winner, rollPhase, session]);
 
   useEffect(() => {
     if (game.winner || hasPlayableMoves || rollPhase !== "resolved") {
@@ -318,14 +262,6 @@ function Board() {
         window.clearTimeout(skipTimeoutId);
       }
     };
-  }, [game, game.winner, hasPlayableMoves, rollPhase]);
-
-  useEffect(() => {
-    if (game.winner || !hasPlayableMoves || rollPhase !== "resolved") {
-      return;
-    }
-
-    game.startClockForCurrentTurn();
   }, [game, game.winner, hasPlayableMoves, rollPhase]);
 
   useEffect(() => {
@@ -412,18 +348,11 @@ function Board() {
     const newSession = gameManager.getSession();
     const newGame = gameManager.getGame();
 
-    spinStartedForRollRef.current = null;
     botTurnInProgressRef.current = false;
     resetMoveHistory();
     setIsTurnSkippedMessageVisible(false);
     setClockSnapshot(newGame.clock.getSnapshot());
     setMatchSnapshot(newSession.getSnapshot());
-    setRollAnimation((state) => ({
-      displayedRoll: INITIAL_REEL_DISPLAY,
-      phase: "ready",
-      roll: newGame.currentRoll,
-      spinId: state.spinId + 1,
-    }));
     setRefresh((value) => value + 1);
   };
 
@@ -601,9 +530,9 @@ function Board() {
                   }`}
                   aria-busy={rollPhase === "spinning"}
                 >
-                  {rollAnimation.displayedRoll.map((pieceType, index) => (
+                  {matchSnapshot.roll.visibleRoll.map((pieceType, index) => (
                     <SlotReel
-                      key={`${rollAnimation.spinId}-${index}`}
+                      key={`${matchSnapshot.roll.sequence}-${index}`}
                       isSpinning={rollPhase === "spinning"}
                       pieceColor={game.currentTurn}
                       pieceSet={game.setup.pieceSet}
@@ -639,12 +568,13 @@ function Board() {
 
               <button
                 className="roll-button"
-                disabled={
-                  game.winner !== null ||
-                  game.isBotTurn() ||
-                  rollPhase !== "ready"
-                }
-                onClick={() => startRoll(true)}
+                disabled={!matchSnapshot.roll.canStartManualRoll}
+                onClick={() => {
+                  void session.requestAction({
+                    schemaVersion: 1,
+                    type: "START_MANUAL_ROLL",
+                  });
+                }}
                 type="button"
               >
                 {t("common.actions.roll")}

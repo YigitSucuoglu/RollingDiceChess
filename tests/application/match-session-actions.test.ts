@@ -13,7 +13,12 @@ function createSession(): LocalBotMatchSession {
     random: () => 0,
     timeSource: { now: () => 0 },
   });
-  return new LocalBotMatchSession(game, toLocalBotMatchConfiguration(setup));
+  return new LocalBotMatchSession(
+    game,
+    toLocalBotMatchConfiguration(setup),
+    undefined,
+    { scheduler: { setTimeout: () => 0, clearTimeout: () => undefined } },
+  );
 }
 
 function piece(id: string, type: PieceType, color: "white" | "black", row: number, col: number, hasMoved = true): Piece {

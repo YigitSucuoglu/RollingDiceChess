@@ -30,6 +30,7 @@ v0.11.7
 - RELEASE-QUALITY-01 — Add automated validation, production smoke checks and GitHub Actions quality gates
 
 ### Engine
+- ARCH-02B — Move manual roll lifecycle orchestration behind MatchSession
 - ARCH-02A — Route Board selection and move intents through MatchSession
 - ARCH-01 — Prepare local match architecture for future server-authoritative multiplayer and mobile clients
 - Classical chess rules completed
@@ -94,6 +95,7 @@ v0.11.7
 ## Current Sprint
 
 Completed:
+- ARCH-02B — Move manual roll lifecycle orchestration behind MatchSession
 - ARCH-02A — Route Board selection and move intents through MatchSession
 - ARCH-01 — Prepare local match architecture for future server-authoritative multiplayer and mobile clients
 - OBS-01B — Configure and verify live production error reporting
@@ -121,12 +123,11 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. ARCH-02B — Move roll lifecycle orchestration behind MatchSession
+1. ARCH-02C — Move bot orchestration behind MatchSession
 
 Roadmap:
-- ARCH-02B — Move roll lifecycle orchestration behind MatchSession
 - ARCH-02C — Move bot orchestration behind MatchSession
-- ARCH-02D — Move clock/turn transition orchestration behind MatchSession
+- ARCH-02D — Move clock, skip, and turn-transition orchestration behind MatchSession
 - RELEASE-01 — Public web beta
 
 Backlog:
@@ -180,6 +181,7 @@ Performance Backlog:
 - OBS-01B live verification confirmed handled and Error Boundary events in production, matching environment/release metadata, and original-source resolution through uploaded source maps; the temporary Production test flag was removed and the application was redeployed.
 - Local bot matches are assembled through a versioned MatchSession boundary and explicit platform adapters; future online sessions must use a separate server-authoritative adapter rather than local client authority.
 - Board selection, legal-target hints, and player move submission now flow through MatchSession actions and immutable snapshots; roll, bot, and clock orchestration remain intentionally incremental.
+- Manual roll ready/spinning/resolved lifecycle, duplicate protection, and resolved-phase clock handoff are session-owned; reel, lever, and sound effects remain presentation-owned.
 
 
 ## Future UI Polish
