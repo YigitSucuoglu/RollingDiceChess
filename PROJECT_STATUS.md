@@ -30,6 +30,7 @@ v0.11.7
 - RELEASE-QUALITY-01 — Add automated validation, production smoke checks and GitHub Actions quality gates
 
 ### Engine
+- ARCH-02C — Move bot turn orchestration behind MatchSession
 - ARCH-02B — Move manual roll lifecycle orchestration behind MatchSession
 - ARCH-02A — Route Board selection and move intents through MatchSession
 - ARCH-01 — Prepare local match architecture for future server-authoritative multiplayer and mobile clients
@@ -95,6 +96,7 @@ v0.11.7
 ## Current Sprint
 
 Completed:
+- ARCH-02C — Move bot turn orchestration behind MatchSession
 - ARCH-02B — Move manual roll lifecycle orchestration behind MatchSession
 - ARCH-02A — Route Board selection and move intents through MatchSession
 - ARCH-01 — Prepare local match architecture for future server-authoritative multiplayer and mobile clients
@@ -123,10 +125,9 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. ARCH-02C — Move bot orchestration behind MatchSession
+1. ARCH-02D — Move clock, skip, and turn-transition orchestration behind MatchSession
 
 Roadmap:
-- ARCH-02C — Move bot orchestration behind MatchSession
 - ARCH-02D — Move clock, skip, and turn-transition orchestration behind MatchSession
 - RELEASE-01 — Public web beta
 
@@ -182,6 +183,7 @@ Performance Backlog:
 - Local bot matches are assembled through a versioned MatchSession boundary and explicit platform adapters; future online sessions must use a separate server-authoritative adapter rather than local client authority.
 - Board selection, legal-target hints, and player move submission now flow through MatchSession actions and immutable snapshots; roll, bot, and clock orchestration remain intentionally incremental.
 - Manual roll ready/spinning/resolved lifecycle, duplicate protection, and resolved-phase clock handoff are session-owned; reel, lever, and sound effects remain presentation-owned.
+- Bot detection, 500 ms start pacing, automatic reveal, planner execution, move publication, and cancellation are session-owned; Board only renders their snapshot effects.
 
 
 ## Future UI Polish

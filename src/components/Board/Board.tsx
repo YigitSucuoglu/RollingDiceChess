@@ -21,7 +21,6 @@ import soundManager from "../../services/SoundManager";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-const AUTOMATIC_ROLL_DELAY_MS = 500;
 const UNPLAYABLE_ROLL_REVIEW_MS = 1200;
 const TURN_SKIPPED_MESSAGE_MS = 1000;
 const CLOCK_REFRESH_INTERVAL_MS = 250;
@@ -72,8 +71,6 @@ function Board() {
   const historyOpenRef = useRef(false);
   const historyOpenFrameRef = useRef<number | null>(null);
   const rollSoundRef = useRef({ game, spinning: 0, resolved: 0 });
-  const botTurnInProgressRef = useRef(false);
-  const botTurnAbortControllerRef = useRef<AbortController | null>(null);
   const playerActionInFlightRef = useRef(false);
   const lastSoundedMoveRef = useRef({ game, timestamp: 0 });
   const resultSoundGameRef = useRef<object | null>(null);
@@ -83,7 +80,7 @@ function Board() {
   const hasPlayableMoves = game.hasPlayableMoves();
   const isInputLocked =
     game.winner !== null ||
-    game.isBotTurn() ||
+    matchSnapshot.currentPlayer !== game.setup.playerColor ||
     !hasPlayableMoves ||
     isTurnSkippedMessageVisible ||
     rollPhase !== "resolved";
@@ -215,23 +212,6 @@ function Board() {
   }, [game, matchSnapshot.roll]);
 
   useEffect(() => {
-    if (
-      game.winner ||
-      !game.isBotTurn() ||
-      rollPhase !== "ready"
-    ) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(
-      () => session.startAutomaticRollReveal(),
-      AUTOMATIC_ROLL_DELAY_MS,
-    );
-
-    return () => window.clearTimeout(timeoutId);
-  }, [game, game.winner, rollPhase, session]);
-
-  useEffect(() => {
     if (game.winner || hasPlayableMoves || rollPhase !== "resolved") {
       return;
     }
@@ -247,7 +227,10 @@ function Board() {
       setIsTurnSkippedMessageVisible(true);
       skipTimeoutId = window.setTimeout(() => {
         if (!game.winner && game.currentRoll === turnRoll) {
-          game.skipUnplayableTurn();
+          void session.requestAction({
+            schemaVersion: 1,
+            type: "SKIP_UNPLAYABLE_TURN",
+          });
         }
 
         setIsTurnSkippedMessageVisible(false);
@@ -262,38 +245,6 @@ function Board() {
         window.clearTimeout(skipTimeoutId);
       }
     };
-  }, [game, game.winner, hasPlayableMoves, rollPhase]);
-
-  useEffect(() => {
-    if (
-      game.winner ||
-      !game.isBotTurn() ||
-      !hasPlayableMoves ||
-      rollPhase !== "resolved" ||
-      botTurnInProgressRef.current
-    ) {
-      return;
-    }
-
-    botTurnInProgressRef.current = true;
-    const abortController = new AbortController();
-    botTurnAbortControllerRef.current = abortController;
-
-    void game
-      .playBotTurn(
-        () => setMatchSnapshot(session.getSnapshot()),
-        abortController.signal
-      )
-      .finally(() => {
-        if (botTurnAbortControllerRef.current === abortController) {
-          botTurnAbortControllerRef.current = null;
-        }
-        botTurnInProgressRef.current = false;
-        setMatchSnapshot(session.getSnapshot());
-        setRefresh((value) => value + 1);
-      });
-
-    return () => abortController.abort();
   }, [game, game.winner, hasPlayableMoves, rollPhase, session]);
 
   const toggleMoveHistory = () => {
@@ -342,13 +293,11 @@ function Board() {
   };
 
   const startNewGame = () => {
-    botTurnAbortControllerRef.current?.abort();
     soundManager.stopAll();
     gameManager.newGame(game.setup);
     const newSession = gameManager.getSession();
     const newGame = gameManager.getGame();
 
-    botTurnInProgressRef.current = false;
     resetMoveHistory();
     setIsTurnSkippedMessageVisible(false);
     setClockSnapshot(newGame.clock.getSnapshot());
@@ -357,7 +306,6 @@ function Board() {
   };
 
   const returnToMainMenu = () => {
-    botTurnAbortControllerRef.current?.abort();
     soundManager.stopAll();
     setIsTurnSkippedMessageVisible(false);
     gameManager.newGame();
@@ -464,7 +412,7 @@ function Board() {
       >
         <div className="turn-header">
           <div className="turn-text">
-            {t("game.toMove", { color: t(`common.colors.${game.currentTurn}`) })}
+            {t("game.toMove", { color: t(`common.colors.${matchSnapshot.currentPlayer}`) })}
           </div>
 
           <div className="game-toolbar">
@@ -534,7 +482,7 @@ function Board() {
                     <SlotReel
                       key={`${matchSnapshot.roll.sequence}-${index}`}
                       isSpinning={rollPhase === "spinning"}
-                      pieceColor={game.currentTurn}
+                      pieceColor={matchSnapshot.currentPlayer}
                       pieceSet={game.setup.pieceSet}
                       reelIndex={index}
                       stopAfterMs={ROLL_TIMING.reelStopTimesMs[index]}

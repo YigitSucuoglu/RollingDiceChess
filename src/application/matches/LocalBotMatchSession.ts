@@ -13,10 +13,12 @@ import type { Scheduler } from "../../domain/contracts/PlatformPorts";
 import { ROLL_TIMING } from "../../config/rollTiming";
 
 const INITIAL_VISIBLE_ROLL = ["pawn", "knight", "bishop"] as const;
+const BOT_START_DELAY_MS = 500;
 
 interface LocalBotMatchSessionDependencies {
   readonly scheduler: Scheduler;
   readonly rollDurationMs?: number;
+  readonly botStartDelayMs?: number;
 }
 
 export default class LocalBotMatchSession implements MatchSession {
@@ -48,6 +50,14 @@ export default class LocalBotMatchSession implements MatchSession {
 
   private readonly rollDurationMs: number;
 
+  private readonly botStartDelayMs: number;
+
+  private botStartTimeout: unknown | null = null;
+
+  private botAbortController: AbortController | null = null;
+
+  private botLifecycleGeneration = 0;
+
   public constructor(
     game: Game,
     configuration: LocalBotMatchConfiguration,
@@ -59,8 +69,10 @@ export default class LocalBotMatchSession implements MatchSession {
     this.getXpProgression = getXpProgression;
     this.scheduler = dependencies.scheduler;
     this.rollDurationMs = dependencies.rollDurationMs ?? ROLL_TIMING.durationMs;
+    this.botStartDelayMs = dependencies.botStartDelayMs ?? BOT_START_DELAY_MS;
     this.observedRoll = game.currentRoll;
     this.unsubscribeGame = game.subscribe(() => this.publish());
+    this.ensureBotLifecycle();
   }
 
   public getSnapshot(): MatchSnapshot {
@@ -164,6 +176,7 @@ export default class LocalBotMatchSession implements MatchSession {
     if (!accepted) return this.reject("invalid-action");
     const snapshot = this.getSnapshot();
     this.publish(snapshot);
+    this.ensureBotLifecycle();
     return { accepted: true, snapshot };
   }
 
@@ -175,6 +188,10 @@ export default class LocalBotMatchSession implements MatchSession {
     if (this.disposed) return;
     this.disposed = true;
     this.clearRollTimeout();
+    this.clearBotStartTimeout();
+    this.botLifecycleGeneration++;
+    this.botAbortController?.abort();
+    this.botAbortController = null;
     this.unsubscribeGame();
     this.listeners.clear();
     this.game.dispose();
@@ -187,16 +204,6 @@ export default class LocalBotMatchSession implements MatchSession {
 
   private reject(reason: MatchActionRejectionReason): MatchActionResult {
     return { accepted: false, reason, snapshot: this.getSnapshot() };
-  }
-
-  public startAutomaticRollReveal(): MatchActionResult {
-    if (this.disposed) return this.reject("session-disposed");
-    this.synchronizeRollTurn();
-    if (this.game.winner) return this.reject("game-over");
-    if (!this.game.isBotTurn() || this.rollPhase !== "ready") {
-      return this.reject(this.rollPhase === "spinning" ? "roll-in-progress" : "roll-not-allowed");
-    }
-    return this.beginRoll("automatic");
   }
 
   private startManualRoll(): MatchActionResult {
@@ -223,6 +230,9 @@ export default class LocalBotMatchSession implements MatchSession {
       this.rollPhase = "resolved";
       this.game.startClockForCurrentTurn();
       this.publish();
+      if (this.game.isBotTurn() && this.game.hasPlayableMoves()) {
+        this.runBotTurn(this.botLifecycleGeneration);
+      }
     }, this.rollDurationMs);
     this.publish(snapshot);
     return { accepted: true, snapshot };
@@ -246,6 +256,54 @@ export default class LocalBotMatchSession implements MatchSession {
     if (this.rollTimeout === null) return;
     this.scheduler.clearTimeout(this.rollTimeout);
     this.rollTimeout = null;
+  }
+
+  private ensureBotLifecycle(): void {
+    this.synchronizeRollTurn();
+    if (
+      this.disposed || this.game.winner || !this.game.isBotTurn() ||
+      this.rollPhase !== "ready" || this.botStartTimeout !== null ||
+      this.botAbortController !== null
+    ) return;
+
+    const generation = ++this.botLifecycleGeneration;
+    this.botStartTimeout = this.scheduler.setTimeout(() => {
+      this.botStartTimeout = null;
+      if (!this.isCurrentBotLifecycle(generation) || this.rollPhase !== "ready") return;
+      this.beginRoll("automatic");
+    }, this.botStartDelayMs);
+  }
+
+  private runBotTurn(generation: number): void {
+    if (!this.isCurrentBotLifecycle(generation) || this.botAbortController) return;
+    const abortController = new AbortController();
+    this.botAbortController = abortController;
+    void this.game.playBotTurn(
+      () => {
+        if (this.isCurrentGeneration(generation) && !abortController.signal.aborted) {
+          this.publish();
+        }
+      },
+      abortController.signal,
+    ).finally(() => {
+      if (this.botAbortController === abortController) this.botAbortController = null;
+      if (!this.isCurrentBotLifecycle(generation)) return;
+      this.ensureBotLifecycle();
+    });
+  }
+
+  private isCurrentBotLifecycle(generation: number): boolean {
+    return this.isCurrentGeneration(generation) && !this.game.winner && this.game.isBotTurn();
+  }
+
+  private isCurrentGeneration(generation: number): boolean {
+    return !this.disposed && generation === this.botLifecycleGeneration;
+  }
+
+  private clearBotStartTimeout(): void {
+    if (this.botStartTimeout === null) return;
+    this.scheduler.clearTimeout(this.botStartTimeout);
+    this.botStartTimeout = null;
   }
 
   private isPosition(value: Readonly<{ row: number; col: number }>): boolean {

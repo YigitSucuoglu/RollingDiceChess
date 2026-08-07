@@ -37,6 +37,11 @@ const migratedBoardMutationViolations = [
   [/\bsetRollAnimation\b|\brollAnimation\b/, "Board owns canonical roll lifecycle state"],
   [/\bROLL_TIMING\.durationMs\b/, "Board owns the roll-resolution timeout"],
   [/\bDiceEngine\b/, "Board accesses DiceEngine"],
+  [/\bBotFactory\b/, "Board accesses BotFactory"],
+  [/\bgame\.playBotTurn\s*\(/, "Board directly executes a bot turn"],
+  [/\bstartAutomaticRollReveal\s*\(/, "Board decides when bot roll reveal starts"],
+  [/\bbotTurnInProgressRef\b|\bbotTurnAbortControllerRef\b/, "Board owns bot lifecycle guards"],
+  [/\bAUTOMATIC_ROLL_DELAY_MS\b|\bBOT_START_DELAY_MS\b/, "Board owns bot-start pacing"],
 ].filter(([pattern]) => pattern.test(boardSource)).map(([, label]) => label);
 
 assert.deepEqual(
