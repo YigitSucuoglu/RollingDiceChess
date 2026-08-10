@@ -11,7 +11,8 @@ describe("GameAssetPreloader", () => {
 
     expect(urls).toHaveLength(14);
     expect(new Set(urls)).toHaveLength(14);
-    expect(urls.some((url) => url.includes("game-trimmed"))).toBe(true);
+    expect(urls.every((url) => url.endsWith(".webp"))).toBe(true);
+    expect(urls.some((url) => url.includes("game-machine"))).toBe(true);
   });
 
   it("deduplicates repeated URLs and reuses cached success", async () => {

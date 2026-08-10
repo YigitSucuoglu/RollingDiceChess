@@ -64,6 +64,7 @@ function PlaySetupPage() {
     return () => { isMountedRef.current = false; };
   }, []);
   useEffect(() => {
+    void import("./GamePage");
     gameAssetPreloader.preload(getRequiredGameAssetUrls(pieceSet)).catch((error: unknown) => {
       if (import.meta.env.DEV) console.error("Game asset background preload failed.", error);
     });

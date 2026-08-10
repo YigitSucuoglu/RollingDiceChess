@@ -25,6 +25,17 @@ No P0 blocker was reproduced. RELEASE-01A storage and keyboard fixes remain heal
 
 ## Qualification matrix
 
+### RELEASE-01C disposition (supersedes the performance/dependency rows above)
+
+- **Fixed:** Runtime Gold pieces and the Game machine/lever now use deterministic alpha-preserving WebP derivatives. Master PNGs remain source-only; production gzip output fell from 9,696.6 KiB to 1,319.9 KiB.
+- **Fixed:** Router-native lazy routes reduce Home initial JS from 157.7 KiB to 132.9 KiB gzip and remove the >500 KiB initial chunk warning.
+- **Fixed:** `react-router-dom`/`react-router` 7.18.2 closes the previously tracked RSC advisory; `npm audit --omit=dev` reports zero vulnerabilities.
+- **Hardened:** Result modal now has a progressive `100dvh` maximum-height override after its `100vh` fallback. Physical iPhone Safari verification remains open.
+- **CSP decision:** Existing restrictive security headers remain. Enforcement was not added without a credentialed Sentry preview test; the future policy must permit the configured Sentry ingestion host and current inline style attributes. An unverified report-only header without a reporting endpoint would add noise without evidence.
+- **Observability:** Normal local production builds still exclude public source maps and the verification route. Credentialed Vercel builds retain hidden source-map upload/deletion behavior. No live verification event was sent.
+
+`GAME-ASSET-PERF-01` and `PERF-03` are subsumed by RELEASE-01C. `AI-PERF-01`, `RENDER-PERF-01`, production audio, Firefox/WebKit CI observation, and physical iPhone/Safari qualification remain open.
+
 | Environment | Automated | Physical | Status | Notes |
 |---|---|---|---|---|
 | Google Chrome 151 / Windows | Real installed browser | No | PASS | Release-critical journey, routes, refresh, storage fallback, console/network guards. |

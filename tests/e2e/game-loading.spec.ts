@@ -5,7 +5,7 @@ import { expect, test } from "./fixtures";
 test("mobile setup scrolls to Start Game and waits for delayed critical assets", async ({ page, assertNoErrors }) => {
   let releaseMachine: (() => void) | undefined;
   const machineGate = new Promise<void>((resolve) => { releaseMachine = resolve; });
-  await page.route(/update-machine-game-trimmed/, async (route) => {
+  await page.route(/game-machine(?:-[^/?]+)?\.webp/, async (route) => {
     await machineGate;
     await route.continue();
   });
@@ -71,7 +71,7 @@ test("setup action remains reachable across mobile and tablet viewports", async 
 
 failureTest("critical asset failure offers Back to Setup and Retry", async ({ page }) => {
   let failMachine = true;
-  await page.route(/update-machine-game-trimmed/, async (route) => {
+  await page.route(/game-machine(?:-[^/?]+)?\.webp/, async (route) => {
     if (failMachine) {
       await route.fulfill({ status: 404, body: "missing" });
       return;

@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "measuredAt": "2026-08-04",
+  "version": 3,
+  "measuredAt": "2026-08-10",
   "environment": {
     "node": "v24.18.0",
     "os": "Windows corporate workstation",
@@ -16,10 +16,10 @@
     }
   },
   "baseline": {
-    "distRawBytes": 10326527,
-    "distGzipBytes": 9895544,
-    "mainJsGzipBytes": 128202,
-    "largestImageBytes": 1856549,
+    "distRawBytes": 1754726,
+    "distGzipBytes": 1351578,
+    "mainJsGzipBytes": 140811,
+    "largestImageBytes": 318997,
     "homeDesktopTransferBytes": 235186,
     "homeMobileTransferBytes": 321102,
     "homeDesktopLcpMs": 2583,
@@ -29,9 +29,9 @@
     "hardBotP95Ms": 613.653
   },
   "informationalBudgets": {
-    "distGzipBytes": 11000000,
+    "distGzipBytes": 1500000,
     "mainJsGzipBytes": 150000,
-    "largestImageBytes": 2100000,
+    "largestImageBytes": 350000,
     "homeInitialTransferBytes": 400000,
     "homeMobileLcpMs": 3500,
     "homeCls": 0.02,

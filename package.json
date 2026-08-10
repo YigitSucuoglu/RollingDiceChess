@@ -25,8 +25,10 @@
     "perf:engine": "tsx scripts/perf-engine.ts",
     "perf:lighthouse": "npm run build && node scripts/perf-lighthouse.mjs",
     "perf:browser": "npm run build && node scripts/perf-browser.mjs",
+    "perf:cold": "npm run build && node scripts/perf-game-cold.mjs",
     "perf": "npm run perf:bundle && npm run perf:engine && npm run perf:lighthouse && npm run perf:browser",
     "assets:home": "node scripts/optimize-home-assets.mjs",
+    "assets:game": "node scripts/optimize-game-assets.mjs",
     "test": "npm run test:i18n && npm run test:profile && npm run test:sound && npm run test:architecture && npm run test:unit",
     "validate": "npm run typecheck && npm run lint && npm run test && vite build && npm run test:release-smoke",
     "validate:ci": "npm run validate",
@@ -38,7 +40,7 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-i18next": "^17.0.11",
-    "react-router-dom": "^7.18.1"
+    "react-router-dom": "7.18.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

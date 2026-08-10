@@ -57,8 +57,8 @@ assert.equal(relativeBuildFiles.some((file) => file.toLowerCase().endsWith(".map
 assert.equal(relativeBuildFiles.some((file) => file.includes(".artifacts") || /(?:screenshot|comparison)/i.test(file)), false, "Cleanup artifacts entered the build");
 
 const requiredSlotPrefixes = [
-  "update-machine-game-trimmed-",
-  "update-lever-game-trimmed-",
+  "game-machine-",
+  "game-lever-",
   "machine-1x-",
   "machine-2x-",
   "machine-mobile-",
@@ -71,6 +71,8 @@ for (const prefix of requiredSlotPrefixes) {
 for (const retiredHomeMaster of [
   "update-machine-transparent-",
   "update-lever-transparent-",
+  "update-machine-game-trimmed-",
+  "update-lever-game-trimmed-",
 ]) {
   assert.equal(
     relativeBuildFiles.some((file) => path.basename(file).startsWith(retiredHomeMaster)),
@@ -78,6 +80,15 @@ for (const retiredHomeMaster of [
     `Home master asset entered production: ${retiredHomeMaster}*`
   );
 }
+
+assert.equal(
+  buildFiles.some((file) =>
+    /(?:white|black)-(?:bishop|king|knight|pawn|queen|rook)-[^/\\]+\.png$/i.test(file) &&
+    fs.statSync(file).size > 350_000
+  ),
+  false,
+  "Oversized Gold source PNG entered production",
+);
 
 const colors = ["white", "black"];
 const pieces = ["bishop", "king", "knight", "pawn", "queen", "rook"];
@@ -88,8 +99,9 @@ for (const color of colors) {
   }
 }
 
-const jsContents = scriptReferences
-  .map((reference) => fs.readFileSync(resolveDistReference(reference), "utf8"))
+const jsContents = buildFiles
+  .filter((file) => path.extname(file).toLowerCase() === ".js")
+  .map((file) => fs.readFileSync(file, "utf8"))
   .join("\n");
 const inlineSvgCount = (jsContents.match(/data:image\/svg\+xml/g) ?? []).length;
 assert.ok(inlineSvgCount >= 24, `Expected embedded Classic/Retro SVG assets; found ${inlineSvgCount}`);

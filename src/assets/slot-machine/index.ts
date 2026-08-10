@@ -1,5 +1,5 @@
-import updateLeverGameUrl from "./generated/update-lever-game-trimmed.png";
-import updateMachineGameUrl from "./generated/update-machine-game-trimmed.png";
+import updateLeverGameUrl from "./runtime/game-lever.webp";
+import updateMachineGameUrl from "./runtime/game-machine.webp";
 
 export const SLOT_MACHINE_ASSETS = {
   gameAssembly: {

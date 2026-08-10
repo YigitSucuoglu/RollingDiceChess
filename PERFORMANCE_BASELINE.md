@@ -142,3 +142,29 @@ At 1440×900/DPR1 Chrome selected the 63.1 KiB 624w machine rendered at 528×352
 Machine uses eager loading, synchronous decode, intrinsic dimensions and `fetchPriority="high"`; no preload was added, avoiding duplicate requests. Lever and pieces use asynchronous decode without lazy loading so composition remains atomic. Fixed-viewport visual inspection preserved machine, reels, lever pivot and caption alignment on desktop/mobile with no visible halo.
 
 The baseline budgets are now 11 MB dist gzip, 150 KB main JS gzip, 2.1 MB largest emitted image, 400 KB Home initial transfer, 3.5 s Home mobile LCP and 0.02 CLS. These remain informational.
+
+## RELEASE-01C Game asset delivery (2026-08-10)
+
+The retained pre-change build was 10,186.4 KiB raw / 9,696.6 KiB gzip / 9,659.6 KiB Brotli. Images accounted for 9,615.4 KiB raw; the 1,813.0 KiB Game machine and twelve 400.8–750.7 KiB Gold PNGs dominated output. The single main JS file was 504.2 KiB raw / 157.7 KiB gzip.
+
+`npm run assets:game` deterministically resizes untouched source canvases with Lanczos3 and emits WebP quality 92 / alpha quality 100. Gold runtime files are 256×320 (covering the measured maximum ~110 CSS px at 2× DPR); the Game machine is 704×394 and lever 47×256. No crop is applied, so transparent padding, alignment, reel positions, machine geometry and lever pivot remain unchanged. Source PNGs remain in `src/assets` but no longer enter `dist`.
+
+Objective comparisons are generated in `.performance/game-assets/asset-report.json`. Across 14 derivatives, SSIM is 0.99907–0.99961 and PSNR is 29.61–34.33 dB at delivery resolution. Alpha comparison is included per asset. Representative screenshots are written to ignored `.performance/release-01c/`.
+
+| Metric | Before | After | Delta |
+|---|---:|---:|---:|
+| Total dist raw | 10,186.4 KiB | 1,713.6 KiB | -83.2% |
+| Total dist gzip | 9,696.6 KiB | 1,319.9 KiB | -86.4% |
+| Total dist Brotli | 9,659.6 KiB | 1,296.7 KiB | -86.6% |
+| Image output | 9,615.4 KiB | 1,140.7 KiB | -88.1% |
+| Gold set | 6,708.3 KiB | 188.3 KiB | -97.2% |
+| Game machine | 1,813.0 KiB | 101.2 KiB | -94.4% |
+| Game lever | 247.9 KiB | 5.1 KiB | -97.9% |
+| Largest emitted file | 1,813.0 KiB image | 400.5 KiB initial JS | -77.9% |
+| Initial JS gzip | 157.7 KiB | 132.9 KiB | -15.7% |
+
+Route-level lazy loading was applied because it removed 24.8 KiB gzip from Home's initial JS and eliminated the >500 KiB initial-chunk warning. Game/domain code remains grouped for gameplay startup. `npm run perf:cold` runs three fresh contexts for normal and Fast-4G-like profiles and records medians/min/max. The network profile is an approximation, not a carrier claim. Vite-hashed assets retain the immutable one-year Vercel asset cache; HTML remains outside that rule.
+
+With browser cache explicitly disabled and Start Game activated immediately after Setup became usable, the three-run normal median transferred 301,678 bytes in 14 critical requests, showed Setup in 49.5 ms, showed the loading state in 35.3 ms, reached Board 122.0 ms after Start Game, and reached Board 289.5 ms after the Home Play action. The Fast-4G-like median used the same bytes/request count, showed the loading state in 35.7 ms, reached Board 1,870.6 ms after Start Game, and completed Home Play → Board in 2,792.2 ms.
+
+The legacy single-run `perf:browser` Setup → Board probe intentionally clicks Start Game without waiting for route/background prefetch and measured 464.4 ms versus the pre-change 225.8 ms. This synthetic immediate-click metric regressed due to route chunk loading; the cold-flow tool captures the actual loading screen and concurrent preload path. The tradeoff is retained and visible here rather than hidden. Roll resolved (1,389.8 ms), selection hints (72.7 ms), and move commit (43.0 ms) remain within ordinary run variance and preserve intentional timing.

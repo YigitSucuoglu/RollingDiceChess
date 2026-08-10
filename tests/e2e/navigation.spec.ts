@@ -19,7 +19,7 @@ test("critical routes and back navigation render without browser errors", async 
   for (const path of ["/play", "/game", "/how-to-play", "/profile", "/settings"]) {
     await page.goto(path);
     await expect(page.locator("main")).toBeVisible();
-    expect(await page.title()).not.toBe(homeTitle);
+    await expect.poll(() => page.title()).not.toBe(homeTitle);
   }
 
   await page.goto("/settings");

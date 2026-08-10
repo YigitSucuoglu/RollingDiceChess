@@ -15,6 +15,7 @@
 .game-result-dialog{
     width:min(92vw,430px);
     max-height:calc(100vh - 40px);
+    max-height:calc(100dvh - 40px);
     padding:clamp(22px,4vh,36px);
 
     display:flex;
