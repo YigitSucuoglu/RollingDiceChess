@@ -12,7 +12,7 @@ test("release-critical game journey works across the qualification matrix", asyn
   const useTouch = /android|iphone/.test(testInfo.project.name);
   let releaseMachine: (() => void) | undefined;
   const machineGate = new Promise<void>((resolve) => { releaseMachine = resolve; });
-  await page.route(/update-machine-game-trimmed/, async (route) => {
+  await page.route(/game-machine(?:-[^/?]+)?\.webp/, async (route) => {
     await machineGate;
     await route.continue();
   });

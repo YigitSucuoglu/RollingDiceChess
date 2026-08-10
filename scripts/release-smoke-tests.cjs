@@ -6,11 +6,13 @@ const projectRoot = path.resolve(__dirname, "..");
 const distRoot = path.join(projectRoot, "dist");
 const indexPath = path.join(distRoot, "index.html");
 const vercelConfigPath = path.join(projectRoot, "vercel.json");
+const projectStatusPath = path.join(projectRoot, "PROJECT_STATUS.md");
 
 assert.ok(fs.existsSync(distRoot), "dist/ does not exist; run the production build first");
 assert.ok(fs.statSync(distRoot).isDirectory(), "dist is not a directory");
 assert.ok(fs.existsSync(indexPath), "dist/index.html is missing");
 assert.ok(fs.existsSync(vercelConfigPath), "vercel.json is missing");
+assert.ok(fs.existsSync(projectStatusPath), "PROJECT_STATUS.md is missing");
 
 const vercelConfig = JSON.parse(fs.readFileSync(vercelConfigPath, "utf8"));
 assert.equal(vercelConfig.framework, "vite", "Vercel framework must be Vite");
@@ -18,6 +20,13 @@ assert.equal(vercelConfig.installCommand, "npm ci", "Vercel install command must
 assert.equal(vercelConfig.buildCommand, "npm run build", "Unexpected Vercel build command");
 assert.equal(vercelConfig.outputDirectory, "dist", "Vercel output directory must be dist");
 assert.ok(vercelConfig.rewrites?.some((rewrite) => rewrite.destination === "/index.html"), "SPA rewrite is missing");
+const assetHeaders = vercelConfig.headers?.find((entry) => entry.source === "/assets/(.*)")?.headers ?? [];
+assert.ok(assetHeaders.some((header) => header.key === "Cache-Control" && /immutable/.test(header.value)), "Immutable hashed-asset cache header is missing");
+assert.equal(
+  vercelConfig.headers?.some((entry) => entry.source === "/(.*)" && entry.headers?.some((header) => header.key === "Cache-Control" && /immutable/.test(header.value))) ?? false,
+  false,
+  "HTML/root routes must not receive an immutable cache header",
+);
 
 const indexHtml = fs.readFileSync(indexPath, "utf8");
 assert.ok(indexHtml.trim().length > 0, "dist/index.html is empty");
@@ -105,6 +114,12 @@ const jsContents = buildFiles
   .join("\n");
 const inlineSvgCount = (jsContents.match(/data:image\/svg\+xml/g) ?? []).length;
 assert.ok(inlineSvgCount >= 24, `Expected embedded Classic/Retro SVG assets; found ${inlineSvgCount}`);
+const projectStatus = fs.readFileSync(projectStatusPath, "utf8");
+const appVersion = projectStatus.match(/## Current Version\s+v([^\s]+)/)?.[1];
+assert.ok(appVersion, "Unable to read application version from PROJECT_STATUS.md");
+assert.ok(jsContents.includes(`roulettechess@${appVersion}`), `Build release metadata does not contain v${appVersion}`);
+assert.equal(/OBS-01B live verification/.test(jsContents), false, "Observability verification route entered the normal production build");
+assert.equal(relativeBuildFiles.some((file) => /ObservabilityVerification/i.test(file)), false, "Observability verification chunk entered production");
 
 const inspectableExtensions = new Set([".html", ".js", ".css", ".svg", ".json", ".map"]);
 for (const file of buildFiles.filter((candidate) => inspectableExtensions.has(path.extname(candidate).toLowerCase()))) {

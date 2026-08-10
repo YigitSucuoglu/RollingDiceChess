@@ -168,3 +168,26 @@ Route-level lazy loading was applied because it removed 24.8 KiB gzip from Home'
 With browser cache explicitly disabled and Start Game activated immediately after Setup became usable, the three-run normal median transferred 301,678 bytes in 14 critical requests, showed Setup in 49.5 ms, showed the loading state in 35.3 ms, reached Board 122.0 ms after Start Game, and reached Board 289.5 ms after the Home Play action. The Fast-4G-like median used the same bytes/request count, showed the loading state in 35.7 ms, reached Board 1,870.6 ms after Start Game, and completed Home Play → Board in 2,792.2 ms.
 
 The legacy single-run `perf:browser` Setup → Board probe intentionally clicks Start Game without waiting for route/background prefetch and measured 464.4 ms versus the pre-change 225.8 ms. This synthetic immediate-click metric regressed due to route chunk loading; the cold-flow tool captures the actual loading screen and concurrent preload path. The tradeoff is retained and visible here rather than hidden. Roll resolved (1,389.8 ms), selection hints (72.7 ms), and move commit (43.0 ms) remain within ordinary run variance and preserve intentional timing.
+
+## RELEASE-01D release-candidate gate (2026-08-10)
+
+No production feature or asset change was made. The 0.4 KiB raw / 0.2 KiB gzip bundle difference is normal minifier/metadata output from the same source inputs; image and initial chunk sizes are stable.
+
+| Metric | RELEASE-01C | RELEASE-01D RC | Delta |
+|---|---:|---:|---:|
+| Total dist raw | 1,713.6 KiB | 1,714.0 KiB | +0.4 KiB |
+| Total dist gzip | 1,319.9 KiB | 1,320.1 KiB | +0.2 KiB |
+| Image output | 1,140.7 KiB | 1,140.7 KiB | 0 |
+| Gold Piece Set | 188.3 KiB | 188.3 KiB | 0 |
+| Game machine | 101.2 KiB | 101.2 KiB | 0 |
+| Game lever | 5.1 KiB | 5.1 KiB | 0 |
+| Initial JS gzip | 132.9 KiB | 132.9 KiB | 0 |
+| Home meaningful UI | 230.7 ms | 174.5 ms | -56.2 ms |
+| Setup → Board | 464.4 ms | 464.0 ms | -0.4 ms |
+| Roll → spinning | 56.3 ms | 50.5 ms | -5.8 ms |
+| Roll → resolved | 1,389.8 ms | 1,390.2 ms | +0.4 ms |
+| Selection → hints | 72.7 ms | 64.0 ms | -8.7 ms |
+| Move commit | 43.0 ms | 41.0 ms | -2.0 ms |
+| Hard bot p50 / p95 | 387.6 / 435.9 ms | 480.4 / 648.0 ms | workstation variance; under 800 ms ceiling |
+
+The browser values are single local runs and are not treated as carrier/user percentiles. Engine p95 variance was also visible in untargeted fixtures; no engine, planner or gameplay source changed between these measurements. The deterministic first-game reference remains 301,678 bytes / 14 critical requests with a 289.5 ms normal Home Play → Board median and 2,792.2 ms Fast-4G-like median.

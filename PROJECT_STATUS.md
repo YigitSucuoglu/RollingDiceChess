@@ -20,6 +20,7 @@ v0.11.7
 ## Completed
 
 ### Quality
+- RELEASE-01D — Release candidate and public beta launch readiness (conditional gates documented)
 - RELEASE-01C — Beta performance and production hardening
 - RELEASE-01B — Cross-browser and real-device beta qualification (automation complete; physical-device gate remains)
 - RELEASE-01A — Public Beta Readiness Audit and Critical Hardening
@@ -100,6 +101,7 @@ v0.11.7
 ## Current Sprint
 
 Completed:
+- RELEASE-01D — Release candidate and public beta launch readiness (conditional gates documented)
 - RELEASE-01C — Beta performance and production hardening
 - RELEASE-01B — Cross-browser and real-device beta qualification (automation complete; physical-device gate remains)
 - RELEASE-01A — Public Beta Readiness Audit and Critical Hardening
@@ -133,10 +135,10 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. RELEASE-01D — Release candidate and public beta launch checklist
+1. RELEASE-01D-HF1 — Verify CI, deployment and production smoke gates
 
 Roadmap:
-- RELEASE-01D — Release candidate and public beta launch checklist
+- RELEASE-01D-HF1 — Verify CI, deployment and production smoke gates
 
 Backlog:
 - SOUND-01B — Add production sound assets to the preserved sound architecture
@@ -193,6 +195,7 @@ Performance Backlog:
 - RELEASE-01A found no P0 blocker; profile persistence now survives unavailable browser storage, board squares have baseline keyboard access, and remaining beta risks are tracked in RELEASE_READINESS.md.
 - RELEASE-01B adds a release-critical Chrome/Edge/Firefox/WebKit and mobile-profile matrix plus CI coverage; installed Chrome, installed Edge, and Android Chromium emulation passed locally, while Firefox/WebKit and all physical-device targets remain explicitly unqualified.
 - RELEASE-01C replaces oversized runtime Gold and Game slot PNG delivery with deterministic alpha-preserving WebP derivatives, keeps master PNGs as sources, adds measured route-level splitting and cold-load tooling, closes the React Router advisory with 7.18.2, and adds a `100dvh` result-dialog fallback. Physical iPhone/Safari qualification remains open.
+- RELEASE-01D treats v0.11.7 as feature-frozen and records a CONDITIONAL GO: local validation, Chromium, Edge, and Android-emulated gates pass; actual GitHub Firefox/WebKit results plus Vercel production smoke remain mandatory before public exposure. Physical iPhone/Safari and Android are accepted but explicitly NOT TESTED gaps.
 
 
 ## Future UI Polish

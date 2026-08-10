@@ -8,6 +8,10 @@ Scope: existing single-player web experience
 
 No P0 blocker was reproduced. RELEASE-01A storage and keyboard fixes remain healthy. RELEASE-01B added a small release-critical browser matrix without duplicating the full Chromium suite. Real installed Chrome and Edge passed; Android Chromium device-profile emulation passed. Firefox, WebKit/iPhone emulation, and physical devices are not marked PASS because their engines/devices were not available locally. Limited Chromium-family beta remains reasonable; broader beta still has a manual/browser-engine qualification gate.
 
+### RELEASE-01D release-candidate decision
+
+**CONDITIONAL GO** for the v0.11.7 single-player public beta. Qualified baseline is `main` commit `6f97b43ff1c16ac44ef84bfb7ab6ff577a12a073` plus the documented RELEASE-01D worker-cap/checklist diff. No product P0/P1 was reproduced. Public exposure remains gated on a green pushed GitHub Quality run—including Firefox/WebKit—and Vercel Ready/SHA/production smoke verification. Physical iPhone/Safari and physical Android are accepted but explicitly **NOT TESTED** gaps. Operational steps, rollback and incident response are in `RELEASE_CHECKLIST.md`.
+
 ## Findings
 
 | Priority | Problem and user impact | Reproduction / affected area | Action |
