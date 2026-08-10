@@ -23,9 +23,13 @@ const FALLBACK_STORAGE: StorageAdapter = {
 };
 
 function getDefaultStorage(): StorageAdapter {
-  return typeof window === "undefined"
-    ? FALLBACK_STORAGE
-    : window.localStorage;
+  try {
+    return typeof window === "undefined"
+      ? FALLBACK_STORAGE
+      : window.localStorage;
+  } catch {
+    return FALLBACK_STORAGE;
+  }
 }
 
 function nonNegativeNumber(value: unknown, fallback = 0): number {
@@ -119,14 +123,22 @@ export class LocalStoragePlayerProfileRepository
   }
 
   public saveProfile(profile: PlayerProfile): void {
-    this.storage.setItem(
-      PLAYER_PROFILE_STORAGE_KEY,
-      JSON.stringify(profile)
-    );
+    try {
+      this.storage.setItem(
+        PLAYER_PROFILE_STORAGE_KEY,
+        JSON.stringify(profile)
+      );
+    } catch {
+      // Persistence failure must not make gameplay or Profile unavailable.
+    }
   }
 
   public resetProfile(): PlayerProfile {
-    this.storage.removeItem(PLAYER_PROFILE_STORAGE_KEY);
+    try {
+      this.storage.removeItem(PLAYER_PROFILE_STORAGE_KEY);
+    } catch {
+      // Keep reset usable in memory when persistent storage is blocked.
+    }
     const profile = createDefaultPlayerProfile();
     this.saveProfile(profile);
     return profile;

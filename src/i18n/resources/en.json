@@ -27,6 +27,7 @@
   },
   "game": {
     "toMove": "{{color}} to move", "turnSkipped": "No playable pieces — Turn skipped", "muteSound": "Mute sound", "enableSound": "Enable sound", "openHistory": "Open move history", "closeHistory": "Close move history",
+    "emptySquare": "empty", "squareLabel": "{{square}}: {{piece}}",
     "clockPlayer": "{{color}} · You", "clockBot": "{{color}} · Bot", "you": "You", "clockAria": "{{color}} player clock: {{minutes}} minutes {{seconds}} seconds", "history": "Move History", "historyEmpty": "No moves yet", "historyAria": "Move history turns", "movesInTurn": "{{color}} moves in turn {{turn}}", "reelSpinning": "Reel {{reel}} spinning", "reelResult": "Reel {{reel}}: {{piece}}"
   },
   "result": {

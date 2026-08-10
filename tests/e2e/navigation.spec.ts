@@ -38,3 +38,35 @@ test("critical routes and back navigation render without browser errors", async 
   assertNoErrors();
   expect(monitoringRequests).toEqual([]);
 });
+
+test("public routes remain recoverable when browser storage is unavailable", async ({ page, assertNoErrors }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "localStorage", {
+      configurable: true,
+      get: () => { throw new DOMException("Storage access denied", "SecurityError"); },
+    });
+  });
+
+  for (const path of ["/", "/profile", "/settings", "/how-to-play"]) {
+    await page.goto(path);
+    await expect(page.locator("main")).toBeVisible();
+  }
+  assertNoErrors();
+});
+
+test("release-critical pages avoid horizontal overflow at compact viewports", async ({ page, assertNoErrors }) => {
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 768, height: 1024 },
+    { width: 844, height: 390 },
+  ]) {
+    await page.setViewportSize(viewport);
+    for (const path of ["/", "/profile", "/settings", "/how-to-play"]) {
+      await page.goto(path);
+      await expect(page.locator("main")).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth))
+        .toBeLessThanOrEqual(viewport.width + 1);
+    }
+  }
+  assertNoErrors();
+});

@@ -27,6 +27,7 @@
   },
   "game": {
     "toMove": "Hamle sırası {{color}}da", "turnSkipped": "Oynanabilir taş yok — Tur atlandı", "muteSound": "Sesi kapat", "enableSound": "Sesi aç", "openHistory": "Hamle geçmişini aç", "closeHistory": "Hamle geçmişini kapat",
+    "emptySquare": "boş", "squareLabel": "{{square}}: {{piece}}",
     "clockPlayer": "{{color}} · Sen", "clockBot": "{{color}} · Bot", "you": "Sen", "clockAria": "{{color}} oyuncu saati: {{minutes}} dakika {{seconds}} saniye", "history": "Hamle Geçmişi", "historyEmpty": "Henüz hamle yok", "historyAria": "Hamle geçmişi turları", "movesInTurn": "{{turn}}. turdaki {{color}} hamleleri", "reelSpinning": "{{reel}}. rulet dönüyor", "reelResult": "{{reel}}. rulet: {{piece}}"
   },
   "result": {

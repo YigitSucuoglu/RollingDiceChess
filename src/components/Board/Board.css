@@ -477,6 +477,12 @@
     position:relative;
 }
 
+.square:focus-visible{
+    outline:3px solid #fff4cf;
+    outline-offset:-3px;
+    z-index:3;
+}
+
 .board-coordinate{
     position:absolute;
     z-index:2;

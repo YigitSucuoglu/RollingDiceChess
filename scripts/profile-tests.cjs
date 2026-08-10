@@ -200,6 +200,16 @@ try {
   );
   assert.equal(corruptRepository.getProfile().statistics.gamesPlayed, 0);
 
+  const blockedStorage = {
+    getItem: () => { throw new Error("storage blocked"); },
+    setItem: () => { throw new Error("storage blocked"); },
+    removeItem: () => { throw new Error("storage blocked"); },
+  };
+  const blockedRepository = new LocalStoragePlayerProfileRepository(blockedStorage);
+  assert.doesNotThrow(() => blockedRepository.getProfile());
+  assert.doesNotThrow(() => blockedRepository.saveProfile(defaultProfile));
+  assert.doesNotThrow(() => blockedRepository.resetProfile());
+
   const partialRepository = new LocalStoragePlayerProfileRepository(
     createMemoryStorage(JSON.stringify({
       schemaVersion: 1,

@@ -20,6 +20,7 @@ v0.11.7
 ## Completed
 
 ### Quality
+- RELEASE-01A — Public Beta Readiness Audit and Critical Hardening
 - OBS-01B — Configure and verify live production error reporting
 - OBS-01A — Add privacy-safe error boundary and Sentry-ready observability foundation
 - DEPLOY-01B-HF1 — Add first-game asset loading state and restore mobile Play Setup scrolling
@@ -97,6 +98,7 @@ v0.11.7
 ## Current Sprint
 
 Completed:
+- RELEASE-01A — Public Beta Readiness Audit and Critical Hardening
 - ARCH-02D — Move clock, skip and turn-transition orchestration behind MatchSession
 - ARCH-02C — Move bot turn orchestration behind MatchSession
 - ARCH-02B — Move manual roll lifecycle orchestration behind MatchSession
@@ -127,10 +129,10 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. RELEASE-01 — Prepare RouletteChess public web beta
+1. RELEASE-01B — Cross-browser and real-device beta qualification
 
 Roadmap:
-- RELEASE-01 — Public web beta
+- RELEASE-01B — Cross-browser and real-device beta qualification
 
 Backlog:
 - SOUND-01B — Add production sound assets to the preserved sound architecture
@@ -186,6 +188,7 @@ Performance Backlog:
 - Manual roll ready/spinning/resolved lifecycle, duplicate protection, and resolved-phase clock handoff are session-owned; reel, lever, and sound effects remain presentation-owned.
 - Bot detection, 500 ms start pacing, automatic reveal, planner execution, move publication, and cancellation are session-owned; Board only renders their snapshot effects.
 - Clock snapshot refresh, no-playable-turn review/message/transition timing, timeout cleanup, controller identity, and interaction capabilities are session-owned; Board renders immutable lifecycle facts and presentation effects only.
+- RELEASE-01A found no P0 blocker; profile persistence now survives unavailable browser storage, board squares have baseline keyboard access, and remaining beta risks are tracked in RELEASE_READINESS.md.
 
 
 ## Future UI Polish

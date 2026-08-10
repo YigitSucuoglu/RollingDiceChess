@@ -245,11 +245,16 @@ function Board() {
       );
 
       const isLight = (row + col) % 2 === 0;
+      const squareName = `${String.fromCharCode(97 + col)}${8 - row}`;
+      const squarePiece = piece
+        ? `${t(`common.colors.${piece.color}`)} ${t(`common.pieces.${piece.type}`)}`
+        : t("game.emptySquare");
 
       squares.push(
         <div
+          aria-label={t("game.squareLabel", { piece: squarePiece, square: squareName })}
           key={`${row}-${col}`}
-          data-square={`${String.fromCharCode(97 + col)}${8 - row}`}
+          data-square={squareName}
           className={`square ${isLight ? "light" : "dark"} ${
             isSelected ? "selected" : ""
           }`}
@@ -282,6 +287,14 @@ function Board() {
                 playerActionInFlightRef.current = false;
               });
           }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              event.currentTarget.click();
+            }
+          }}
+          role="button"
+          tabIndex={isInputLocked ? -1 : 0}
         >
           {piece && <Piece piece={piece} pieceSet={session.configuration.pieceSet} />}
 

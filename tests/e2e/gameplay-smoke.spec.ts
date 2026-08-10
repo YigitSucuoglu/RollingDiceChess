@@ -16,7 +16,9 @@ test("deterministic human roll animates, resolves and records a legal move", asy
 
   const e2 = page.locator('[data-square="e2"]');
   const e4 = page.locator('[data-square="e4"]');
-  await e2.click();
+  await e2.focus();
+  await expect(e2).toBeFocused();
+  await page.keyboard.press("Enter");
   await expect(e2).toHaveClass(/selected/);
   await expect(page.locator(".move-dot")).not.toHaveCount(0);
   await e4.dblclick();
