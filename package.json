@@ -18,6 +18,7 @@
     "test:release-smoke": "node scripts/release-smoke-tests.cjs",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:qualification": "playwright test --config playwright.qualification.config.ts",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:deployed": "playwright test --config playwright.deployed.config.ts",
     "perf:bundle": "npm run build && node scripts/perf-bundle.mjs",

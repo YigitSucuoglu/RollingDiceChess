@@ -141,7 +141,7 @@ function HomePage() {
       <footer className="home-footer">
         <span>RouletteChess</span>
         <span aria-hidden="true">•</span>
-        <span>v0.8.8</span>
+        <span>v{__APP_VERSION__}</span>
       </footer>
     </main>
   );
