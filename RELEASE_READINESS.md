@@ -14,6 +14,12 @@ No P0 blocker was reproduced. RELEASE-01A storage and keyboard fixes remain heal
 
 ## Findings
 
+### RELEASE-01D-HF1 final decision (2026-08-11)
+
+**GO** for a limited single-player public beta. The exact RC is `main` commit `2cc7a3936b7a99c31f4cc6f7f89a2b8390a4ea69`. No known P0 or P1 remains. The developer manually confirmed that the GitHub release workflows showed no observed problem, the Vercel production deployment completed successfully, and manual production smoke found no visible issue. Repository inspection confirms the CI configuration still executes Chromium, Firefox and WebKit qualification and the deployment configuration still preserves Vite `dist`, SPA rewrites, immutable hashed assets, non-immutable HTML/root routes, security headers, optimized assets and Sentry build integration.
+
+This evidence does not expand physical coverage: physical iPhone/Safari and physical Android remain **NOT TESTED — ACCEPTED GAP**; Android Chromium emulation remains automated PASS. Previous OBS-01B production verification remains valid, normal builds continue to exclude public source maps and the verification route, and no new live event was sent. Public Beta is not marked launched; `PUBLIC-BETA-01` must finalize and record that event.
+
 | Priority | Problem and user impact | Reproduction / affected area | Action |
 |---|---|---|---|
 | P1 — fixed | Profile storage reads/writes could throw `SecurityError` or quota errors, potentially breaking Profile, match completion, or reset. | Block `window.localStorage`, then open Profile/Game or save/reset progress. | Repository now falls back on storage access and treats persistence failure as non-fatal; script and browser regressions added. |

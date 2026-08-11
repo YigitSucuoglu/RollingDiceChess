@@ -20,6 +20,7 @@ v0.11.7
 ## Completed
 
 ### Quality
+- RELEASE-01D-HF1 — Close final CI, deployment and production smoke release gates
 - RELEASE-01D — Release candidate and public beta launch readiness (conditional gates documented)
 - RELEASE-01C — Beta performance and production hardening
 - RELEASE-01B — Cross-browser and real-device beta qualification (automation complete; physical-device gate remains)
@@ -101,6 +102,7 @@ v0.11.7
 ## Current Sprint
 
 Completed:
+- RELEASE-01D-HF1 — Close final CI, deployment and production smoke release gates
 - RELEASE-01D — Release candidate and public beta launch readiness (conditional gates documented)
 - RELEASE-01C — Beta performance and production hardening
 - RELEASE-01B — Cross-browser and real-device beta qualification (automation complete; physical-device gate remains)
@@ -135,10 +137,10 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. RELEASE-01D-HF1 — Verify CI, deployment and production smoke gates
+1. PUBLIC-BETA-01 — Finalize and record the first RouletteChess public beta release
 
 Roadmap:
-- RELEASE-01D-HF1 — Verify CI, deployment and production smoke gates
+- PUBLIC-BETA-01 — Finalize and record the first RouletteChess public beta release
 
 Backlog:
 - SOUND-01B — Add production sound assets to the preserved sound architecture
@@ -196,6 +198,7 @@ Performance Backlog:
 - RELEASE-01B adds a release-critical Chrome/Edge/Firefox/WebKit and mobile-profile matrix plus CI coverage; installed Chrome, installed Edge, and Android Chromium emulation passed locally, while Firefox/WebKit and all physical-device targets remain explicitly unqualified.
 - RELEASE-01C replaces oversized runtime Gold and Game slot PNG delivery with deterministic alpha-preserving WebP derivatives, keeps master PNGs as sources, adds measured route-level splitting and cold-load tooling, closes the React Router advisory with 7.18.2, and adds a `100dvh` result-dialog fallback. Physical iPhone/Safari qualification remains open.
 - RELEASE-01D treats v0.11.7 as feature-frozen and records a CONDITIONAL GO: local validation, Chromium, Edge, and Android-emulated gates pass; actual GitHub Firefox/WebKit results plus Vercel production smoke remain mandatory before public exposure. Physical iPhone/Safari and Android are accepted but explicitly NOT TESTED gaps.
+- RELEASE-01D-HF1 records the final GO for a limited single-player beta after developer-confirmed GitHub workflows, successful Vercel production deployment, and manual production smoke with no observed issue. Physical iPhone/Safari and Android remain explicitly NOT TESTED accepted gaps; Public Beta is not marked launched until PUBLIC-BETA-01.
 
 
 ## Future UI Polish

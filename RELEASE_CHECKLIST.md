@@ -1,29 +1,32 @@
 # RouletteChess v0.11.7 Release Candidate Checklist
 
-Qualified baseline: `main` at `6f97b43ff1c16ac44ef84bfb7ab6ff577a12a073`, plus the uncommitted RELEASE-01D checklist and E2E worker-cap changes listed by `git diff`.
+Qualified RC: `main` at `2cc7a3936b7a99c31f4cc6f7f89a2b8390a4ea69` (`v0.11.7: chore - finalize release candidate launch readiness`).
 
-Release recommendation: **CONDITIONAL GO**. Local Chromium, Edge and Android-emulated qualification is healthy. Public exposure still requires a green GitHub Quality workflow, including Firefox/WebKit, and successful production deployment smoke. Physical iPhone/Safari and Android remain accepted, explicitly untested beta gaps.
+Release recommendation: **GO** for a limited single-player public beta. The developer manually confirmed the GitHub release workflows, successful Vercel production deployment and production smoke with no observed issue. Local Chromium, Edge and Android-emulated qualification remains healthy. Physical iPhone/Safari and Android remain accepted, explicitly untested beta gaps. Public Beta has not yet been marked launched; launch recording belongs to `PUBLIC-BETA-01`.
 
-## Post-commit and push gates
+## Evidence status
 
-- [ ] Review `git diff` and commit only RELEASE-01D changes.
-- [ ] Push `main`; record the resulting full Git SHA as the RC identifier.
-- [ ] Confirm GitHub **Validate release quality** is green.
-- [ ] Confirm GitHub **Chromium browser regression** is green.
-- [ ] Confirm GitHub **Cross-browser beta qualification** is green for Chromium, Firefox, WebKit, Android Chromium emulation and iPhone/WebKit emulation.
-- [ ] Confirm Vercel production deployment is `Ready` and its Git SHA equals the RC SHA.
-- [ ] Cold-open Home; verify branding, `v0.11.7`, images and navigation.
-- [ ] Open Setup; change color, difficulty, Piece Set and board theme; start a game.
-- [ ] Verify loading/recovery, Roll, lever/reels, clock, legal moves, rights, bot return and Move History.
-- [ ] Smoke Profile, Settings, How to Play, direct route refresh, Back/Forward and unknown-route recovery.
-- [ ] Check 390×844 or a real mobile browser for overflow and reachable Start Game/Game controls.
-- [ ] Check production console/network for page errors, unhandled rejection, chunk/asset 404/403 and unexpected Sentry failures.
-- [ ] Confirm Sentry release/environment match the deployment and no new release-wide issue is rising.
-- [ ] Confirm guessed source-map URLs and `/__observability-test` do not expose production content.
-- [ ] Identify and record the last known-good Vercel deployment before exposure.
-- [ ] Accept the known limitations below and record the final public-beta decision.
+- **PASS:** supported by local automated evidence or developer production smoke.
+- **MANUALLY CONFIRMED:** external dashboard/workflow state reported by the developer; not independently queried by Codex.
+- **NOT TESTED — ACCEPTED GAP:** explicitly outside available physical-device evidence for this limited beta.
 
-Do not mark the public beta launched until every non-physical gate above is complete.
+## Release gate closeout
+
+- [x] RELEASE-01D changes committed on `main` — **PASS**.
+- [x] `main` pushed; RC SHA recorded above — **PASS**.
+- [x] GitHub **Validate release quality** reviewed — **MANUALLY CONFIRMED** by developer.
+- [x] GitHub **Chromium browser regression** reviewed — **MANUALLY CONFIRMED** by developer.
+- [x] GitHub **Cross-browser beta qualification** reviewed for the configured Chromium, Firefox and WebKit matrix — **MANUALLY CONFIRMED** by developer.
+- [x] Vercel production deployment completed successfully — **MANUALLY CONFIRMED** by developer.
+- [x] Production smoke completed with no visible issue observed — **PASS — developer verified**.
+- [x] Version metadata is consistently `v0.11.7` — **PASS** via release smoke/build metadata.
+- [x] Rollback procedure and last-known-good deployment selection method are available below — **PASS**.
+- [x] Known limitations and accepted physical-device gaps reviewed — **ACCEPTED**.
+- [ ] Physical iPhone/Safari — **NOT TESTED — ACCEPTED GAP**.
+- [ ] Physical Android — **NOT TESTED — ACCEPTED GAP**; Android Chromium emulation is PASS.
+- [ ] Record the actual first public-beta launch — reserved for `PUBLIC-BETA-01`.
+
+All non-physical release gates required for the GO decision are closed. Do not mark the public beta launched until `PUBLIC-BETA-01` records the release.
 
 ## Rollback procedure
 
@@ -48,7 +51,7 @@ Do not mark the public beta launched until every non-physical gate above is comp
 
 - Single-player bot experience only; no multiplayer, lobby or matchmaking.
 - No account, authentication or cloud sync; profile/settings are browser-local.
-- Physical iPhone/Safari and physical Android are **NOT TESTED**; emulation is not physical qualification.
+- Physical iPhone/Safari and physical Android are **NOT TESTED — ACCEPTED GAP**; emulation is not physical qualification.
 - Production audio assets are intentionally absent; sound architecture remains a safe no-op.
 - Enforcing Content Security Policy is pending credentialed Sentry/OAuth/WebSocket-compatible validation.
 - RouletteChess intentionally does not implement classical check, checkmate, stalemate or draw rules; king capture/timeout are the supported terminal rules.
