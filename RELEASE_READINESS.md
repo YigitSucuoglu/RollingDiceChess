@@ -1,10 +1,16 @@
 # RouletteChess Public Beta Readiness
 
 Audit date: 2026-08-10
-Application version: v0.11.7  
+Application version: v1.0.0
 Scope: existing single-player web experience
 
 ## Executive assessment
+
+**GO** for the first official RouletteChess singleplayer release, v1.0.0. This release promotes the qualified v0.11.7 release-candidate line without runtime changes and inherits its approved qualification and performance baseline, subject to the final v1.0.0 metadata validation recorded in this task. There are no known P0 or P1 issues.
+
+Physical iPhone/Safari and physical Android remain **NOT TESTED — ACCEPTED GAP**. Production audio is not yet available, enforcing CSP remains future hardening, and the existing P2/P3 performance and polish backlog remains open. These accepted limitations do not block v1.0.0.
+
+### v0.11.7 qualification history
 
 No P0 blocker was reproduced. RELEASE-01A storage and keyboard fixes remain healthy. RELEASE-01B added a small release-critical browser matrix without duplicating the full Chromium suite. Real installed Chrome and Edge passed; Android Chromium device-profile emulation passed. Firefox, WebKit/iPhone emulation, and physical devices are not marked PASS because their engines/devices were not available locally. Limited Chromium-family beta remains reasonable; broader beta still has a manual/browser-engine qualification gate.
 
@@ -18,7 +24,7 @@ No P0 blocker was reproduced. RELEASE-01A storage and keyboard fixes remain heal
 
 **GO** for a limited single-player public beta. The exact RC is `main` commit `2cc7a3936b7a99c31f4cc6f7f89a2b8390a4ea69`. No known P0 or P1 remains. The developer manually confirmed that the GitHub release workflows showed no observed problem, the Vercel production deployment completed successfully, and manual production smoke found no visible issue. Repository inspection confirms the CI configuration still executes Chromium, Firefox and WebKit qualification and the deployment configuration still preserves Vite `dist`, SPA rewrites, immutable hashed assets, non-immutable HTML/root routes, security headers, optimized assets and Sentry build integration.
 
-This evidence does not expand physical coverage: physical iPhone/Safari and physical Android remain **NOT TESTED — ACCEPTED GAP**; Android Chromium emulation remains automated PASS. Previous OBS-01B production verification remains valid, normal builds continue to exclude public source maps and the verification route, and no new live event was sent. Public Beta is not marked launched; `PUBLIC-BETA-01` must finalize and record that event.
+This evidence does not expand physical coverage: physical iPhone/Safari and physical Android remain **NOT TESTED — ACCEPTED GAP**; Android Chromium emulation remains automated PASS. Previous OBS-01B production verification remains valid, normal builds continue to exclude public source maps and the verification route, and no new live event was sent. The qualified RC was subsequently promoted through release-metadata-only changes to the official v1.0.0 singleplayer release.
 
 | Priority | Problem and user impact | Reproduction / affected area | Action |
 |---|---|---|---|

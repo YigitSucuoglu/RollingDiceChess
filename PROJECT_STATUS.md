@@ -2,7 +2,7 @@
 
 ## Current Version
 
-v0.11.7
+v1.0.0
 
 ---
 
@@ -20,6 +20,7 @@ v0.11.7
 ## Completed
 
 ### Quality
+- RELEASE-1.0.0 — Promote the qualified v0.11.7 RC line to the first official RouletteChess singleplayer release
 - RELEASE-01D-HF1 — Close final CI, deployment and production smoke release gates
 - RELEASE-01D — Release candidate and public beta launch readiness (conditional gates documented)
 - RELEASE-01C — Beta performance and production hardening
@@ -102,6 +103,7 @@ v0.11.7
 ## Current Sprint
 
 Completed:
+- RELEASE-1.0.0 — Finalize the first official RouletteChess singleplayer release
 - RELEASE-01D-HF1 — Close final CI, deployment and production smoke release gates
 - RELEASE-01D — Release candidate and public beta launch readiness (conditional gates documented)
 - RELEASE-01C — Beta performance and production hardening
@@ -137,10 +139,10 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. PUBLIC-BETA-01 — Finalize and record the first RouletteChess public beta release
+1. AUTH-01 — Establish account and authentication foundation
 
 Roadmap:
-- PUBLIC-BETA-01 — Finalize and record the first RouletteChess public beta release
+- AUTH-01 — Establish account and authentication foundation
 
 Backlog:
 - SOUND-01B — Add production sound assets to the preserved sound architecture
@@ -199,6 +201,15 @@ Performance Backlog:
 - RELEASE-01C replaces oversized runtime Gold and Game slot PNG delivery with deterministic alpha-preserving WebP derivatives, keeps master PNGs as sources, adds measured route-level splitting and cold-load tooling, closes the React Router advisory with 7.18.2, and adds a `100dvh` result-dialog fallback. Physical iPhone/Safari qualification remains open.
 - RELEASE-01D treats v0.11.7 as feature-frozen and records a CONDITIONAL GO: local validation, Chromium, Edge, and Android-emulated gates pass; actual GitHub Firefox/WebKit results plus Vercel production smoke remain mandatory before public exposure. Physical iPhone/Safari and Android are accepted but explicitly NOT TESTED gaps.
 - RELEASE-01D-HF1 records the final GO for a limited single-player beta after developer-confirmed GitHub workflows, successful Vercel production deployment, and manual production smoke with no observed issue. Physical iPhone/Safari and Android remain explicitly NOT TESTED accepted gaps; Public Beta is not marked launched until PUBLIC-BETA-01.
+- RELEASE-1.0.0 promotes the qualified v0.11.7 release-candidate line to the first official RouletteChess singleplayer release. No gameplay or runtime behavior changed for this promotion.
+
+### Versioning Policy
+
+- v1.0.0 is the first official singleplayer release.
+- v1.0.x is reserved for real bugfix and hotfix releases.
+- v1.x.0 is reserved for meaningful backward-compatible product or architecture milestones.
+- v2.0.0 is the intended major milestone for publicly available multiplayer.
+- Task identifiers such as AUTH-01, DATA-01, and MULTI-01 are independent from semantic version numbers.
 
 
 ## Future UI Polish

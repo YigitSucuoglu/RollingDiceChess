@@ -1,8 +1,18 @@
-# RouletteChess v0.11.7 Release Candidate Checklist
+# RouletteChess v1.0.0 Release Checklist
 
-Qualified RC: `main` at `2cc7a3936b7a99c31f4cc6f7f89a2b8390a4ea69` (`v0.11.7: chore - finalize release candidate launch readiness`).
+Version: **v1.0.0**
 
-Release recommendation: **GO** for a limited single-player public beta. The developer manually confirmed the GitHub release workflows, successful Vercel production deployment and production smoke with no observed issue. Local Chromium, Edge and Android-emulated qualification remains healthy. Physical iPhone/Safari and Android remain accepted, explicitly untested beta gaps. Public Beta has not yet been marked launched; launch recording belongs to `PUBLIC-BETA-01`.
+Release type: **First official singleplayer release**
+
+Qualification: **GO**
+
+P0: **none**
+
+P1: **none**
+
+Qualified predecessor RC: `main` at `2cc7a3936b7a99c31f4cc6f7f89a2b8390a4ea69` (`v0.11.7: chore - finalize release candidate launch readiness`). The v1.0.0 release commit will contain metadata and documentation changes only and must be tagged only after its CI, deployment and production smoke pass.
+
+Release decision: **GO** for the first official RouletteChess singleplayer release. The developer manually confirmed the GitHub release workflows, successful Vercel production deployment and production smoke for the qualified RC with no observed issue. Local Chromium, Edge and Android-emulated qualification remains healthy. Physical iPhone/Safari and Android remain accepted, explicitly untested gaps.
 
 ## Evidence status
 
@@ -19,14 +29,15 @@ Release recommendation: **GO** for a limited single-player public beta. The deve
 - [x] GitHub **Cross-browser beta qualification** reviewed for the configured Chromium, Firefox and WebKit matrix — **MANUALLY CONFIRMED** by developer.
 - [x] Vercel production deployment completed successfully — **MANUALLY CONFIRMED** by developer.
 - [x] Production smoke completed with no visible issue observed — **PASS — developer verified**.
-- [x] Version metadata is consistently `v0.11.7` — **PASS** via release smoke/build metadata.
+- [x] Canonical version metadata is `v1.0.0` — **PASS** via release smoke/build metadata.
 - [x] Rollback procedure and last-known-good deployment selection method are available below — **PASS**.
 - [x] Known limitations and accepted physical-device gaps reviewed — **ACCEPTED**.
 - [ ] Physical iPhone/Safari — **NOT TESTED — ACCEPTED GAP**.
 - [ ] Physical Android — **NOT TESTED — ACCEPTED GAP**; Android Chromium emulation is PASS.
-- [ ] Record the actual first public-beta launch — reserved for `PUBLIC-BETA-01`.
+- [ ] Commit and push the v1.0.0 metadata, wait for CI and Vercel Ready, then verify production shows v1.0.0.
+- [ ] Create annotated tag `v1.0.0` on that exact release commit and publish the GitHub Release.
 
-All non-physical release gates required for the GO decision are closed. Do not mark the public beta launched until `PUBLIC-BETA-01` records the release.
+All qualification gates required for the GO decision are closed. The tag must point to the final v1.0.0 release commit, not the older v0.11.7 RC commit.
 
 ## Rollback procedure
 
