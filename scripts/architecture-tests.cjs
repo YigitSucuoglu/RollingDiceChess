@@ -9,6 +9,7 @@ const sourceFiles = roots.flatMap((root) => fs.existsSync(root)
       .map((file) => path.join(root, file))
   : []);
 const violations = [];
+const authProviderImportPattern = /from\s+["'](?:firebase|@firebase|@supabase|@auth0|@clerk|next-auth)(?:\/|["'])/;
 
 for (const file of sourceFiles) {
   const source = fs.readFileSync(file, "utf8");
@@ -22,9 +23,36 @@ for (const file of sourceFiles) {
   for (const [pattern, label] of forbidden) {
     if (pattern.test(source)) violations.push(`${file}: ${label}`);
   }
+  if (authProviderImportPattern.test(source)) {
+    violations.push(`${file}: authentication provider SDK import`);
+  }
   if (file.startsWith(path.join("src", "domain")) && /["']\.\.\/\.\.\/engine\//.test(source)) {
     violations.push(`${file}: domain-to-engine dependency`);
   }
+}
+
+const authContractFiles = [
+  "src/application/auth/AuthenticationContracts.ts",
+  "src/application/auth/AuthenticationPort.ts",
+  "src/application/accounts/ProfileOwnership.ts",
+];
+for (const file of authContractFiles) {
+  const source = fs.readFileSync(file, "utf8");
+  const forbidden = [
+    [/from\s+["']react(?:\/|["'])/, "React import"],
+    [/\blocalStorage\b|\bsessionStorage\b/, "browser storage"],
+    [/\bwindow\.|\bdocument\./, "DOM global"],
+    [authProviderImportPattern, "authentication provider SDK import"],
+    [/\b(?:accessToken|refreshToken|oauthToken|password|providerPayload)\b/, "credential/provider field"],
+  ];
+  for (const [pattern, label] of forbidden) {
+    if (pattern.test(source)) violations.push(`${file}: ${label}`);
+  }
+}
+
+const matchContracts = fs.readFileSync("src/domain/contracts/MatchContracts.ts", "utf8");
+if (/\b(?:accessToken|refreshToken|oauthToken|password|providerPayload)\b/.test(matchContracts)) {
+  violations.push("src/domain/contracts/MatchContracts.ts: authentication credential/provider field");
 }
 
 assert.deepEqual(violations, [], `Architecture boundary violations:\n${violations.join("\n")}`);

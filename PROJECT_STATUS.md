@@ -20,6 +20,7 @@ v1.0.0
 ## Completed
 
 ### Quality
+- AUTH-01A — Establish provider-independent account and authentication foundation
 - RELEASE-1.0.0 — Promote the qualified v0.11.7 RC line to the first official RouletteChess singleplayer release
 - RELEASE-01D-HF1 — Close final CI, deployment and production smoke release gates
 - RELEASE-01D — Release candidate and public beta launch readiness (conditional gates documented)
@@ -103,6 +104,7 @@ v1.0.0
 ## Current Sprint
 
 Completed:
+- AUTH-01A — Establish provider-independent account and authentication foundation
 - RELEASE-1.0.0 — Finalize the first official RouletteChess singleplayer release
 - RELEASE-01D-HF1 — Close final CI, deployment and production smoke release gates
 - RELEASE-01D — Release candidate and public beta launch readiness (conditional gates documented)
@@ -139,10 +141,10 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. AUTH-01 — Establish account and authentication foundation
+1. AUTH-01B — Evaluate and integrate the production authentication provider
 
 Roadmap:
-- AUTH-01 — Establish account and authentication foundation
+- AUTH-01B — Evaluate and integrate the production authentication provider
 
 Backlog:
 - SOUND-01B — Add production sound assets to the preserved sound architecture
@@ -202,6 +204,7 @@ Performance Backlog:
 - RELEASE-01D treats v0.11.7 as feature-frozen and records a CONDITIONAL GO: local validation, Chromium, Edge, and Android-emulated gates pass; actual GitHub Firefox/WebKit results plus Vercel production smoke remain mandatory before public exposure. Physical iPhone/Safari and Android are accepted but explicitly NOT TESTED gaps.
 - RELEASE-01D-HF1 records the final GO for a limited single-player beta after developer-confirmed GitHub workflows, successful Vercel production deployment, and manual production smoke with no observed issue. Physical iPhone/Safari and Android remain explicitly NOT TESTED accepted gaps; Public Beta is not marked launched until PUBLIC-BETA-01.
 - RELEASE-1.0.0 promotes the qualified v0.11.7 release-candidate line to the first official RouletteChess singleplayer release. No gameplay or runtime behavior changed for this promotion.
+- AUTH-01A separates application account identity from the browser-local Player Profile behind a provider-independent AuthenticationPort. The current runtime uses an offline GuestAuthenticationAdapter; provider selection, login UI, remote persistence, and guest-profile merge policy are deferred.
 
 ### Versioning Policy
 
