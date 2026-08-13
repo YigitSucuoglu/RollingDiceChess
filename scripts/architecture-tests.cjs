@@ -55,6 +55,20 @@ if (/\b(?:accessToken|refreshToken|oauthToken|password|providerPayload)\b/.test(
   violations.push("src/domain/contracts/MatchContracts.ts: authentication credential/provider field");
 }
 
+const allSourceFiles = fs.readdirSync("src", { recursive: true })
+  .filter((file) => /\.(?:ts|tsx)$/.test(file))
+  .map((file) => path.join("src", file));
+for (const file of allSourceFiles) {
+  const source = fs.readFileSync(file, "utf8");
+  if (/@supabase\/supabase-js/.test(source)
+      && !file.startsWith(path.join("src", "infrastructure", "auth"))) {
+    violations.push(`${file}: Supabase SDK outside auth infrastructure`);
+  }
+  if (/VITE_SUPABASE_(?:SERVICE_ROLE|SECRET)|SUPABASE_SERVICE_ROLE/.test(source)) {
+    violations.push(`${file}: forbidden Supabase secret/service-role identifier`);
+  }
+}
+
 assert.deepEqual(violations, [], `Architecture boundary violations:\n${violations.join("\n")}`);
 
 const boardSource = fs.readFileSync("src/components/Board/Board.tsx", "utf8");

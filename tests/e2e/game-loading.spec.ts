@@ -70,6 +70,9 @@ test("setup action remains reachable across mobile and tablet viewports", async 
 });
 
 failureTest("critical asset failure offers Back to Setup and Retry", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem("roulettechess.auth-mode.v1", "guest");
+  });
   let failMachine = true;
   await page.route(/game-machine(?:-[^/?]+)?\.webp/, async (route) => {
     if (failMachine) {

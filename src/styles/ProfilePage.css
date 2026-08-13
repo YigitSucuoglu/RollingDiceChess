@@ -118,6 +118,28 @@
   text-transform: uppercase;
 }
 
+.profile-account {
+  align-items: center;
+  background: rgba(19, 18, 16, 0.78);
+  border: 1px solid rgba(207, 164, 87, 0.22);
+  display: flex;
+  gap: 1.5rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+}
+
+.profile-account h2 { color: #f2e6d1; font-family: Georgia, serif; font-weight: 400; margin-top: .25rem; }
+.profile-account > div > p:last-child { color: #8f8678; font-size: .78rem; margin-top: .3rem; }
+.profile-account button { background: transparent; border: 1px solid rgba(225, 187, 113, .45); color: #e6c98f; cursor: pointer; min-height: 2.75rem; padding: .65rem 1rem; }
+.profile-account button:focus-visible { outline: 3px solid #f1ca78; outline-offset: 3px; }
+.profile-account button:disabled { cursor: wait; opacity: .65; }
+
+@media (max-width: 600px) {
+  .profile-account { align-items: stretch; flex-direction: column; }
+  .profile-account button { width: 100%; }
+}
+
 .profile-identity {
   align-items: center;
   background:

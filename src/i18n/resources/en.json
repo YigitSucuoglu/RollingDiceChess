@@ -19,6 +19,21 @@
     "settings": "Settings", "profile": "Profile", "howToPlay": "How to Play",
     "heroLabel": "Roulette machine with Gold and Obsidian chess pieces", "caption": "Three pieces. One turn. Every move matters."
   },
+  "auth": {
+    "title": "Choose how to play",
+    "description": "Sign in for future account features, or continue with your local profile.",
+    "continueWithGoogle": "Continue with Google",
+    "playAsGuest": "Play as Guest",
+    "connecting": "Connecting…",
+    "failure": "Sign-in could not be completed. Try again or continue as Guest.",
+    "guestNote": "Guest progress stays on this device.",
+    "account": "Account",
+    "guest": "Guest",
+    "signedInWithGoogle": "Signed in with Google",
+    "guestProfile": "Progress and statistics are stored locally on this device.",
+    "localProfilePending": "Your current progression remains local until profile migration is available.",
+    "signOut": "Sign Out"
+  },
   "setup": {
     "title": "Play Setup", "timeControl": "Time Control", "playAs": "Play As", "opponent": "Opponent", "bot": "Bot", "local": "Local", "online": "Online", "difficulty": "Bot Difficulty", "pieceSet": "Piece Set", "boardTheme": "Board Theme",
     "descriptions": { "easy": "Random legal moves", "medium": "Tactical move choices", "hard": "Plans the full turn" },

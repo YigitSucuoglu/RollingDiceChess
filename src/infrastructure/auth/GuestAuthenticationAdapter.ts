@@ -1,5 +1,6 @@
 import {
   AUTH_SESSION_SCHEMA_VERSION,
+  cloneAuthenticationSession,
   toGuestSessionId,
   type AuthenticationSession,
   type GuestSessionId,
@@ -18,13 +19,6 @@ function createGuestSessionId(): GuestSessionId {
   return toGuestSessionId(`guest-${suffix}`);
 }
 
-function cloneSession(session: AuthenticationSession): AuthenticationSession {
-  return {
-    schemaVersion: session.schemaVersion,
-    state: { ...session.state },
-  };
-}
-
 export class GuestAuthenticationAdapter implements AuthenticationPort {
   private readonly listeners = new Set<AuthenticationStateListener>();
 
@@ -39,8 +33,12 @@ export class GuestAuthenticationAdapter implements AuthenticationPort {
     };
   }
 
+  public isAuthenticationAvailable(): boolean {
+    return false;
+  }
+
   public getSession(): AuthenticationSession {
-    return cloneSession(this.session);
+    return cloneAuthenticationSession(this.session);
   }
 
   public async restoreSession(): Promise<AuthenticationSession> {
@@ -52,6 +50,10 @@ export class GuestAuthenticationAdapter implements AuthenticationPort {
     this.listeners.add(listener);
     listener(this.getSession());
     return () => this.listeners.delete(listener);
+  }
+
+  public chooseGuest(): AuthenticationSession {
+    return this.getSession();
   }
 
   public async beginAuthentication(): Promise<AuthenticationSession> {

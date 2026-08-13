@@ -126,7 +126,9 @@ for (const file of buildFiles.filter((candidate) => inspectableExtensions.has(pa
   const contents = fs.readFileSync(file, "utf8");
   // Require a directory segment and a second separator so regex source such as
   // Sentry's `/Id:\d+/` is not mistaken for an absolute Windows filesystem path.
-  assert.equal(/[A-Za-z]:\\[^\\/\r\n]{1,128}\\/.test(contents), false, `Absolute Windows path found in ${path.relative(distRoot, file)}`);
+  // Ignore escaped template text such as `t:\\n${value}\\` while retaining
+  // the broad absolute-path scan for real drive-rooted build leaks.
+  assert.equal(/[A-Za-z]:\\(?!n\$\{)[^\\/\r\n]{1,128}\\/.test(contents), false, `Absolute Windows path found in ${path.relative(distRoot, file)}`);
   assert.equal(/(?:^|["'(\s])[A-Za-z]:\//m.test(contents), false, `Forward-slash Windows path found in ${path.relative(distRoot, file)}`);
   assert.equal(/(?:C|D):\/Users\//i.test(contents), false, `Development user path found in ${path.relative(distRoot, file)}`);
 }

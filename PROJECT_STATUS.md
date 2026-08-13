@@ -20,6 +20,7 @@ v1.0.0
 ## Completed
 
 ### Quality
+- AUTH-01B — Integrate Supabase Google authentication and Guest entry flow
 - AUTH-01A — Establish provider-independent account and authentication foundation
 - RELEASE-1.0.0 — Promote the qualified v0.11.7 RC line to the first official RouletteChess singleplayer release
 - RELEASE-01D-HF1 — Close final CI, deployment and production smoke release gates
@@ -104,6 +105,7 @@ v1.0.0
 ## Current Sprint
 
 Completed:
+- AUTH-01B — Integrate Supabase Google authentication and Guest entry flow
 - AUTH-01A — Establish provider-independent account and authentication foundation
 - RELEASE-1.0.0 — Finalize the first official RouletteChess singleplayer release
 - RELEASE-01D-HF1 — Close final CI, deployment and production smoke release gates
@@ -141,10 +143,10 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. AUTH-01B — Evaluate and integrate the production authentication provider
+1. AUTH-01C — Design and implement Guest-to-Account profile ownership and migration
 
 Roadmap:
-- AUTH-01B — Evaluate and integrate the production authentication provider
+- AUTH-01C — Design and implement Guest-to-Account profile ownership and migration
 
 Backlog:
 - SOUND-01B — Add production sound assets to the preserved sound architecture
@@ -205,6 +207,7 @@ Performance Backlog:
 - RELEASE-01D-HF1 records the final GO for a limited single-player beta after developer-confirmed GitHub workflows, successful Vercel production deployment, and manual production smoke with no observed issue. Physical iPhone/Safari and Android remain explicitly NOT TESTED accepted gaps; Public Beta is not marked launched until PUBLIC-BETA-01.
 - RELEASE-1.0.0 promotes the qualified v0.11.7 release-candidate line to the first official RouletteChess singleplayer release. No gameplay or runtime behavior changed for this promotion.
 - AUTH-01A separates application account identity from the browser-local Player Profile behind a provider-independent AuthenticationPort. The current runtime uses an offline GuestAuthenticationAdapter; provider selection, login UI, remote persistence, and guest-profile merge policy are deferred.
+- AUTH-01B selects Supabase Auth with Google OAuth behind the existing AuthenticationPort, adds an explicit persistent local Guest choice, and keeps PlayerProfile data local and untouched. Authenticated accounts are future leaderboard candidates; guest migration, database profile persistence, and display-name UX remain deferred.
 
 ### Versioning Policy
 

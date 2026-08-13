@@ -3,6 +3,8 @@
 interface ImportMetaEnv {
   readonly VITE_OBSERVABILITY_TEST_MODE?: string;
   readonly VITE_SENTRY_DSN?: string;
+  readonly VITE_SUPABASE_PUBLISHABLE_KEY?: string;
+  readonly VITE_SUPABASE_URL?: string;
 }
 
 interface ImportMeta {

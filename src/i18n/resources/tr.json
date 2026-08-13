@@ -19,6 +19,21 @@
     "settings": "Ayarlar", "profile": "Profil", "howToPlay": "Nasıl Oynanır",
     "heroLabel": "Altın ve Obsidyen satranç taşları bulunan rulet makinesi", "caption": "Üç taş. Bir tur. Her hamle önemli."
   },
+  "auth": {
+    "title": "Nasıl oynamak istediğini seç",
+    "description": "Gelecekteki hesap özellikleri için giriş yap veya yerel profilinle devam et.",
+    "continueWithGoogle": "Google ile Devam Et",
+    "playAsGuest": "Misafir Olarak Oyna",
+    "connecting": "Bağlanıyor…",
+    "failure": "Giriş tamamlanamadı. Tekrar dene veya Misafir olarak devam et.",
+    "guestNote": "Misafir ilerlemesi bu cihazda kalır.",
+    "account": "Hesap",
+    "guest": "Misafir",
+    "signedInWithGoogle": "Google ile giriş yapıldı",
+    "guestProfile": "İlerleme ve istatistikler bu cihazda yerel olarak saklanır.",
+    "localProfilePending": "Profil aktarımı sunulana kadar mevcut ilerlemen yerel kalır.",
+    "signOut": "Çıkış Yap"
+  },
   "setup": {
     "title": "Oyun Ayarları", "timeControl": "Süre Kontrolü", "playAs": "Tarafın", "opponent": "Rakip", "bot": "Bot", "local": "Yerel", "online": "Çevrimiçi", "difficulty": "Bot Zorluğu", "pieceSet": "Taş Seti", "boardTheme": "Tahta Teması",
     "descriptions": { "easy": "Rastgele yasal hamleler", "medium": "Taktik hamle seçimleri", "hard": "Tüm turu planlar" },

@@ -1,10 +1,11 @@
-import { useEffect, useMemo, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import playerProfileService, {
 } from "../profile/PlayerProfileService";
 import type { AppLanguage } from "../settings/AppSettings";
 import "../styles/ProfilePage.css";
+import { useAuthentication } from "../auth/authentication-context";
 
 const ACHIEVEMENT_PLACEHOLDERS = [
   "firstVictory", "hundredGames", "captureHundredKings", "tripleQueenRoll",
@@ -34,6 +35,17 @@ function ProfilePage() {
   const { t, i18n } = useTranslation();
   const language: AppLanguage = i18n.resolvedLanguage === "tr" ? "tr" : "en";
   const profile = useMemo(() => playerProfileService.getViewModel(language), [language]);
+  const { authentication, session } = useAuthentication();
+  const [authPending, setAuthPending] = useState(false);
+  const authenticated = session.state.status === "authenticated";
+
+  const handleAuthentication = async () => {
+    if (authPending) return;
+    setAuthPending(true);
+    if (authenticated) await authentication.signOut();
+    else await authentication.beginAuthentication();
+    setAuthPending(false);
+  };
 
   useEffect(() => {
     const previousTitle = document.title;
@@ -65,6 +77,30 @@ function ProfilePage() {
           <p>{t("profile.eyebrow")}</p>
           <h1>{t("profile.title")}</h1>
         </header>
+
+        <section aria-labelledby="profile-account-title" className="profile-account">
+          <div>
+            <p className="profile-overline">{t("auth.account")}</p>
+            <h2 id="profile-account-title">
+              {authenticated ? t("auth.signedInWithGoogle") : t("auth.guest")}
+            </h2>
+            <p>{authenticated ? t("auth.localProfilePending") : t("auth.guestProfile")}</p>
+          </div>
+          {(authenticated || authentication.isAuthenticationAvailable()) && (
+            <button
+              aria-busy={authPending}
+              disabled={authPending}
+              onClick={() => void handleAuthentication()}
+              type="button"
+            >
+              {authPending
+                ? t("auth.connecting")
+                : authenticated
+                  ? t("auth.signOut")
+                  : t("auth.continueWithGoogle")}
+            </button>
+          )}
+        </section>
 
         <section
           aria-labelledby="player-identity-title"

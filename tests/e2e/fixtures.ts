@@ -9,6 +9,11 @@ export async function installErrorGuards(page: Page): Promise<void> {
   page.on("requestfailed", (request) => failures.push(`requestfailed: ${request.url()} (${request.failure()?.errorText})`));
   await page.addInitScript(() => {
     Math.random = () => 0;
+    try {
+      window.localStorage.setItem("roulettechess.auth-mode.v1", "guest");
+    } catch {
+      // Storage-denial tests intentionally replace localStorage afterwards.
+    }
   });
   page.on("close", () => expect(failures, failures.join("\n")).toEqual([]));
   Object.defineProperty(page, "__qaFailures", { value: failures });

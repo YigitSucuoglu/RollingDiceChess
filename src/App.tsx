@@ -3,6 +3,9 @@ import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
 import ObservabilityRouteTracker from "./observability/ObservabilityRouteTracker";
+import AuthenticationEntry from "./auth/AuthenticationEntry";
+import AuthenticationProvider from "./auth/AuthenticationProvider";
+import { useAuthentication } from "./auth/authentication-context";
 const GamePage = lazy(() => import("./pages/GamePage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
@@ -12,7 +15,14 @@ const ObservabilityVerificationPage = __OBSERVABILITY_TEST_MODE__
   ? lazy(() => import("./observability/ObservabilityVerificationPage"))
   : null;
 
-function App() {
+function ApplicationRoutes() {
+  const { initialized, session } = useAuthentication();
+  if (!initialized) {
+    return <div aria-label="Loading" className="route-loading" role="status" />;
+  }
+  if (session.state.status === "unselected" || session.state.status === "authenticating" || session.state.status === "failed") {
+    return <AuthenticationEntry />;
+  }
   return (
     <BrowserRouter>
       <ObservabilityRouteTracker />
@@ -31,6 +41,14 @@ function App() {
         </Routes>
       </Suspense>
     </BrowserRouter>
+  );
+}
+
+function App() {
+  return (
+    <AuthenticationProvider>
+      <ApplicationRoutes />
+    </AuthenticationProvider>
   );
 }
 

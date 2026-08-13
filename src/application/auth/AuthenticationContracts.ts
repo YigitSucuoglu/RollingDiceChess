@@ -8,6 +8,7 @@ export type GuestSessionId = string & { readonly [guestSessionIdBrand]: true };
 
 export interface AuthenticatedAccount {
   readonly accountId: AccountId;
+  readonly provider: "google";
 }
 
 export type AuthenticationFailureCode =
@@ -17,6 +18,7 @@ export type AuthenticationFailureCode =
   | "unknown";
 
 export type AuthenticationState =
+  | { readonly status: "unselected"; readonly guestSessionId: GuestSessionId }
   | { readonly status: "guest"; readonly guestSessionId: GuestSessionId }
   | { readonly status: "authenticating"; readonly guestSessionId: GuestSessionId }
   | { readonly status: "authenticated"; readonly account: AuthenticatedAccount }
@@ -29,6 +31,17 @@ export type AuthenticationState =
 export interface AuthenticationSession {
   readonly schemaVersion: typeof AUTH_SESSION_SCHEMA_VERSION;
   readonly state: AuthenticationState;
+}
+
+export function cloneAuthenticationSession(
+  session: AuthenticationSession,
+): AuthenticationSession {
+  return {
+    schemaVersion: session.schemaVersion,
+    state: session.state.status === "authenticated"
+      ? { status: "authenticated", account: { ...session.state.account } }
+      : { ...session.state },
+  };
 }
 
 export function toAccountId(value: string): AccountId {

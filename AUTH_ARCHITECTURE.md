@@ -36,3 +36,26 @@ Authentication identifies who holds an account. Player Profile stores RouletteCh
 - Contracts contain no React, DOM, browser storage, or provider SDK types and are suitable for deterministic fake adapters and future mobile clients.
 - Authentication is established before match creation. It never becomes match authority or game-rule logic.
 - A future server-authoritative multiplayer adapter may receive an application account identity during secure session creation, but MatchSession/gameplay snapshots must remain credential-free.
+
+## AUTH-01B production provider
+
+Supabase Auth is the production authentication provider and Google is the primary authenticated sign-in method. `SupabaseAuthenticationAdapter` is the only owner of Supabase SDK auth types and maps the stable Supabase user UUID to application `AccountId`. Its public account DTO contains only `accountId` and `provider: "google"`; email, name, avatar, provider metadata, access tokens, and refresh tokens never cross the adapter.
+
+Application composition creates exactly one auth source. With valid `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`, it creates one Supabase client/adapter; missing or invalid public configuration deliberately falls back to `GuestAuthenticationAdapter`, so offline singleplayer remains usable. No service-role key belongs in browser configuration.
+
+The browser OAuth redirect uses `window.location.origin`. Supabase handles URL session detection, token exchange, refresh, and persistence. No dedicated callback route or manual token parsing is used. The current origin must remain on the Supabase redirect allowlist.
+
+Explicit guest choice is stored as the non-sensitive preference `roulettechess.auth-mode.v1`. It is not identity or authorization. A signed-in Supabase session takes precedence over this preference. Sign-out ends the Supabase session and returns the application to local guest mode without deleting profile or settings.
+
+Storage remains separated:
+
+```text
+Supabase-managed auth session storage != RouletteChess PlayerProfile storage
+                                      != guest-mode preference
+```
+
+Storage denial degrades to runtime-only state. Supabase and guest preference storage operations use guarded access; gameplay/profile repositories retain their existing fallback behavior.
+
+Authenticated accounts are candidates for future ranked leaderboard participation. Guests are not leaderboard-eligible and remain local-only; an optional non-unique guest display name is deferred. No leaderboard, username reservation, application profile table, database migration, RLS policy, or cloud profile persistence exists yet.
+
+The externally configured Supabase project must keep Google enabled, the Google OAuth callback owned by Supabase, the production Site URL, and allowlisted localhost/production redirect origins. Local and deployed builds require only empty-safe public variables documented in `.env.example`; actual values stay in `.env.local` and Vercel environment configuration.
