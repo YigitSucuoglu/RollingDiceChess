@@ -1,12 +1,44 @@
-import { expect, test as base, type Page } from "@playwright/test";
+import { expect, test as base, type Page, type Request } from "@playwright/test";
+import { isBenignBrowserCancellation, isHttpFailure } from "./network-failure-classifier";
 
-export async function installErrorGuards(page: Page): Promise<void> {
+interface QaFailureState {
+  asserted: boolean;
+  failures: string[];
+}
+
+export async function installErrorGuards(page: Page, browserName: string): Promise<QaFailureState> {
   const failures: string[] = [];
+  const pendingImages = new Set<Request>();
+  const navigationSupersededImages = new WeakSet<Request>();
+  const state: QaFailureState = { asserted: false, failures };
   page.on("console", (message) => {
     if (message.type() === "error") failures.push(`console.error: ${message.text()}`);
   });
   page.on("pageerror", (error) => failures.push(`pageerror: ${error.message}`));
-  page.on("requestfailed", (request) => failures.push(`requestfailed: ${request.url()} (${request.failure()?.errorText})`));
+  page.on("request", (request) => {
+    if (request.resourceType() === "document") {
+      for (const pendingImage of pendingImages) navigationSupersededImages.add(pendingImage);
+    } else if (request.resourceType() === "image") {
+      pendingImages.add(request);
+    }
+  });
+  page.on("requestfinished", (request) => pendingImages.delete(request));
+  page.on("response", (response) => {
+    if (isHttpFailure(response.status())) {
+      failures.push(`http ${response.status()}: ${response.url()}`);
+    }
+  });
+  page.on("requestfailed", (request) => {
+    pendingImages.delete(request);
+    const errorText = request.failure()?.errorText;
+    if (isBenignBrowserCancellation({
+      browserName,
+      errorText,
+      resourceType: request.resourceType(),
+      supersededByNavigation: navigationSupersededImages.has(request),
+    })) return;
+    failures.push(`requestfailed: ${request.url()} (${errorText})`);
+  });
   await page.addInitScript(() => {
     Math.random = () => 0;
     try {
@@ -15,19 +47,23 @@ export async function installErrorGuards(page: Page): Promise<void> {
       // Storage-denial tests intentionally replace localStorage afterwards.
     }
   });
-  page.on("close", () => expect(failures, failures.join("\n")).toEqual([]));
-  Object.defineProperty(page, "__qaFailures", { value: failures });
+  Object.defineProperty(page, "__qaFailureState", { value: state });
+  return state;
 }
 
 export const test = base.extend<{ assertNoErrors: () => void }>({
-  page: async ({ page }, provide) => {
-    await installErrorGuards(page);
+  page: async ({ page, browserName }, provide) => {
+    const state = await installErrorGuards(page, browserName);
     await provide(page);
+    if (!state.asserted) {
+      expect(state.failures, state.failures.join("\n")).toEqual([]);
+    }
   },
   assertNoErrors: async ({ page }, provide) => {
     await provide(() => {
-      const failures = (page as Page & { __qaFailures: string[] }).__qaFailures;
-      expect(failures, failures.join("\n")).toEqual([]);
+      const state = (page as Page & { __qaFailureState: QaFailureState }).__qaFailureState;
+      state.asserted = true;
+      expect(state.failures, state.failures.join("\n")).toEqual([]);
     });
   },
 });

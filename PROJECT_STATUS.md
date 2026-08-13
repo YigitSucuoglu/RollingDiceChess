@@ -20,6 +20,7 @@ v1.0.0
 ## Completed
 
 ### Quality
+- AUTH-01B-HF1 — Correct Firefox qualification handling for benign request cancellations
 - AUTH-01B — Integrate Supabase Google authentication and Guest entry flow
 - AUTH-01A — Establish provider-independent account and authentication foundation
 - RELEASE-1.0.0 — Promote the qualified v0.11.7 RC line to the first official RouletteChess singleplayer release
@@ -105,6 +106,7 @@ v1.0.0
 ## Current Sprint
 
 Completed:
+- AUTH-01B-HF1 — Correct Firefox qualification handling for benign request cancellations
 - AUTH-01B — Integrate Supabase Google authentication and Guest entry flow
 - AUTH-01A — Establish provider-independent account and authentication foundation
 - RELEASE-1.0.0 — Finalize the first official RouletteChess singleplayer release
@@ -143,10 +145,10 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. AUTH-01C — Design and implement Guest-to-Account profile ownership and migration
+1. AUTH-01C — Design cloud player identity, profile ownership and Guest-to-Account migration
 
 Roadmap:
-- AUTH-01C — Design and implement Guest-to-Account profile ownership and migration
+- AUTH-01C — Design cloud player identity, profile ownership and Guest-to-Account migration
 
 Backlog:
 - SOUND-01B — Add production sound assets to the preserved sound architecture
@@ -208,6 +210,7 @@ Performance Backlog:
 - RELEASE-1.0.0 promotes the qualified v0.11.7 release-candidate line to the first official RouletteChess singleplayer release. No gameplay or runtime behavior changed for this promotion.
 - AUTH-01A separates application account identity from the browser-local Player Profile behind a provider-independent AuthenticationPort. The current runtime uses an offline GuestAuthenticationAdapter; provider selection, login UI, remote persistence, and guest-profile merge policy are deferred.
 - AUTH-01B selects Supabase Auth with Google OAuth behind the existing AuthenticationPort, adds an explicit persistent local Guest choice, and keeps PlayerProfile data local and untouched. Authenticated accounts are future leaderboard candidates; guest migration, database profile persistence, and display-name UX remain deferred.
+- AUTH-01B-HF1 distinguishes Firefox navigation-superseded image cancellations from real request failures in QA fixtures while adding explicit fatal handling for HTTP 4xx/5xx responses.
 
 ### Versioning Policy
 

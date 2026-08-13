@@ -67,7 +67,10 @@ test("public routes, refresh, storage fallback and language remain healthy", asy
     });
   });
   await page.goto("/settings");
-  await expect(page.locator("main")).toBeVisible();
+  const guestEntry = page.getByRole("button", { name: /play as guest|misafir olarak oyna/i });
+  await expect(page.locator("#settings-language").or(guestEntry)).toBeVisible();
+  if (await guestEntry.isVisible()) await guestEntry.click();
+  await expect(page.locator("#settings-language")).toBeVisible();
   await page.locator("#settings-language").selectOption("tr");
   await expect(page.locator("html")).toHaveAttribute("lang", "tr");
   await expect(page).toHaveTitle(/Ayarlar/);
