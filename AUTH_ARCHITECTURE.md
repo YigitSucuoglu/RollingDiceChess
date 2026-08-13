@@ -59,3 +59,11 @@ Storage denial degrades to runtime-only state. Supabase and guest preference sto
 Authenticated accounts are candidates for future ranked leaderboard participation. Guests are not leaderboard-eligible and remain local-only; an optional non-unique guest display name is deferred. No leaderboard, username reservation, application profile table, database migration, RLS policy, or cloud profile persistence exists yet.
 
 The externally configured Supabase project must keep Google enabled, the Google OAuth callback owned by Supabase, the production Site URL, and allowlisted localhost/production redirect origins. Local and deployed builds require only empty-safe public variables documented in `.env.example`; actual values stay in `.env.local` and Vercel environment configuration.
+
+## AUTH-01C player identity target
+
+The application defines a provider-independent `PlayerId` plus focused player repository and migration contracts. PlayerId is neither local `PlayerProfile.playerId` nor `AccountId`; display-name changes and provider linking do not replace it. Supabase row/query types remain an infrastructure concern.
+
+Supabase Anonymous Auth is the selected secure cloud Guest primitive because RLS can recognize `auth.uid()` without trusting a client-provided UUID. Supported identity linking is the normal Guest-to-Google path. A pre-existing Google identity uses an explicit transactional replacement choice, never arithmetic merge. See `PLAYER_DATA_MODEL.md` and the versioned migration.
+
+The migration is **NOT APPLIED**. Runtime intentionally retains AUTH-01B local Guest and local PlayerProfile behavior. Cloud Guest creation, synchronization, rename and conflict UI remain disabled until DATA-01 validates the remote schema and Auth settings.

@@ -20,6 +20,7 @@ v1.0.0
 ## Completed
 
 ### Quality
+- AUTH-01C — Establish cloud player identity, profile ownership and Guest-to-Account migration model
 - AUTH-01B-HF1 — Correct Firefox qualification handling for benign request cancellations
 - AUTH-01B — Integrate Supabase Google authentication and Guest entry flow
 - AUTH-01A — Establish provider-independent account and authentication foundation
@@ -106,6 +107,7 @@ v1.0.0
 ## Current Sprint
 
 Completed:
+- AUTH-01C — Establish cloud player identity, profile ownership and Guest-to-Account migration model
 - AUTH-01B-HF1 — Correct Firefox qualification handling for benign request cancellations
 - AUTH-01B — Integrate Supabase Google authentication and Guest entry flow
 - AUTH-01A — Establish provider-independent account and authentication foundation
@@ -145,10 +147,12 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. AUTH-01C — Design cloud player identity, profile ownership and Guest-to-Account migration
+1. DATA-01 — Apply and validate cloud player persistence and synchronization
 
 Roadmap:
-- AUTH-01C — Design cloud player identity, profile ownership and Guest-to-Account migration
+- DATA-01 — Apply and validate cloud player persistence and synchronization
+- RATING-01 — Design authoritative multiplayer rating
+- LEADERBOARD-01 — Add PlayerId-based multiplayer leaderboard
 
 Backlog:
 - SOUND-01B — Add production sound assets to the preserved sound architecture
@@ -211,6 +215,7 @@ Performance Backlog:
 - AUTH-01A separates application account identity from the browser-local Player Profile behind a provider-independent AuthenticationPort. The current runtime uses an offline GuestAuthenticationAdapter; provider selection, login UI, remote persistence, and guest-profile merge policy are deferred.
 - AUTH-01B selects Supabase Auth with Google OAuth behind the existing AuthenticationPort, adds an explicit persistent local Guest choice, and keeps PlayerProfile data local and untouched. Authenticated accounts are future leaderboard candidates; guest migration, database profile persistence, and display-name UX remain deferred.
 - AUTH-01B-HF1 distinguishes Firefox navigation-superseded image cancellations from real request failures in QA fixtures while adding explicit fatal handling for HTTP 4xx/5xx responses.
+- AUTH-01C defines stable PlayerId ownership, normalized progression/rating storage, anonymous-Guest target architecture and transactional replacement-based conflict resolution. Its versioned Supabase migration is NOT APPLIED; runtime remains local-first until DATA-01 remotely validates RLS, Anonymous Auth and identity linking.
 
 ### Versioning Policy
 

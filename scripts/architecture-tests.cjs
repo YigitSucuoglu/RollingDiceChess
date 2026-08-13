@@ -35,6 +35,8 @@ const authContractFiles = [
   "src/application/auth/AuthenticationContracts.ts",
   "src/application/auth/AuthenticationPort.ts",
   "src/application/accounts/ProfileOwnership.ts",
+  "src/application/players/PlayerContracts.ts",
+  "src/application/players/PlayerProfilePort.ts",
 ];
 for (const file of authContractFiles) {
   const source = fs.readFileSync(file, "utf8");
@@ -67,6 +69,16 @@ for (const file of allSourceFiles) {
   if (/VITE_SUPABASE_(?:SERVICE_ROLE|SECRET)|SUPABASE_SERVICE_ROLE/.test(source)) {
     violations.push(`${file}: forbidden Supabase secret/service-role identifier`);
   }
+  if ((file.startsWith(path.join("src", "domain"))
+      || file.startsWith(path.join("src", "engine")))
+      && /application\/players|infrastructure\/.*player/i.test(source)) {
+    violations.push(`${file}: gameplay layer imports player persistence`);
+  }
+}
+
+const playerPort = fs.readFileSync("src/application/players/PlayerProfilePort.ts", "utf8");
+if (/rating|multiplayerRating/i.test(playerPort.replace(/\/\/.*rating.*$/gim, ""))) {
+  violations.push("src/application/players/PlayerProfilePort.ts: browser rating mutation surface");
 }
 
 assert.deepEqual(violations, [], `Architecture boundary violations:\n${violations.join("\n")}`);
