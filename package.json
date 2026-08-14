@@ -15,6 +15,7 @@
     "test:i18n": "node scripts/i18n-tests.cjs",
     "test:sound": "node scripts/sound-tests.cjs",
     "test:architecture": "node scripts/architecture-tests.cjs",
+    "test:data:remote": "node --use-system-ca scripts/data-01a-remote-security.mjs",
     "test:release-smoke": "node scripts/release-smoke-tests.cjs",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",

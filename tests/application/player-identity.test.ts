@@ -66,11 +66,20 @@ describe("cloud player identity model", () => {
 
   it("keeps rating outside browser-writable SQL policy paths", () => {
     const sql = readFileSync("supabase/migrations/202608130001_auth_01c_player_identity.sql", "utf8");
+    expect(sql.trimStart()).toMatch(/^--[\s\S]*?begin;/);
+    expect(sql.trimEnd()).toMatch(/commit;$/);
     expect(sql).toContain("multiplayer_rating integer not null default 1000");
     expect(sql).toContain("alter table public.player_ratings enable row level security");
     expect(sql).not.toMatch(/create policy[^;]+player_ratings[^;]+for update/is);
     expect(sql).toContain("revoke all on all tables in schema public from anon, authenticated");
     expect(sql).toContain("resolve_profile_conflict");
     expect(sql).toContain("for update");
+    expect(sql).toContain("set search_path = ''");
+    expect(sql).toContain("roulettechess_on_auth_user_created");
+    expect(sql).toContain("for existing_auth_user in select id, is_anonymous from auth.users");
+    expect(sql).toContain("bootstrap_local_profile(source_profile jsonb)");
+    expect(sql).not.toMatch(/grant\s+(?:insert|update|delete|all)[^;]+to authenticated/is);
+    expect(readFileSync("supabase/tests/data_01a_schema_verification.sql", "utf8"))
+      .toContain("Browser role has a forbidden direct mutation grant");
   });
 });

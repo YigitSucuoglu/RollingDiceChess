@@ -2,9 +2,9 @@
 
 ## Deployment status
 
-`supabase/migrations/202608130001_auth_01c_player_identity.sql`: **NOT APPLIED**.
+`supabase/migrations/202608130001_auth_01c_player_identity.sql`: **APPLIED**.
 
-The repository contains the migration contract, but this task had no authenticated Supabase project access. Cloud persistence, rename, anonymous Guest creation and conflict resolution must not be presented as live until DATA-01 applies and validates it remotely.
+The developer applied the complete migration exactly once to RouletteChess project `kbtnnknsgobfvyydxbex`; the catalog verification assertions passed. This establishes the database boundary only. Normal application runtime still does not create/synchronize cloud profiles.
 
 ## Identity and ownership
 
@@ -12,7 +12,7 @@ The repository contains the migration contract, but this task had no authenticat
 
 Supabase Anonymous Auth is the selected cloud Guest strategy. It supplies a server-recognized `auth.uid()` for RLS without email/password. Identity linking can preserve the same auth user and PlayerId. If browser auth storage is cleared, an unlinked Guest may become unrecoverable. A Google identity already owned by another auth user requires a short-lived server-recorded handoff and explicit conflict choice.
 
-The shipped Guest flow remains local until the migration is applied and Anonymous Sign-Ins/manual identity linking are enabled and verified. This preserves offline play and avoids claiming undeployed cloud storage.
+Anonymous Sign-Ins are enabled and remote RLS was validated with two disposable anonymous client sessions. The shipped Guest flow nevertheless remains local until DATA-01B deliberately integrates it. Manual identity linking remains disabled and is deferred.
 
 ## Persisted model
 
@@ -54,3 +54,48 @@ The local profile remains after bootstrap for recovery. No token, email, provide
 7. Only then connect infrastructure/UI and mark remote status **APPLIED**.
 
 Future history references PlayerId, not name. Guests and Google-linked users may both later appear on a rating leaderboard. Multiplayer, RATING-01 and LEADERBOARD-01 are out of scope.
+
+## DATA-01A preflight and operational status
+
+Remote project target: RouletteChess (`kbtnnknsgobfvyydxbex`, Central EU/Frankfurt). The project reference is taken from the developer-provided task context; it was **not authenticated or queried by Codex**. No Supabase CLI, linked local project, database credential, access token or installed local PostgreSQL/Docker runtime was available.
+
+Preflight found and corrected two deployment blockers before any remote DDL:
+
+- existing Supabase Auth users were not backfilled because the original trigger covered only future users;
+- the bootstrap RPC copied only XP/games/wins/losses and could silently omit the remaining local statistics.
+
+The migration is now explicitly transactional and one-shot. It installs a uniquely named auth trigger, safely backfills existing Auth users, expands bootstrap into normalized columns from a versioned JSON input, refuses overwrite of a non-empty cloud profile, and keeps bootstrap replay idempotent. Conflict resolution verifies live Guest ownership, locks ownership records, accepts same-decision replay after completion and rejects contradictory/stale operations.
+
+### Security inventory
+
+All seven user-data tables have RLS enabled. `authenticated` receives SELECT only on current-player views of `players`, ownership, progression, piece statistics and ratings. `anon` receives no table/RPC access. Bootstrap/intents receive no direct table grants. The browser receives only the five narrow RPC grants; it receives no direct INSERT/UPDATE/DELETE grant and no rating mutation path.
+
+Every helper/RPC uses `SECURITY DEFINER`, an empty `search_path`, qualified relations, no dynamic SQL and caller identity derived from `auth.uid()`/`auth.jwt()`. Non-RPC helpers live in the non-exposed `private` schema with EXECUTE revoked from browser roles. Public RPCs validate current ownership rather than accepting an arbitrary target PlayerId.
+
+Policy summary:
+
+| Table | Browser operation | Condition |
+| --- | --- | --- |
+| players | SELECT | owned PlayerId only |
+| player_auth_owners | SELECT | `auth_user_id = auth.uid()` |
+| player_progression | SELECT | owned PlayerId only |
+| player_piece_statistics | SELECT | owned PlayerId only |
+| player_ratings | SELECT | owned PlayerId only |
+| local_profile_bootstraps | none | SECURITY DEFINER RPC only |
+| player_migration_intents | none | SECURITY DEFINER RPC only |
+
+`supabase/tests/data_01a_schema_verification.sql` is a non-destructive post-deployment catalog assertion script. It checks tables, backfill, RLS, policies/functions and forbidden grants. Admin/pgAdmin or Supabase SQL Editor access can bypass RLS and therefore is not evidence of browser-client authorization; two distinct client sessions remain mandatory.
+
+Current operational results:
+
+- Remote migration: **APPLIED** (developer-confirmed).
+- Catalog verification SQL: **PASS**.
+- Anonymous Sign-Ins: **ENABLED** (developer-confirmed).
+- Manual identity linking: **DISABLED / DEFERRED**.
+- Two-user own/cross RLS: **PASS** using real publishable-key client sessions.
+- Direct player/progression mutation denial: **PASS**.
+- Rating and cross-player rating mutation denial: **PASS**; rating remained 1000.
+- Ownership theft denial: **PASS**.
+- Rename and bootstrap security boundaries: **PASS**.
+- Conflict replacement end-to-end: **DEFERRED**.
+- Disposable test data: **REMAINS**; Auth user IDs and FK-aware cleanup guidance are recorded in `DATA_01A_RUNBOOK.md`.
