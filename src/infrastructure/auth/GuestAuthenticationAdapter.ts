@@ -29,7 +29,7 @@ export class GuestAuthenticationAdapter implements AuthenticationPort {
   public constructor(idFactory: GuestSessionIdFactory = createGuestSessionId) {
     this.session = {
       schemaVersion: AUTH_SESSION_SCHEMA_VERSION,
-      state: { status: "guest", guestSessionId: idFactory() },
+      state: { status: "guest", guestSessionId: idFactory(), persistence: "local" },
     };
   }
 
@@ -52,7 +52,7 @@ export class GuestAuthenticationAdapter implements AuthenticationPort {
     return () => this.listeners.delete(listener);
   }
 
-  public chooseGuest(): AuthenticationSession {
+  public async chooseGuest(): Promise<AuthenticationSession> {
     return this.getSession();
   }
 

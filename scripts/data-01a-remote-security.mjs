@@ -118,6 +118,18 @@ function localBootstrapPayload(sourceProfileId) {
   };
 }
 
+function progressionOperationPayload() {
+  const zeroPieces = Object.fromEntries(PIECE_TYPES.map((piece) => [piece, 0]));
+  return {
+    xpDelta: 50, gamesDelta: 1, winsDelta: 1, lossesDelta: 0,
+    playTimeSecondsDelta: 60, kingsCapturedDelta: 0, rouletteRollsDelta: 1,
+    playerTurnsCompletedDelta: 1, threeRightsTurnsDelta: 0,
+    triplePawnRollsDelta: 0, tripleKnightRollsDelta: 0, tripleQueenRollsDelta: 0,
+    rollsByPieceDelta: zeroPieces, movesByPieceDelta: zeroPieces,
+    capturesByPieceDelta: zeroPieces,
+  };
+}
+
 async function run() {
   if ((!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_PUBLISHABLE_KEY) && existsSync(".env.local")) {
     process.loadEnvFile(".env.local");
@@ -177,6 +189,45 @@ async function run() {
     assert(!progressB.error && progressB.data.total_xp === 0, "bootstrap modified foreign progression");
     assert(!ratingA.error && ratingA.data.multiplayer_rating === 1000, "bootstrap modified rating");
     pass("Bootstrap isolation/idempotency");
+
+    const operationId = crypto.randomUUID();
+    const operation = progressionOperationPayload();
+    const syncFirst = await clientA.rpc("apply_player_progression_operation", {
+      requested_operation_id: operationId, operation,
+    });
+    if (syncFirst.error) throw new Error(`progression operation failed: ${syncFirst.error.message}`);
+    const syncReplay = await clientA.rpc("apply_player_progression_operation", {
+      requested_operation_id: operationId, operation,
+    });
+    if (syncReplay.error) throw new Error(`progression replay failed: ${syncReplay.error.message}`);
+    assert(syncFirst.data.progression.total_xp === 175, "operation did not update caller progression once");
+    assert(syncReplay.data.progression.total_xp === 175, "operation replay applied more than once");
+    const [syncB, syncRating] = await Promise.all([
+      clientB.from("player_progression").select("total_xp").single(),
+      clientA.from("player_ratings").select("multiplayer_rating").single(),
+    ]);
+    assert(!syncB.error && syncB.data.total_xp === 0, "operation modified foreign progression");
+    assert(!syncRating.error && syncRating.data.multiplayer_rating === 1000, "operation modified rating");
+    pass("Progression operation caller isolation");
+    pass("Progression operation replay", "PASS (applied once)");
+    pass("Progression rating isolation", "PASS (1000)");
+
+    for (const malformed of [
+      { ...operation, rating: 999999 },
+      { ...operation, xpDelta: -1 },
+      { ...operation, rouletteRollsDelta: 10001 },
+      { ...operation, playerId: ownB.playerId },
+    ]) {
+      const result = await clientA.rpc("apply_player_progression_operation", {
+        requested_operation_id: crypto.randomUUID(), operation: malformed,
+      });
+      assert(Boolean(result.error), "malformed progression operation unexpectedly succeeded");
+    }
+    assertPermissionDenied("operation ledger insert", await clientA.from("player_progression_operations").insert({
+      player_id: ownB.playerId, operation_id: crypto.randomUUID(), payload_hash: "00",
+    }));
+    pass("Malformed/negative/huge operation", "PASS (rejected)");
+    pass("Operation ledger direct write", "PASS (denied)");
 
     const sharedName = `Data01A-${Date.now().toString().slice(-8)}`;
     const renameA = await clientA.rpc("rename_current_player", { requested_name: sharedName });

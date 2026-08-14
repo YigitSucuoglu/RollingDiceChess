@@ -16,7 +16,7 @@ describe("GuestAuthenticationAdapter", () => {
 
     expect(initial).toEqual({
       schemaVersion: 1,
-      state: { status: "guest", guestSessionId: "guest-test" },
+      state: { status: "guest", guestSessionId: "guest-test", persistence: "local" },
     });
     expect(restored).toEqual(initial);
     expect(await adapter.beginAuthentication()).toEqual(initial);
@@ -44,6 +44,7 @@ describe("GuestAuthenticationAdapter", () => {
     expect(second.getSession().state).toEqual({
       status: "guest",
       guestSessionId: "guest-second",
+      persistence: "local",
     });
     second.dispose();
   });

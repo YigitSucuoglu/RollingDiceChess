@@ -13,6 +13,8 @@ import {
   type PlayerProfile,
 } from "./PlayerProfile";
 import type { PlayerProfileRepository } from "./PlayerProfileRepository";
+import type { AuthenticationSession } from "../application/auth/AuthenticationContracts";
+import { PlayerSyncCoordinator, type CloudPlayerSyncPort } from "./PlayerSync";
 import {
   calculateLevelProgression,
   createMatchXpProgressionResult,
@@ -125,6 +127,7 @@ function formatPiece(pieceType: PieceType | null): string {
 
 export class PlayerProfileService {
   private readonly repository: PlayerProfileRepository;
+  private sync?: PlayerSyncCoordinator;
 
   constructor(
     repository: PlayerProfileRepository =
@@ -137,7 +140,28 @@ export class PlayerProfileService {
     return this.repository.getProfile();
   }
 
+  public configureCloudSync(remote: CloudPlayerSyncPort, storage?: Storage): void {
+    if (!this.sync) this.sync = new PlayerSyncCoordinator(this.repository, remote, storage);
+  }
+
+  public async handleAuthenticationSession(session: AuthenticationSession): Promise<void> {
+    await this.sync?.handleAuthentication(session);
+  }
+
+  public async reconnectCloudSync(): Promise<void> {
+    await this.sync?.reconnect();
+  }
+
+  public isCloudProfileEstablished(): boolean {
+    return this.sync?.isCloudCanonical() ?? false;
+  }
+
+  public hasProfileSyncConflict(): boolean {
+    return this.sync?.hasConflict() ?? false;
+  }
+
   public resetProfile(): PlayerProfileViewModel {
+    if (this.isCloudProfileEstablished()) return this.getViewModel();
     this.repository.resetProfile();
     return this.getViewModel();
   }
@@ -271,6 +295,7 @@ export class PlayerProfileService {
     }
 
     const profile = this.repository.getProfile();
+    const profileBeforeMatch = structuredClone(profile);
 
     if (profile.processedMatchIds.includes(session.matchId)) {
       return null;
@@ -320,6 +345,7 @@ export class PlayerProfileService {
       session.matchId,
     ].slice(-MAX_PROCESSED_MATCH_IDS);
     this.repository.saveProfile(profile);
+    this.sync?.recordCompletedMatch(profileBeforeMatch, profile);
     session.completionResult = createMatchXpProgressionResult(
       previousTotalXp,
       reward.finalXp

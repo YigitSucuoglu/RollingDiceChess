@@ -22,6 +22,11 @@ function providerSession(userId: string): Session {
   };
 }
 
+function anonymousSession(userId: string): Session {
+  const session = providerSession(userId);
+  return { ...session, user: { ...session.user, is_anonymous: true } };
+}
+
 function memoryStorage(initialGuest = false) {
   const values = new Map<string, string>();
   if (initialGuest) values.set("roulettechess.auth-mode.v1", "guest");
@@ -37,6 +42,7 @@ function harness(restoredSession: Session | null = null) {
   const unsubscribe = vi.fn();
   const getSession = vi.fn(async () => ({ data: { session: restoredSession }, error: null }));
   const signInWithOAuth = vi.fn(async () => ({ data: { provider: "google", url: "https://provider.invalid" }, error: null }));
+  const signInAnonymously = vi.fn(async () => ({ data: { user: anonymousSession("anonymous-uuid").user, session: anonymousSession("anonymous-uuid") }, error: null }));
   const signOut = vi.fn(async () => ({ error: null }));
   const client = {
     auth: {
@@ -45,6 +51,7 @@ function harness(restoredSession: Session | null = null) {
         onChange = callback;
         return { data: { subscription: { unsubscribe } } };
       }),
+      signInAnonymously,
       signInWithOAuth,
       signOut,
     },
@@ -54,7 +61,7 @@ function harness(restoredSession: Session | null = null) {
     origin: "https://roulettechess.example",
     storage: memoryStorage(),
   });
-  return { adapter, getSession, onChange: (session: Session | null) => onChange?.("SIGNED_IN", session), signInWithOAuth, signOut, unsubscribe };
+  return { adapter, getSession, onChange: (session: Session | null) => onChange?.("SIGNED_IN", session), signInAnonymously, signInWithOAuth, signOut, unsubscribe };
 }
 
 describe("SupabaseAuthenticationAdapter", () => {
@@ -90,12 +97,15 @@ describe("SupabaseAuthenticationAdapter", () => {
     adapter.dispose();
   });
 
-  it("publishes guest selection and remembers it without creating a Supabase user", () => {
-    const { adapter, signInWithOAuth } = harness();
+  it("creates one cloud-backed anonymous Guest", async () => {
+    const { adapter, signInAnonymously, signInWithOAuth } = harness();
     const listener = vi.fn();
     adapter.subscribe(listener);
-    expect(adapter.chooseGuest().state.status).toBe("guest");
-    expect(listener).toHaveBeenCalledTimes(2);
+    expect((await adapter.chooseGuest()).state).toEqual({
+      status: "guest", guestSessionId: "guest-fixed", persistence: "cloud",
+    });
+    expect(signInAnonymously).toHaveBeenCalledOnce();
+    expect(listener).toHaveBeenCalledTimes(3);
     expect(signInWithOAuth).not.toHaveBeenCalled();
     adapter.dispose();
   });
@@ -137,10 +147,10 @@ describe("SupabaseAuthenticationAdapter", () => {
     adapter.dispose();
   });
 
-  it("keeps adapter instances isolated", () => {
+  it("keeps adapter instances isolated", async () => {
     const first = harness();
     const second = harness();
-    first.adapter.chooseGuest();
+    await first.adapter.chooseGuest();
     expect(first.adapter.getSession().state.status).toBe("guest");
     expect(second.adapter.getSession().state.status).toBe("unselected");
     first.adapter.dispose();

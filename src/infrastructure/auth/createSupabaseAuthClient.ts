@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-import type { SupabaseAuthClient } from "./SupabaseAuthenticationAdapter";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 interface SafeBrowserStorage {
   getItem(key: string): string | null;
@@ -38,7 +38,7 @@ function createSafeBrowserStorage(): SafeBrowserStorage {
 export function createSupabaseAuthClient(
   url: string,
   publishableKey: string,
-): SupabaseAuthClient {
+): SupabaseClient {
   return createClient(url, publishableKey, {
     auth: {
       autoRefreshToken: true,

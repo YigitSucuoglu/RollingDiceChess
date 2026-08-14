@@ -17,6 +17,13 @@ export default function AuthenticationEntry() {
     setPending(false);
   };
 
+  const playAsGuest = async () => {
+    if (pending) return;
+    setPending(true);
+    await authentication.chooseGuest();
+    setPending(false);
+  };
+
   return (
     <main className="auth-entry">
       <section aria-labelledby="auth-entry-title" className="auth-entry-card">
@@ -35,8 +42,10 @@ export default function AuthenticationEntry() {
             {pending ? t("auth.connecting") : t("auth.continueWithGoogle")}
           </button>
           <button
+            aria-busy={pending}
             className="auth-entry-guest"
-            onClick={() => authentication.chooseGuest()}
+            disabled={pending}
+            onClick={() => void playAsGuest()}
             type="button"
           >
             {t("auth.playAsGuest")}

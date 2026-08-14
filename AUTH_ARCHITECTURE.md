@@ -45,7 +45,7 @@ Application composition creates exactly one auth source. With valid `VITE_SUPABA
 
 The browser OAuth redirect uses `window.location.origin`. Supabase handles URL session detection, token exchange, refresh, and persistence. No dedicated callback route or manual token parsing is used. The current origin must remain on the Supabase redirect allowlist.
 
-Explicit guest choice is stored as the non-sensitive preference `roulettechess.auth-mode.v1`. It is not identity or authorization. A signed-in Supabase session takes precedence over this preference. Sign-out ends the Supabase session and returns the application to local guest mode without deleting profile or settings.
+Explicit guest choice is stored as the non-sensitive preference `roulettechess.auth-mode.v1`. It is not identity or authorization. With configured Supabase, the choice creates/restores Supabase Anonymous Auth; provider failure degrades to a tagged local Guest. A signed-in Supabase session takes precedence. Sign-out ends the permanent session and requests a cloud Guest without deleting profile or settings.
 
 Storage remains separated:
 
@@ -56,7 +56,7 @@ Supabase-managed auth session storage != RouletteChess PlayerProfile storage
 
 Storage denial degrades to runtime-only state. Supabase and guest preference storage operations use guarded access; gameplay/profile repositories retain their existing fallback behavior.
 
-Authenticated accounts are candidates for future ranked leaderboard participation. Guests are not leaderboard-eligible and remain local-only; an optional non-unique guest display name is deferred. No leaderboard, username reservation, application profile table, database migration, RLS policy, or cloud profile persistence exists yet.
+Authenticated accounts are candidates for future ranked leaderboard participation. Guests remain ineligible for future ranked leaderboard participation; their cloud profile stores casual progression only. Duplicate generated Guest display names are allowed. No leaderboard or username reservation exists.
 
 The externally configured Supabase project must keep Google enabled, the Google OAuth callback owned by Supabase, the production Site URL, and allowlisted localhost/production redirect origins. Local and deployed builds require only empty-safe public variables documented in `.env.example`; actual values stay in `.env.local` and Vercel environment configuration.
 
@@ -66,4 +66,4 @@ The application defines a provider-independent `PlayerId` plus focused player re
 
 Supabase Anonymous Auth is the selected secure cloud Guest primitive because RLS can recognize `auth.uid()` without trusting a client-provided UUID. Supported identity linking is the normal Guest-to-Google path. A pre-existing Google identity uses an explicit transactional replacement choice, never arithmetic merge. See `PLAYER_DATA_MODEL.md` and the versioned migration.
 
-The migration is **NOT APPLIED**. Runtime intentionally retains AUTH-01B local Guest and local PlayerProfile behavior. Cloud Guest creation, synchronization, rename and conflict UI remain disabled until DATA-01 validates the remote schema and Auth settings.
+DATA-01A and the DATA-01B progression-operation migration are **APPLIED**. DATA-01B adds configured cloud Guest creation and a cloud-canonical/cache synchronization coordinator; catalog and two-client remote security verification passed. Guest-to-Google linking/conflict resolution remain deferred to DATA-01C.

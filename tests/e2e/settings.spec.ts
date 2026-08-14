@@ -19,15 +19,9 @@ test("sound and language preferences persist", async ({ page, assertNoErrors }) 
   assertNoErrors();
 });
 
-test("profile reset confirmation supports cancel and confirm in isolated context", async ({ page, assertNoErrors }) => {
+test("cloud canonical profile cannot be reset from local settings", async ({ page, assertNoErrors }) => {
   await page.goto("/settings");
-  await page.getByRole("button", { name: /reset profile|profili sıfırla/i }).click();
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toBeVisible();
-  await dialog.getByRole("button", { name: /cancel|iptal/i }).click();
-  await expect(dialog).toBeHidden();
-  await page.getByRole("button", { name: /reset profile|profili sıfırla/i }).click();
-  await dialog.getByRole("button", { name: /^reset$|^sıfırla$/i }).click();
-  await expect(dialog).toBeHidden();
+  await expect(page.getByRole("button", { name: /cloud profile reset unavailable/i })).toBeDisabled();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   assertNoErrors();
 });

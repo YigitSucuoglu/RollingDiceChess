@@ -137,3 +137,12 @@ commit;
 ```
 
 All critical DATA-01A remote security gates passed. DATA-01B remains the next task.
+
+## DATA-01B harness extension
+
+`test:data:remote` now also exercises caller-only progression, exact replay once, foreign-player isolation, unchanged rating 1000, malformed/negative/huge payload rejection and direct operation-ledger denial. `202608140001_data_01b_progression_sync.sql` is **APPLIED**, `data_01b_schema_verification.sql` passed, and the extended remote harness passed.
+
+DATA-01B disposable Auth users from the successful remote run (manual Dashboard/FK-aware cleanup remains required):
+
+- Client A: `a7d7faef-5560-4b7c-84eb-c81dd4e181b4`
+- Client B: `8df14129-5435-4cca-85d4-ce6aa61cb215`

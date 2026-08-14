@@ -16,18 +16,19 @@ import { applyAppLanguage } from "../i18n";
 export interface AppSettingsViewModel {
   readonly soundEnabled: boolean;
   readonly language: AppLanguage;
+  readonly profileResetAvailable: boolean;
 }
 
 export class AppSettingsService {
   private readonly repository: AppSettingsRepository;
   private readonly sounds: Pick<SoundManager, "isEnabled" | "setEnabled">;
-  private readonly profiles: Pick<PlayerProfileService, "resetProfile">;
+  private readonly profiles: Pick<PlayerProfileService, "resetProfile" | "isCloudProfileEstablished">;
 
   constructor(
     repository: AppSettingsRepository =
       new LocalStorageAppSettingsRepository(),
     sounds: Pick<SoundManager, "isEnabled" | "setEnabled"> = soundManager,
-    profiles: Pick<PlayerProfileService, "resetProfile"> =
+    profiles: Pick<PlayerProfileService, "resetProfile" | "isCloudProfileEstablished"> =
       playerProfileService
   ) {
     this.repository = repository;
@@ -39,6 +40,7 @@ export class AppSettingsService {
     return {
       soundEnabled: this.sounds.isEnabled(),
       language: this.repository.getSettings().language,
+      profileResetAvailable: !this.profiles.isCloudProfileEstablished(),
     };
   }
 

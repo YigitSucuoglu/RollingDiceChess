@@ -63,8 +63,8 @@ const allSourceFiles = fs.readdirSync("src", { recursive: true })
 for (const file of allSourceFiles) {
   const source = fs.readFileSync(file, "utf8");
   if (/@supabase\/supabase-js/.test(source)
-      && !file.startsWith(path.join("src", "infrastructure", "auth"))) {
-    violations.push(`${file}: Supabase SDK outside auth infrastructure`);
+      && !file.startsWith(path.join("src", "infrastructure"))) {
+    violations.push(`${file}: Supabase SDK outside infrastructure`);
   }
   if (/VITE_SUPABASE_(?:SERVICE_ROLE|SECRET)|SUPABASE_SERVICE_ROLE/.test(source)) {
     violations.push(`${file}: forbidden Supabase secret/service-role identifier`);

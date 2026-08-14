@@ -32,6 +32,10 @@
     "signedInWithGoogle": "Google ile giriş yapıldı",
     "guestProfile": "İlerleme ve istatistikler bu cihazda yerel olarak saklanır.",
     "localProfilePending": "Profil aktarımı sunulana kadar mevcut ilerlemen yerel kalır.",
+    "cloudProfile": "Bulut profilin etkin; çevrimdışı ilerleme bağlantı geri geldiğinde eşitlenir.",
+    "cloudGuestWarning": "Tarayıcı/site verileri silinirse Misafir ilerlemesine erişilemeyebilir. Hesabını korumak için daha sonra Google'a bağlan.",
+    "localGuestWarning": "Bulut geçici olarak kullanılamıyor. Yerel olarak oynamaya devam edip sonra tekrar deneyebilirsin.",
+    "profileSyncConflict": "Yerel ve bulut ilerlemelerinin ikisi de mevcut. İkisi de korundu; eşitleme öncesi çözüm gerekiyor.",
     "signOut": "Çıkış Yap"
   },
   "setup": {
@@ -62,7 +66,7 @@
     "browserTitle": "Ayarlar | RouletteChess", "eyebrow": "Deneyim kontrolleri", "title": "Ayarlar", "description": "RouletteChess deneyimini yapılandır.",
     "soundControls": "Ses kontrolleri", "audio": "Ses", "soundEffects": "Ses Efektleri", "soundDescription": "Hamle, rulet, uyarı ve oyun sonucu sesleri.", "soundLabel": "Ses efektleri",
     "displayLanguage": "Görüntüleme dili", "language": "Dil", "languageDescription": "Uygulama genelinde kullanılacak dili seçin.",
-    "localPlayerData": "Yerel oyuncu verileri", "data": "Veriler", "resetOfflineProfile": "Çevrimdışı Profili Sıfırla", "resetDescription": "Yerel XP, ilerleme ve tüm istatistikleri sil.", "resetComplete": "Çevrimdışı profil sıfırlandı.",
+    "localPlayerData": "Yerel oyuncu verileri", "data": "Veriler", "resetOfflineProfile": "Çevrimdışı Profili Sıfırla", "resetDescription": "Yerel XP, ilerleme ve tüm istatistikleri sil.", "resetComplete": "Çevrimdışı profil sıfırlandı.", "cloudResetUnavailable": "Bulut profili sıfırlanamaz",
     "dialog": { "eyebrow": "Sıfırlamayı onayla", "title": "Çevrimdışı Profil Sıfırlansın mı?", "description": "XP'niz, ilerlemeniz ve tüm çevrimdışı istatistikleriniz kalıcı olarak silinecek. Bu işlem geri alınamaz." },
     "languageChanged": "Dil Türkçe olarak değiştirildi."
   },

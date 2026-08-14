@@ -203,13 +203,16 @@ function SettingsPage() {
               </div>
               <button
                 className="settings-reset-button"
+                disabled={!settings.profileResetAvailable}
                 onClick={() => {
                   setResetStatus("");
                   setIsResetDialogOpen(true);
                 }}
                 type="button"
               >
-                {t("common.actions.resetProfile")}
+                {settings.profileResetAvailable
+                  ? t("common.actions.resetProfile")
+                  : t("settings.cloudResetUnavailable")}
               </button>
             </div>
             <p aria-live="polite" className="settings-reset-status">

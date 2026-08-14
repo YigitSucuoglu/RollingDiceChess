@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import playerProfileService, {
@@ -34,8 +34,8 @@ function RouletteStatCard({
 function ProfilePage() {
   const { t, i18n } = useTranslation();
   const language: AppLanguage = i18n.resolvedLanguage === "tr" ? "tr" : "en";
-  const profile = useMemo(() => playerProfileService.getViewModel(language), [language]);
   const { authentication, session } = useAuthentication();
+  const profile = playerProfileService.getViewModel(language);
   const [authPending, setAuthPending] = useState(false);
   const authenticated = session.state.status === "authenticated";
 
@@ -84,7 +84,14 @@ function ProfilePage() {
             <h2 id="profile-account-title">
               {authenticated ? t("auth.signedInWithGoogle") : t("auth.guest")}
             </h2>
-            <p>{authenticated ? t("auth.localProfilePending") : t("auth.guestProfile")}</p>
+            <p>{authenticated
+              ? t("auth.cloudProfile")
+              : session.state.status === "guest" && session.state.persistence === "cloud"
+                ? t("auth.cloudGuestWarning")
+                : t("auth.localGuestWarning")}</p>
+            {playerProfileService.hasProfileSyncConflict() && (
+              <p role="status">{t("auth.profileSyncConflict")}</p>
+            )}
           </div>
           {(authenticated || authentication.isAuthenticationAvailable()) && (
             <button

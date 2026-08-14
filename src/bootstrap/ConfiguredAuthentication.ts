@@ -9,6 +9,7 @@ import type {
   AuthenticationPort,
   AuthenticationStateListener,
 } from "../application/auth/AuthenticationPort";
+import playerProfileService from "../profile/PlayerProfileService";
 
 interface ConfiguredAuthenticationOptions {
   readonly origin: string;
@@ -31,6 +32,7 @@ export default class ConfiguredAuthentication implements AuthenticationPort {
   private delegate?: AuthenticationPort;
   private delegatePromise?: Promise<AuthenticationPort>;
   private delegateUnsubscribe?: () => void;
+  private onlineListenerAttached = false;
   private disposed = false;
   private lastPublishedSerialized = "";
   private session: AuthenticationSession = {
@@ -48,6 +50,7 @@ export default class ConfiguredAuthentication implements AuthenticationPort {
   public async restoreSession(): Promise<AuthenticationSession> {
     const delegate = await this.getDelegate();
     this.session = await delegate.restoreSession();
+    await playerProfileService.handleAuthenticationSession(this.session);
     this.publish();
     return this.getSession();
   }
@@ -61,16 +64,9 @@ export default class ConfiguredAuthentication implements AuthenticationPort {
     return () => this.listeners.delete(listener);
   }
 
-  public chooseGuest(): AuthenticationSession {
-    if (this.delegate) {
-      this.session = this.delegate.chooseGuest();
-    } else {
-      try { this.options.storage?.setItem("roulettechess.auth-mode.v1", "guest"); } catch { /* Runtime-only guest mode. */ }
-      this.session = {
-        schemaVersion: AUTH_SESSION_SCHEMA_VERSION,
-        state: { status: "guest", guestSessionId: this.guestSessionId },
-      };
-    }
+  public async chooseGuest(): Promise<AuthenticationSession> {
+    this.session = await (await this.getDelegate()).chooseGuest();
+    await playerProfileService.handleAuthenticationSession(this.session);
     this.publish();
     return this.getSession();
   }
@@ -86,6 +82,7 @@ export default class ConfiguredAuthentication implements AuthenticationPort {
   public dispose(): void {
     this.disposed = true;
     this.delegateUnsubscribe?.();
+    if (this.onlineListenerAttached) window.removeEventListener("online", this.handleOnline);
     this.delegate?.dispose();
     this.listeners.clear();
   }
@@ -95,20 +92,35 @@ export default class ConfiguredAuthentication implements AuthenticationPort {
     this.delegatePromise = Promise.all([
       import("../infrastructure/auth/SupabaseAuthenticationAdapter"),
       import("../infrastructure/auth/createSupabaseAuthClient"),
-    ]).then(([adapterModule, clientModule]) => {
+      import("../infrastructure/player/SupabaseCloudPlayerSync"),
+    ]).then(([adapterModule, clientModule, playerModule]) => {
+      const client = clientModule.createSupabaseAuthClient(this.options.url, this.options.publishableKey);
+      playerProfileService.configureCloudSync(
+        new playerModule.SupabaseCloudPlayerSync(client),
+        this.options.storage,
+      );
       const delegate = new adapterModule.SupabaseAuthenticationAdapter(
-        clientModule.createSupabaseAuthClient(this.options.url, this.options.publishableKey),
+        client,
         { guestSessionId: this.guestSessionId, origin: this.options.origin, storage: this.options.storage },
       );
       this.delegate = delegate;
       this.delegateUnsubscribe = delegate.subscribe((session) => {
         this.session = session;
+        void playerProfileService.handleAuthenticationSession(session);
         this.publish();
       });
+      if (!this.onlineListenerAttached) {
+        window.addEventListener("online", this.handleOnline);
+        this.onlineListenerAttached = true;
+      }
       return delegate;
     });
     return this.delegatePromise;
   }
+
+  private readonly handleOnline = (): void => {
+    void playerProfileService.reconnectCloudSync();
+  };
 
   private publish(): void {
     const snapshot = this.getSession();

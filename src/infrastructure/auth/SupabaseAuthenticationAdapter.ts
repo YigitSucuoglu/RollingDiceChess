@@ -24,7 +24,7 @@ interface PreferenceStorage {
 
 export interface SupabaseAuthClient {
   auth: Pick<SupabaseClient["auth"],
-    "getSession" | "onAuthStateChange" | "signInWithOAuth" | "signOut">;
+    "getSession" | "onAuthStateChange" | "signInAnonymously" | "signInWithOAuth" | "signOut">;
 }
 
 export interface SupabaseAuthenticationOptions {
@@ -119,6 +119,7 @@ export class SupabaseAuthenticationAdapter implements AuthenticationPort {
       const { data, error } = await this.client.auth.getSession();
       if (error) throw error;
       this.applySupabaseSession(data.session, false);
+      if (!data.session && readGuestPreference(this.storage)) return this.chooseGuest();
     } catch {
       this.session = this.createGuestCapableSession(
         readGuestPreference(this.storage) ? "guest" : "unselected",
@@ -135,9 +136,23 @@ export class SupabaseAuthenticationAdapter implements AuthenticationPort {
     return () => this.listeners.delete(listener);
   }
 
-  public chooseGuest(): AuthenticationSession {
+  public async chooseGuest(): Promise<AuthenticationSession> {
     writeGuestPreference(this.storage, true);
-    this.session = this.createGuestCapableSession("guest");
+    if (this.session.state.status === "guest" && this.session.state.persistence === "cloud") {
+      return this.getSession();
+    }
+    this.session = {
+      schemaVersion: AUTH_SESSION_SCHEMA_VERSION,
+      state: { status: "authenticating", guestSessionId: this.guestSessionId },
+    };
+    this.publish();
+    try {
+      const { data, error } = await this.client.auth.signInAnonymously();
+      if (error) throw error;
+      this.applySupabaseSession(data.session, false);
+    } catch {
+      this.session = this.createGuestCapableSession("guest", "local");
+    }
     this.publish();
     return this.getSession();
   }
@@ -175,8 +190,7 @@ export class SupabaseAuthenticationAdapter implements AuthenticationPort {
       writeGuestPreference(this.storage, true);
       const { error } = await this.client.auth.signOut();
       if (error) throw error;
-      this.session = this.createGuestCapableSession("guest");
-      this.publish();
+      return this.chooseGuest();
     } catch {
       this.session = {
         schemaVersion: AUTH_SESSION_SCHEMA_VERSION,
@@ -202,7 +216,10 @@ export class SupabaseAuthenticationAdapter implements AuthenticationPort {
     supabaseSession: Session | null,
     publish = true,
   ): void {
-    if (supabaseSession?.user.id) {
+    if (supabaseSession?.user.id && supabaseSession.user.is_anonymous) {
+      writeGuestPreference(this.storage, true);
+      this.session = this.createGuestCapableSession("guest", "cloud");
+    } else if (supabaseSession?.user.id) {
       writeGuestPreference(this.storage, false);
       this.session = {
         schemaVersion: AUTH_SESSION_SCHEMA_VERSION,
@@ -224,10 +241,13 @@ export class SupabaseAuthenticationAdapter implements AuthenticationPort {
 
   private createGuestCapableSession(
     status: "guest" | "unselected",
+    persistence: "cloud" | "local" = "local",
   ): AuthenticationSession {
     return {
       schemaVersion: AUTH_SESSION_SCHEMA_VERSION,
-      state: { status, guestSessionId: this.guestSessionId },
+      state: status === "guest"
+        ? { status, guestSessionId: this.guestSessionId, persistence }
+        : { status, guestSessionId: this.guestSessionId },
     };
   }
 

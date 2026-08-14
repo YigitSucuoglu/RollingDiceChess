@@ -19,7 +19,11 @@ export type AuthenticationFailureCode =
 
 export type AuthenticationState =
   | { readonly status: "unselected"; readonly guestSessionId: GuestSessionId }
-  | { readonly status: "guest"; readonly guestSessionId: GuestSessionId }
+  | {
+      readonly status: "guest";
+      readonly guestSessionId: GuestSessionId;
+      readonly persistence: "cloud" | "local";
+    }
   | { readonly status: "authenticating"; readonly guestSessionId: GuestSessionId }
   | { readonly status: "authenticated"; readonly account: AuthenticatedAccount }
   | {

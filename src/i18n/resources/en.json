@@ -32,6 +32,10 @@
     "signedInWithGoogle": "Signed in with Google",
     "guestProfile": "Progress and statistics are stored locally on this device.",
     "localProfilePending": "Your current progression remains local until profile migration is available.",
+    "cloudProfile": "Your cloud profile is active; offline progress will synchronize when connectivity returns.",
+    "cloudGuestWarning": "Guest progress may become inaccessible if browser/site data is cleared. Connect Google later to protect your account.",
+    "localGuestWarning": "Cloud is temporarily unavailable. You can keep playing locally and retry later.",
+    "profileSyncConflict": "Local and cloud progress both exist. Both are preserved; resolution is required before synchronization.",
     "signOut": "Sign Out"
   },
   "setup": {
@@ -62,7 +66,7 @@
     "browserTitle": "Settings | RouletteChess", "eyebrow": "Experience controls", "title": "Settings", "description": "Configure your RouletteChess experience.",
     "soundControls": "Sound controls", "audio": "Audio", "soundEffects": "Sound Effects", "soundDescription": "Moves, roulette, alerts, and game results.", "soundLabel": "Sound effects",
     "displayLanguage": "Display language", "language": "Language", "languageDescription": "Choose the language used throughout the application.",
-    "localPlayerData": "Local player data", "data": "Data", "resetOfflineProfile": "Reset Offline Profile", "resetDescription": "Erase local XP, progression, and all statistics.", "resetComplete": "Offline profile reset complete.",
+    "localPlayerData": "Local player data", "data": "Data", "resetOfflineProfile": "Reset Offline Profile", "resetDescription": "Erase local XP, progression, and all statistics.", "resetComplete": "Offline profile reset complete.", "cloudResetUnavailable": "Cloud profile reset unavailable",
     "dialog": { "eyebrow": "Confirm reset", "title": "Reset Offline Profile?", "description": "This will permanently erase your XP, progression, and all offline statistics. This action cannot be undone." },
     "languageChanged": "Language changed to English."
   },

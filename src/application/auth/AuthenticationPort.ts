@@ -9,7 +9,7 @@ export interface AuthenticationPort {
   getSession(): AuthenticationSession;
   restoreSession(): Promise<AuthenticationSession>;
   subscribe(listener: AuthenticationStateListener): () => void;
-  chooseGuest(): AuthenticationSession;
+  chooseGuest(): Promise<AuthenticationSession>;
   beginAuthentication(): Promise<AuthenticationSession>;
   signOut(): Promise<AuthenticationSession>;
   dispose(): void;

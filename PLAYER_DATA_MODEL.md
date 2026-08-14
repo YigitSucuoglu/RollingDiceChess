@@ -4,7 +4,7 @@
 
 `supabase/migrations/202608130001_auth_01c_player_identity.sql`: **APPLIED**.
 
-The developer applied the complete migration exactly once to RouletteChess project `kbtnnknsgobfvyydxbex`; the catalog verification assertions passed. This establishes the database boundary only. Normal application runtime still does not create/synchronize cloud profiles.
+The developer applied DATA-01A and the separate DATA-01B operation migration to RouletteChess project `kbtnnknsgobfvyydxbex`. Both catalog verification scripts passed, followed by the extended two-client remote security harness.
 
 ## Identity and ownership
 
@@ -12,7 +12,7 @@ The developer applied the complete migration exactly once to RouletteChess proje
 
 Supabase Anonymous Auth is the selected cloud Guest strategy. It supplies a server-recognized `auth.uid()` for RLS without email/password. Identity linking can preserve the same auth user and PlayerId. If browser auth storage is cleared, an unlinked Guest may become unrecoverable. A Google identity already owned by another auth user requires a short-lived server-recorded handoff and explicit conflict choice.
 
-Anonymous Sign-Ins are enabled and remote RLS was validated with two disposable anonymous client sessions. The shipped Guest flow nevertheless remains local until DATA-01B deliberately integrates it. Manual identity linking remains disabled and is deferred.
+Anonymous Sign-Ins are enabled and remote RLS was validated with two disposable anonymous client sessions. Configured Guest entry now requests a persistent Supabase anonymous session and falls back locally on failure. Manual identity linking remains disabled and deferred.
 
 ## Persisted model
 
@@ -22,6 +22,7 @@ Anonymous Sign-Ins are enabled and remote RLS was validated with two disposable 
 - `player_piece_statistics`: normalized per-piece counters.
 - `player_ratings`: separate rating default `1000`; browser roles receive no UPDATE path.
 - `local_profile_bootstraps`: schema-versioned bootstrap idempotency ledger.
+- `player_progression_operations`: caller-bound operation/replay ledger.
 - `player_migration_intents`: expiring hashed handoff and auditable outcome.
 
 Local `PlayerProfile.playerId` is a source-record identifier, not cloud PlayerId. Display name, XP and statistics are bootstrap inputs. `processedMatchIds` stays local cache/idempotency data. Language, sound, themes and setup preferences remain settings, outside identity.
@@ -98,4 +99,5 @@ Current operational results:
 - Ownership theft denial: **PASS**.
 - Rename and bootstrap security boundaries: **PASS**.
 - Conflict replacement end-to-end: **DEFERRED**.
+- DATA-01B progression migration: **APPLIED**; catalog verification and extended remote harness: **PASS**.
 - Disposable test data: **REMAINS**; Auth user IDs and FK-aware cleanup guidance are recorded in `DATA_01A_RUNBOOK.md`.
