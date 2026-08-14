@@ -6,6 +6,14 @@ interface QaFailureState {
   failures: string[];
 }
 
+const E2E_AUTH_FIXTURE_STORAGE_KEY = "roulettechess.e2e-auth-fixture.v1";
+
+export async function useCloudGuestFixture(page: Page): Promise<void> {
+  await page.addInitScript(({ key }) => {
+    window.localStorage.setItem(key, "cloud");
+  }, { key: E2E_AUTH_FIXTURE_STORAGE_KEY });
+}
+
 export async function installErrorGuards(page: Page, browserName: string): Promise<QaFailureState> {
   const failures: string[] = [];
   const pendingImages = new Set<Request>();
@@ -16,6 +24,9 @@ export async function installErrorGuards(page: Page, browserName: string): Promi
   });
   page.on("pageerror", (error) => failures.push(`pageerror: ${error.message}`));
   page.on("request", (request) => {
+    if (/\.supabase\.co(?:\/|$)/i.test(new URL(request.url()).hostname)) {
+      failures.push(`forbidden normal-E2E Supabase request: ${request.url()}`);
+    }
     if (request.resourceType() === "document") {
       for (const pendingImage of pendingImages) navigationSupersededImages.add(pendingImage);
     } else if (request.resourceType() === "image") {

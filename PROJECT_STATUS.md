@@ -20,6 +20,7 @@ v1.0.0
 ## Completed
 
 ### Quality
+- DATA-01B-HF1 — Decouple normal browser E2E from live Supabase Guest creation
 - DATA-01B — Integrate runtime cloud Guest identity and profile synchronization
 - DATA-01A — Apply Supabase player schema and validate RLS/security
 - AUTH-01C — Establish cloud player identity, profile ownership and Guest-to-Account migration model
@@ -109,6 +110,7 @@ v1.0.0
 ## Current Sprint
 
 Completed:
+- DATA-01B-HF1 — Decouple normal browser E2E from live Supabase Guest creation
 - DATA-01B — Integrate runtime cloud Guest identity and profile synchronization
 - DATA-01A — Apply Supabase player schema and validate RLS/security
 - AUTH-01C — Establish cloud player identity, profile ownership and Guest-to-Account migration model
@@ -223,6 +225,7 @@ Performance Backlog:
 - AUTH-01B-HF1 distinguishes Firefox navigation-superseded image cancellations from real request failures in QA fixtures while adding explicit fatal handling for HTTP 4xx/5xx responses.
 - AUTH-01C defines stable PlayerId ownership, normalized progression/rating storage, anonymous-Guest target architecture and transactional replacement-based conflict resolution. DATA-01A applied the schema, passed catalog assertions and proved own/cross RLS isolation plus player, progression, rating and ownership mutation denial through two real publishable-key anonymous sessions. Anonymous Sign-Ins are enabled; manual identity linking and runtime cloud synchronization remain deferred.
 - DATA-01B creates/restores cloud-backed Guests when configured, retains local Guest fallback, treats cloud as canonical after safe bootstrap, queues idempotent offline match operations, and blocks unsafe cloud-profile reset. Its separate migration, catalog verification, two-client RLS/replay/rating harness, and Chromium runtime suite passed. Manual identity linking remains disabled and DATA-01C owns Guest-to-Google conflict resolution.
+- DATA-01B-HF1 keeps normal Chromium E2E self-contained through compile-time E2E cloud/local fixtures and a strict Supabase request guard. Live Supabase validation remains opt-in through `test:data:remote`; production and Vercel retain the real DATA-01B adapters.
 
 ### Versioning Policy
 

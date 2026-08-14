@@ -1,8 +1,10 @@
 import type { AuthenticationPort } from "../application/auth/AuthenticationPort";
 import { GuestAuthenticationAdapter } from "../infrastructure/auth/GuestAuthenticationAdapter";
 import ConfiguredAuthentication from "./ConfiguredAuthentication";
+import { createE2EAuthentication } from "../infrastructure/testing/E2EAuthenticationAdapter";
 
 export function createAuthentication(): AuthenticationPort {
+  if (import.meta.env.MODE === "e2e") return createE2EAuthentication();
   const url = import.meta.env.VITE_SUPABASE_URL?.trim();
   const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();
   const validUrl = (() => {

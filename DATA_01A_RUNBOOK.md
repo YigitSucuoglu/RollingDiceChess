@@ -146,3 +146,5 @@ DATA-01B disposable Auth users from the successful remote run (manual Dashboard/
 
 - Client A: `a7d7faef-5560-4b7c-84eb-c81dd4e181b4`
 - Client B: `8df14129-5435-4cca-85d4-ce6aa61cb215`
+
+Normal `test:e2e` and GitHub Chromium regression are deterministic and must never be treated as remote Supabase verification. They use an E2E-only application adapter and reject every Supabase request. Only an explicit `test:data:remote` invocation may create disposable anonymous users.

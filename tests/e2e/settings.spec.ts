@@ -1,4 +1,4 @@
-import { expect, test } from "./fixtures";
+import { expect, test, useCloudGuestFixture } from "./fixtures";
 
 test("sound and language preferences persist", async ({ page, assertNoErrors }) => {
   await page.goto("/settings");
@@ -20,8 +20,19 @@ test("sound and language preferences persist", async ({ page, assertNoErrors }) 
 });
 
 test("cloud canonical profile cannot be reset from local settings", async ({ page, assertNoErrors }) => {
+  await useCloudGuestFixture(page);
   await page.goto("/settings");
   await expect(page.getByRole("button", { name: /cloud profile reset unavailable/i })).toBeDisabled();
   await expect(page.getByRole("dialog")).toHaveCount(0);
+  assertNoErrors();
+});
+
+test("local fallback profile retains the local reset flow", async ({ page, assertNoErrors }) => {
+  await page.goto("/settings");
+  await page.getByRole("button", { name: /reset profile/i }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: /cancel/i }).click();
+  await expect(dialog).toBeHidden();
   assertNoErrors();
 });

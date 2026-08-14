@@ -120,6 +120,7 @@ assert.ok(appVersion, "Unable to read application version from PROJECT_STATUS.md
 assert.ok(jsContents.includes(`roulettechess@${appVersion}`), `Build release metadata does not contain v${appVersion}`);
 assert.equal(/OBS-01B live verification/.test(jsContents), false, "Observability verification route entered the normal production build");
 assert.equal(relativeBuildFiles.some((file) => /ObservabilityVerification/i.test(file)), false, "Observability verification chunk entered production");
+assert.equal(/Guest1234|roulettechess\.e2e-auth-fixture|E2EAuthentication/.test(jsContents), false, "E2E auth/profile fixture entered the normal production build");
 
 const inspectableExtensions = new Set([".html", ".js", ".css", ".svg", ".json", ".map"]);
 for (const file of buildFiles.filter((candidate) => inspectableExtensions.has(path.extname(candidate).toLowerCase()))) {

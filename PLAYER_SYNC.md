@@ -31,3 +31,12 @@ Cloud profile reset is deferred: the current local reset action is disabled once
 ## DATA-01B deployment
 
 The migration `supabase/migrations/202608140001_data_01b_progression_sync.sql` must be applied once after DATA-01A. In Supabase SQL Editor, confirm project ref `kbtnnknsgobfvyydxbex`, execute the complete migration, then execute `supabase/tests/data_01b_schema_verification.sql`. Only after both succeed run `npm.cmd run test:data:remote`; that harness creates disposable anonymous users and tests own-only sync, replay, malformed payload rejection, direct-write denial, and rating isolation.
+
+## Test layers
+
+- Unit tests use deterministic in-memory ports and never contact Supabase.
+- Normal Playwright E2E builds to `dist-e2e` in Vite's dedicated `e2e` mode. An application-level adapter supplies an explicit cloud Guest (`Guest1234`, fixed UUID, rating 1000) or local fallback. Every normal E2E test fails if any `*.supabase.co` request occurs.
+- `npm.cmd run test:data:remote` is the only automated live Supabase security/integration path. It is opt-in and intentionally excluded from `test`, `validate`, normal Chromium CI, and cross-browser qualification.
+- Manual browser smoke verifies production configuration and real Anonymous Auth when deliberately required.
+
+The E2E adapter selection is compile-time mode gated. Normal production `dist` contains neither the fixture marker/storage key nor impersonation behavior; release smoke enforces this. Vercel continues to use the real configured Supabase composition.
