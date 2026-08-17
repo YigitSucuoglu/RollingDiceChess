@@ -92,7 +92,7 @@ Current operational results:
 - Remote migration: **APPLIED** (developer-confirmed).
 - Catalog verification SQL: **PASS**.
 - Anonymous Sign-Ins: **ENABLED** (developer-confirmed).
-- Manual identity linking: **DISABLED / DEFERRED**.
+- Manual identity linking: **ENABLED** (developer-confirmed for DATA-01C).
 - Two-user own/cross RLS: **PASS** using real publishable-key client sessions.
 - Direct player/progression mutation denial: **PASS**.
 - Rating and cross-player rating mutation denial: **PASS**; rating remained 1000.
@@ -100,4 +100,6 @@ Current operational results:
 - Rename and bootstrap security boundaries: **PASS**.
 - Conflict replacement end-to-end: **DEFERRED**.
 - DATA-01B progression migration: **APPLIED**; catalog verification and extended remote harness: **PASS**.
+- DATA-01C migration: **APPLIED** (developer-confirmed); catalog verification: **PASS**.
+- DATA-01C publishable-key security harness: **PASS** for anonymous completion denial and all existing RLS, mutation, replay, and rating-isolation gates. Positive Google linking/conflict remains a manual OAuth test.
 - Disposable test data: **REMAINS**; Auth user IDs and FK-aware cleanup guidance are recorded in `DATA_01A_RUNBOOK.md`.

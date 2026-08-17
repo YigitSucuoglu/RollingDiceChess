@@ -261,12 +261,17 @@ async function run() {
       requested_resolution: "USE_GUEST_PROFILE",
     });
     assert(Boolean(resolveAsGuest.error), "anonymous Guest executed conflict resolution");
+    const completeAsGuest = await clientA.rpc("complete_linked_guest_upgrade", {
+      handoff_token: intentA.data[0].handoff_token,
+    });
+    assert(Boolean(completeAsGuest.error), "anonymous Guest completed an account upgrade");
     pass("Protected migration RPC caller checks");
 
     console.log("DATA-01A REMOTE SECURITY\n");
     for (const [name, result] of results) console.log(`${name.padEnd(34, ".")} ${result}`);
     console.log("Conflict RPC end-to-end".padEnd(34, ".") + " DEFERRED");
-    console.log("Manual identity linking".padEnd(34, ".") + " DISABLED / DEFERRED");
+    console.log("DATA-01C anonymous completion".padEnd(34, ".") + " PASS (denied)");
+    console.log("Manual identity linking".padEnd(34, ".") + " ENABLED (developer-confirmed)");
     console.log("\nDisposable Auth users (manual Dashboard cleanup required):");
     console.log(`Client A: ${identityA.authUserId}`);
     console.log(`Client B: ${identityB.authUserId}`);

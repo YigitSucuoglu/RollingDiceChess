@@ -24,7 +24,8 @@
 .auth-entry-actions { display: grid; gap: .75rem; margin-top: 2rem; }
 .auth-entry-actions button { border-radius: 2px; cursor: pointer; font: inherit; font-weight: 700; min-height: 3.2rem; padding: .8rem 1rem; }
 .auth-entry-actions button:focus-visible { outline: 3px solid #f1ca78; outline-offset: 3px; }
-.auth-entry-google { background: #f4ead8; border: 1px solid #fff; color: #17130e; }
+.auth-entry-google { align-items: center; background: #f4ead8; border: 1px solid #fff; color: #17130e; display: inline-flex; gap: .7rem; justify-content: center; }
+.google-mark { flex: 0 0 auto; height: 1.1rem; width: 1.1rem; }
 .auth-entry-google:disabled { cursor: wait; opacity: .65; }
 .auth-entry-guest { background: transparent; border: 1px solid rgba(225, 187, 113, .45); color: #e6c98f; }
 .auth-entry-error { color: #e7a28f; margin-top: 1rem; }

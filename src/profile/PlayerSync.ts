@@ -99,6 +99,7 @@ export class PlayerSyncCoordinator {
   private initializing?: Promise<void>;
   private flushing?: Promise<void>;
   private memoryState: PlayerSyncState = EMPTY_STATE;
+  private migrationSuspended = false;
 
   public constructor(local: PlayerProfileRepository, remote: CloudPlayerSyncPort, storage?: SyncStorage) {
     this.local = local;
@@ -114,6 +115,18 @@ export class PlayerSyncCoordinator {
     return this.readState().conflict;
   }
 
+  public isAccountMigrationSuspended(): boolean {
+    return this.migrationSuspended;
+  }
+
+  public suspendForAccountMigration(): void {
+    this.migrationSuspended = true;
+  }
+
+  public resumeAfterAccountMigrationFailure(): void {
+    this.migrationSuspended = false;
+  }
+
   public async handleAuthentication(session: AuthenticationSession): Promise<void> {
     this.connected = session.state.status === "authenticated"
       || (session.state.status === "guest" && session.state.persistence === "cloud");
@@ -125,6 +138,7 @@ export class PlayerSyncCoordinator {
   }
 
   public recordCompletedMatch(before: PlayerProfile, after: PlayerProfile): void {
+    if (this.migrationSuspended) return;
     const state = this.readState();
     if (!state.cloudPlayerId || state.conflict) return;
     const operation = createProgressionOperation(before, after, crypto.randomUUID());
@@ -146,6 +160,38 @@ export class PlayerSyncCoordinator {
       this.flushing = this.flush().finally(() => { this.flushing = undefined; });
     }
     await this.flushing;
+  }
+
+  public async prepareForAccountMigration(): Promise<boolean> {
+    const state = this.readState();
+    if (!this.connected || !state.cloudPlayerId || state.conflict) return false;
+    await this.flushPending();
+    return this.readState().pending.length === 0;
+  }
+
+  public async adoptCanonicalAfterAccountMigration(
+    expectedPlayerId?: string,
+  ): Promise<CloudProfileSnapshot> {
+    const state = this.readState();
+    if (state.pending.length > 0) {
+      throw new Error("Pending progression must be synchronized before account migration.");
+    }
+    this.initializing = undefined;
+    const canonical = await this.remote.loadCurrent();
+    if (expectedPlayerId && canonical.playerId !== expectedPlayerId) {
+      throw new Error("Cloud canonical profile does not match the migration survivor.");
+    }
+    this.writeState({
+      schemaVersion: 1,
+      cloudPlayerId: canonical.playerId,
+      bootstrapSourceProfileId: canonical.profile.playerId,
+      pending: [],
+      conflict: false,
+    });
+    this.local.saveProfile(canonical.profile);
+    this.connected = true;
+    this.migrationSuspended = false;
+    return canonical;
   }
 
   private async initialize(): Promise<void> {

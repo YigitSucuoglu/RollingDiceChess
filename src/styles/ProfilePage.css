@@ -131,7 +131,7 @@
 
 .profile-account h2 { color: #f2e6d1; font-family: Georgia, serif; font-weight: 400; margin-top: .25rem; }
 .profile-account > div > p:last-child { color: #8f8678; font-size: .78rem; margin-top: .3rem; }
-.profile-account button { background: transparent; border: 1px solid rgba(225, 187, 113, .45); color: #e6c98f; cursor: pointer; min-height: 2.75rem; padding: .65rem 1rem; }
+.profile-account button { align-items: center; background: transparent; border: 1px solid rgba(225, 187, 113, .45); color: #e6c98f; cursor: pointer; display: inline-flex; gap: .65rem; justify-content: center; min-height: 2.75rem; padding: .65rem 1rem; }
 .profile-account button:focus-visible { outline: 3px solid #f1ca78; outline-offset: 3px; }
 .profile-account button:disabled { cursor: wait; opacity: .65; }
 
@@ -139,6 +139,20 @@
   .profile-account { align-items: stretch; flex-direction: column; }
   .profile-account button { width: 100%; }
 }
+
+.profile-conflict { background: rgba(19, 18, 16, .94); border: 1px solid rgba(207, 164, 87, .35); margin-bottom: 1rem; padding: clamp(1.25rem, 3vw, 2rem); }
+.profile-conflict header h2 { color: #f2e6d1; font-family: Georgia, serif; font-weight: 400; margin: .35rem 0; }
+.profile-conflict header > p:last-child, .profile-migration-message { color: #b9ad99; line-height: 1.5; }
+.profile-conflict-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 1.25rem; }
+.profile-conflict article { border: 1px solid rgba(225, 187, 113, .25); padding: 1rem; }
+.profile-conflict article h3 { color: #c9b992; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+.profile-conflict article > strong { color: #f2e6d1; display: block; font-family: Georgia, serif; font-size: 1.4rem; margin-top: .45rem; }
+.profile-conflict dl div { display: flex; justify-content: space-between; margin-top: .45rem; }
+.profile-conflict dt { color: #8f8678; }.profile-conflict dd { color: #e6c98f; }
+.profile-conflict button { align-items: center; background: transparent; border: 1px solid rgba(225, 187, 113, .45); color: #e6c98f; cursor: pointer; display: flex; gap: .6rem; justify-content: center; margin-top: 1rem; min-height: 2.75rem; padding: .65rem 1rem; width: 100%; }
+.profile-conflict button:focus-visible { outline: 3px solid #f1ca78; outline-offset: 3px; }
+.profile-migration-message { background: rgba(19, 18, 16, .9); border: 1px solid rgba(207, 164, 87, .25); margin-bottom: 1rem; padding: .8rem 1rem; }
+@media (max-width: 600px) { .profile-conflict-grid { grid-template-columns: 1fr; } }
 
 .profile-identity {
   align-items: center;

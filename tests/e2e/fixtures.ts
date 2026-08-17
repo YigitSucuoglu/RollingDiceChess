@@ -14,6 +14,16 @@ export async function useCloudGuestFixture(page: Page): Promise<void> {
   }, { key: E2E_AUTH_FIXTURE_STORAGE_KEY });
 }
 
+export async function useAccountMigrationFixture(
+  page: Page,
+  fixture: "upgrade" | "conflict-guest" | "conflict-google" | "resolution-failure",
+): Promise<void> {
+  await page.addInitScript(({ key, value }) => window.localStorage.setItem(key, value), {
+    key: E2E_AUTH_FIXTURE_STORAGE_KEY,
+    value: fixture,
+  });
+}
+
 export async function installErrorGuards(page: Page, browserName: string): Promise<QaFailureState> {
   const failures: string[] = [];
   const pendingImages = new Set<Request>();

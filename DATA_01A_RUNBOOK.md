@@ -148,3 +148,16 @@ DATA-01B disposable Auth users from the successful remote run (manual Dashboard/
 - Client B: `8df14129-5435-4cca-85d4-ce6aa61cb215`
 
 Normal `test:e2e` and GitHub Chromium regression are deterministic and must never be treated as remote Supabase verification. They use an E2E-only application adapter and reject every Supabase request. Only an explicit `test:data:remote` invocation may create disposable anonymous users.
+
+## DATA-01C deployment
+
+Manual Linking is enabled (developer-confirmed). Apply `supabase/migrations/202608170001_data_01c_account_migration.sql` in the SQL Editor for project `kbtnnknsgobfvyydxbex`, then run `supabase/tests/data_01c_schema_verification.sql`. The latter is read-only/rollback-based. Do not edit or replay the earlier DATA-01A/DATA-01B migration files.
+
+The remote publishable-key harness may prove anonymous rejection, invalid/expired intent handling, direct-write denial, and existing RLS isolation. A positive Google link/conflict test requires disposable permanent identities; never use a valuable developer account for destructive Keep Guest/Keep Google verification.
+
+DATA-01C deployment result: migration and catalog verification were applied successfully (developer-confirmed). The extended publishable-key harness passed, including anonymous completion denial. Its disposable Auth users were:
+
+- Client A: `e4713210-9174-45ff-9029-c3c31848ff56`
+- Client B: `f883015c-6e6a-4fa8-b360-7fb795b37be6`
+
+These rows remain for manual Dashboard/FK-aware cleanup. Positive Google linking and destructive conflict resolution were not automated.

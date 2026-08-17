@@ -20,6 +20,8 @@ v1.0.0
 ## Completed
 
 ### Quality
+- DATA-01C-HF1 — Fix canonical profile handoff after account conflict resolution
+- DATA-01C — Implement Guest-to-Google identity linking and profile conflict resolution
 - DATA-01B-HF1 — Decouple normal browser E2E from live Supabase Guest creation
 - DATA-01B — Integrate runtime cloud Guest identity and profile synchronization
 - DATA-01A — Apply Supabase player schema and validate RLS/security
@@ -110,6 +112,8 @@ v1.0.0
 ## Current Sprint
 
 Completed:
+- DATA-01C-HF1 — Fix canonical profile handoff after account conflict resolution
+- DATA-01C — Implement Guest-to-Google identity linking and profile conflict resolution
 - DATA-01B-HF1 — Decouple normal browser E2E from live Supabase Guest creation
 - DATA-01B — Integrate runtime cloud Guest identity and profile synchronization
 - DATA-01A — Apply Supabase player schema and validate RLS/security
@@ -153,12 +157,13 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. DATA-01C — Implement Guest-to-Google identity linking and profile conflict resolution
+1. PROFILE-IDENTITY-01 — Add a public 5-character player discriminator
 
 Roadmap:
 - DATA-01A — Apply Supabase player schema and validate RLS/security
 - DATA-01B — Integrate runtime cloud Guest identity and profile synchronization
 - DATA-01C — Implement Guest-to-Google identity linking and profile conflict resolution
+- PROFILE-IDENTITY-01 — Add a public 5-character player discriminator
 - RATING-01 — Design authoritative multiplayer rating
 - LEADERBOARD-01 — Add PlayerId-based multiplayer leaderboard
 
@@ -223,9 +228,11 @@ Performance Backlog:
 - AUTH-01A separates application account identity from the browser-local Player Profile behind a provider-independent AuthenticationPort. The current runtime uses an offline GuestAuthenticationAdapter; provider selection, login UI, remote persistence, and guest-profile merge policy are deferred.
 - AUTH-01B selects Supabase Auth with Google OAuth behind the existing AuthenticationPort, adds an explicit persistent local Guest choice, and keeps PlayerProfile data local and untouched. Authenticated accounts are future leaderboard candidates; guest migration, database profile persistence, and display-name UX remain deferred.
 - AUTH-01B-HF1 distinguishes Firefox navigation-superseded image cancellations from real request failures in QA fixtures while adding explicit fatal handling for HTTP 4xx/5xx responses.
-- AUTH-01C defines stable PlayerId ownership, normalized progression/rating storage, anonymous-Guest target architecture and transactional replacement-based conflict resolution. DATA-01A applied the schema, passed catalog assertions and proved own/cross RLS isolation plus player, progression, rating and ownership mutation denial through two real publishable-key anonymous sessions. Anonymous Sign-Ins are enabled; manual identity linking and runtime cloud synchronization remain deferred.
-- DATA-01B creates/restores cloud-backed Guests when configured, retains local Guest fallback, treats cloud as canonical after safe bootstrap, queues idempotent offline match operations, and blocks unsafe cloud-profile reset. Its separate migration, catalog verification, two-client RLS/replay/rating harness, and Chromium runtime suite passed. Manual identity linking remains disabled and DATA-01C owns Guest-to-Google conflict resolution.
+- AUTH-01C defines stable PlayerId ownership, normalized progression/rating storage, anonymous-Guest target architecture and transactional replacement-based conflict resolution. DATA-01A applied the schema, passed catalog assertions and proved own/cross RLS isolation plus player, progression, rating and ownership mutation denial through two real publishable-key anonymous sessions. Anonymous Sign-Ins are enabled; the formerly deferred runtime cloud and identity-linking work is completed by DATA-01B/DATA-01C.
+- DATA-01B creates/restores cloud-backed Guests when configured, retains local Guest fallback, treats cloud as canonical after safe bootstrap, queues idempotent offline match operations, and blocks unsafe cloud-profile reset. Its separate migration, catalog verification, two-client RLS/replay/rating harness, and Chromium runtime suite passed. Manual Linking is now enabled and DATA-01C owns the completed Guest-to-Google conflict flow.
 - DATA-01B-HF1 keeps normal Chromium E2E self-contained through compile-time E2E cloud/local fixtures and a strict Supabase request guard. Live Supabase validation remains opt-in through `test:data:remote`; production and Vercel retain the real DATA-01B adapters.
+- DATA-01C connects a cloud Guest to Google through Supabase Manual Linking while preserving the Guest PlayerId when no conflict exists. Existing Google progression triggers an explicit Keep Guest/Keep Google choice; profiles are never arithmetically merged, the losing PlayerId is retired/replaced, and the surviving rating remains unchanged. Migration intents are expiry-aware, hash-backed, bound to Guest ownership and the permanent account, and same-decision replay is idempotent while contradictory replay is rejected. The migration and catalog verification were applied successfully; the publishable-key remote harness passed its safe automated gates. Real Google OAuth and destructive conflict choices remain explicitly manual verification.
+- DATA-01C-HF1 replaces the stale post-conflict reinitialization path with an explicit server-confirmed canonical profile adoption. The survivor PlayerId and cloud snapshot now replace sync state and local cache before progression resumes; unresolved conflicts show a migration-pending account state without normal Sign Out/Play actions and remain safely resumable without choosing or retiring either profile.
 
 ### Versioning Policy
 

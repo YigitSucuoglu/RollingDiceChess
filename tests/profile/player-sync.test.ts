@@ -104,4 +104,110 @@ describe("PlayerSyncCoordinator", () => {
     expect(operation?.payload).toMatchObject({ xpDelta: 75, gamesDelta: 1, lossesDelta: 1 });
     expect(JSON.stringify(operation)).not.toMatch(/rating|playerId|account|token/i);
   });
+
+  it("flushes every pending operation before account migration and resets only after empty", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const canonical = cloud();
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => canonical), bootstrap: vi.fn(),
+      applyOperation: vi.fn(async () => canonical),
+    };
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+    await sync.handleAuthentication(cloudGuest());
+    const before = repository.getProfile();
+    const after = structuredClone(before);
+    after.totalXp += 50;
+    after.statistics.gamesPlayed++;
+    after.statistics.wins++;
+    sync.recordCompletedMatch(before, after);
+    expect(await sync.prepareForAccountMigration()).toBe(true);
+    expect(JSON.parse(localStorage.getItem(PLAYER_SYNC_STORAGE_KEY)!).pending).toHaveLength(0);
+    sync.suspendForAccountMigration();
+    await sync.adoptCanonicalAfterAccountMigration(canonical.playerId);
+    expect(sync.isCloudCanonical()).toBe(true);
+  });
+
+  for (const scenario of [
+    { name: "Keep Google", survivorId: "google-b", survivorXp: 70 },
+    { name: "Keep Guest", survivorId: "guest-a", survivorXp: 50 },
+  ]) {
+    it(`adopts the ${scenario.name} survivor before the next progression operation`, async () => {
+      const localStorage = storage();
+      const repository = new LocalStoragePlayerProfileRepository(localStorage);
+      const guest = meaningful(createDefaultPlayerProfile());
+      guest.playerId = "guest-a";
+      guest.totalXp = 50;
+      repository.saveProfile(guest);
+      localStorage.setItem(PLAYER_SYNC_STORAGE_KEY, JSON.stringify({
+        schemaVersion: 1,
+        cloudPlayerId: "guest-a",
+        bootstrapSourceProfileId: guest.playerId,
+        pending: [],
+        conflict: false,
+      }));
+      let active = cloud(structuredClone(guest));
+      active = { ...active, playerId: "guest-a" };
+      const appliedTo: string[] = [];
+      const remote: CloudPlayerSyncPort = {
+        loadCurrent: vi.fn(async () => structuredClone(active)),
+        bootstrap: vi.fn(),
+        applyOperation: vi.fn(async (operation) => {
+          appliedTo.push(active.playerId);
+          const next = structuredClone(active);
+          next.profile.totalXp += Number(operation.payload.xpDelta);
+          active = next;
+          return structuredClone(active);
+        }),
+      };
+      const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+      await sync.handleAuthentication(cloudGuest());
+      expect(await sync.prepareForAccountMigration()).toBe(true);
+      sync.suspendForAccountMigration();
+
+      const survivor = meaningful(createDefaultPlayerProfile());
+      survivor.playerId = scenario.survivorId;
+      survivor.displayName = scenario.name === "Keep Google" ? "Player" : "Guest1234";
+      survivor.totalXp = scenario.survivorXp;
+      active = { ...cloud(survivor), playerId: scenario.survivorId };
+      await sync.adoptCanonicalAfterAccountMigration(scenario.survivorId);
+
+      expect(repository.getProfile().playerId).toBe(scenario.survivorId);
+      expect(repository.getProfile().totalXp).toBe(scenario.survivorXp);
+      const before = repository.getProfile();
+      const after = structuredClone(before);
+      after.totalXp += 25;
+      after.statistics.gamesPlayed++;
+      after.statistics.wins++;
+      sync.recordCompletedMatch(before, after);
+      await vi.waitFor(() => expect(remote.applyOperation).toHaveBeenCalledOnce());
+      expect(appliedTo).toEqual([scenario.survivorId]);
+      expect(repository.getProfile().totalXp).toBe(scenario.survivorXp + 25);
+
+      const refreshedRepository = new LocalStoragePlayerProfileRepository(localStorage);
+      const refreshed = new PlayerSyncCoordinator(refreshedRepository, remote, localStorage);
+      await refreshed.handleAuthentication(cloudGuest());
+      expect(refreshedRepository.getProfile().playerId).toBe(scenario.survivorId);
+      expect(refreshedRepository.getProfile().totalXp).toBe(scenario.survivorXp + 25);
+    });
+  }
+
+  it("does not queue progression while account ownership is unresolved", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => cloud()), bootstrap: vi.fn(), applyOperation: vi.fn(),
+    };
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+    await sync.handleAuthentication(cloudGuest());
+    sync.suspendForAccountMigration();
+    const before = repository.getProfile();
+    const after = structuredClone(before);
+    after.totalXp += 25;
+    after.statistics.gamesPlayed++;
+    after.statistics.wins++;
+    sync.recordCompletedMatch(before, after);
+    expect(remote.applyOperation).not.toHaveBeenCalled();
+    expect(JSON.parse(localStorage.getItem(PLAYER_SYNC_STORAGE_KEY)!).pending).toHaveLength(0);
+  });
 });

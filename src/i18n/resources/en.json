@@ -36,7 +36,31 @@
     "cloudGuestWarning": "Guest progress may become inaccessible if browser/site data is cleared. Connect Google later to protect your account.",
     "localGuestWarning": "Cloud is temporarily unavailable. You can keep playing locally and retry later.",
     "profileSyncConflict": "Local and cloud progress both exist. Both are preserved; resolution is required before synchronization.",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "connectGoogle": "Connect Google",
+    "migrationEyebrow": "Account protection",
+    "chooseProgress": "Choose which progress to keep",
+    "noMergeWarning": "Only the selected progression will remain active. The two profiles will not be combined.",
+    "guestProgress": "Guest progress",
+    "googleProgress": "Google progress",
+    "useGuestProgress": "Use Guest Progress",
+    "useGoogleProgress": "Use Google Progress",
+    "level": "Level",
+    "games": "Games",
+    "rating": "Rating",
+    "migrationComplete": "Google is connected. Your selected progression is protected.",
+    "googleSignInSuccessful": "Google sign-in successful",
+    "migrationPendingDescription": "Choose which progress to keep to finish connecting your account.",
+    "migrationErrors": {
+      "conflict-inspection-failed": "We couldn't compare the profiles. Please retry.",
+      "intent-expired": "This connection request expired. Start again.",
+      "local-guest": "Connect to the cloud before linking Google.",
+      "offline": "Google connection requires an internet connection.",
+      "pending-progression": "Finish synchronizing your Guest progress before connecting Google.",
+      "provider-failed": "Google connection was cancelled or could not be completed.",
+      "resolution-failed": "The profile choice could not be confirmed. Retry safely.",
+      "temporarily-unavailable": "Account connection is temporarily unavailable. Your progress is safe."
+    }
   },
   "setup": {
     "title": "Play Setup", "timeControl": "Time Control", "playAs": "Play As", "opponent": "Opponent", "bot": "Bot", "local": "Local", "online": "Online", "difficulty": "Bot Difficulty", "pieceSet": "Piece Set", "boardTheme": "Board Theme",

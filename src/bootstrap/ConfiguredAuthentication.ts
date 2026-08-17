@@ -10,6 +10,7 @@ import type {
   AuthenticationStateListener,
 } from "../application/auth/AuthenticationPort";
 import playerProfileService from "../profile/PlayerProfileService";
+import accountMigrationService from "../application/accounts/AccountMigrationService";
 
 interface ConfiguredAuthenticationOptions {
   readonly origin: string;
@@ -50,7 +51,8 @@ export default class ConfiguredAuthentication implements AuthenticationPort {
   public async restoreSession(): Promise<AuthenticationSession> {
     const delegate = await this.getDelegate();
     this.session = await delegate.restoreSession();
-    await playerProfileService.handleAuthenticationSession(this.session);
+    const migrationHandled = await accountMigrationService.restoreContinuation();
+    if (!migrationHandled) await playerProfileService.handleAuthenticationSession(this.session);
     this.publish();
     return this.getSession();
   }
@@ -84,6 +86,7 @@ export default class ConfiguredAuthentication implements AuthenticationPort {
     this.delegateUnsubscribe?.();
     if (this.onlineListenerAttached) window.removeEventListener("online", this.handleOnline);
     this.delegate?.dispose();
+    accountMigrationService.dispose();
     this.listeners.clear();
   }
 
@@ -93,11 +96,15 @@ export default class ConfiguredAuthentication implements AuthenticationPort {
       import("../infrastructure/auth/SupabaseAuthenticationAdapter"),
       import("../infrastructure/auth/createSupabaseAuthClient"),
       import("../infrastructure/player/SupabaseCloudPlayerSync"),
-    ]).then(([adapterModule, clientModule, playerModule]) => {
+      import("../infrastructure/auth/SupabaseAccountMigrationAdapter"),
+    ]).then(([adapterModule, clientModule, playerModule, migrationModule]) => {
       const client = clientModule.createSupabaseAuthClient(this.options.url, this.options.publishableKey);
       playerProfileService.configureCloudSync(
         new playerModule.SupabaseCloudPlayerSync(client),
         this.options.storage,
+      );
+      accountMigrationService.configure(
+        new migrationModule.SupabaseAccountMigrationAdapter(client, this.options.origin),
       );
       const delegate = new adapterModule.SupabaseAuthenticationAdapter(
         client,
@@ -106,7 +113,9 @@ export default class ConfiguredAuthentication implements AuthenticationPort {
       this.delegate = delegate;
       this.delegateUnsubscribe = delegate.subscribe((session) => {
         this.session = session;
-        void playerProfileService.handleAuthenticationSession(session);
+        if (accountMigrationService.getState().status === "idle") {
+          void playerProfileService.handleAuthenticationSession(session);
+        }
         this.publish();
       });
       if (!this.onlineListenerAttached) {

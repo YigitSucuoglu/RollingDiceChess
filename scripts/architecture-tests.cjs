@@ -35,6 +35,7 @@ const authContractFiles = [
   "src/application/auth/AuthenticationContracts.ts",
   "src/application/auth/AuthenticationPort.ts",
   "src/application/accounts/ProfileOwnership.ts",
+  "src/application/accounts/AccountMigration.ts",
   "src/application/players/PlayerContracts.ts",
   "src/application/players/PlayerProfilePort.ts",
 ];

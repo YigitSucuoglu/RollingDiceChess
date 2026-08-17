@@ -36,7 +36,31 @@
     "cloudGuestWarning": "Tarayıcı/site verileri silinirse Misafir ilerlemesine erişilemeyebilir. Hesabını korumak için daha sonra Google'a bağlan.",
     "localGuestWarning": "Bulut geçici olarak kullanılamıyor. Yerel olarak oynamaya devam edip sonra tekrar deneyebilirsin.",
     "profileSyncConflict": "Yerel ve bulut ilerlemelerinin ikisi de mevcut. İkisi de korundu; eşitleme öncesi çözüm gerekiyor.",
-    "signOut": "Çıkış Yap"
+    "signOut": "Çıkış Yap",
+    "connectGoogle": "Google'a Bağlan",
+    "migrationEyebrow": "Hesap koruması",
+    "chooseProgress": "Korunacak ilerlemeyi seç",
+    "noMergeWarning": "Yalnızca seçilen ilerleme etkin kalır. İki profil birleştirilmez.",
+    "guestProgress": "Misafir ilerlemesi",
+    "googleProgress": "Google ilerlemesi",
+    "useGuestProgress": "Misafir İlerlemesini Kullan",
+    "useGoogleProgress": "Google İlerlemesini Kullan",
+    "level": "Seviye",
+    "games": "Oyun",
+    "rating": "Derece",
+    "migrationComplete": "Google bağlandı. Seçilen ilerlemen koruma altında.",
+    "googleSignInSuccessful": "Google girişi başarılı",
+    "migrationPendingDescription": "Hesabınızı bağlamayı tamamlamak için hangi ilerlemeyi koruyacağınızı seçin.",
+    "migrationErrors": {
+      "conflict-inspection-failed": "Profiller karşılaştırılamadı. Lütfen tekrar dene.",
+      "intent-expired": "Bu bağlantı isteğinin süresi doldu. Yeniden başlat.",
+      "local-guest": "Google'a bağlanmadan önce bulut bağlantısını kur.",
+      "offline": "Google bağlantısı için internet gerekir.",
+      "pending-progression": "Google'a bağlanmadan önce Misafir ilerlemesinin eşitlenmesini tamamla.",
+      "provider-failed": "Google bağlantısı iptal edildi veya tamamlanamadı.",
+      "resolution-failed": "Profil seçimi onaylanamadı. Güvenle tekrar deneyebilirsin.",
+      "temporarily-unavailable": "Hesap bağlantısı geçici olarak kullanılamıyor. İlerlemen güvende."
+    }
   },
   "setup": {
     "title": "Oyun Ayarları", "timeControl": "Süre Kontrolü", "playAs": "Tarafın", "opponent": "Rakip", "bot": "Bot", "local": "Yerel", "online": "Çevrimiçi", "difficulty": "Bot Zorluğu", "pieceSet": "Taş Seti", "boardTheme": "Tahta Teması",

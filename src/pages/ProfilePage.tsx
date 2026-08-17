@@ -6,6 +6,9 @@ import playerProfileService, {
 import type { AppLanguage } from "../settings/AppSettings";
 import "../styles/ProfilePage.css";
 import { useAuthentication } from "../auth/authentication-context";
+import accountMigrationService from "../application/accounts/AccountMigrationService";
+import type { AccountMigrationState, ProfileConflictResolution } from "../application/accounts/AccountMigration";
+import GoogleMark from "../components/GoogleMark/GoogleMark";
 
 const ACHIEVEMENT_PLACEHOLDERS = [
   "firstVictory", "hundredGames", "captureHundredKings", "tripleQueenRoll",
@@ -37,15 +40,31 @@ function ProfilePage() {
   const { authentication, session } = useAuthentication();
   const profile = playerProfileService.getViewModel(language);
   const [authPending, setAuthPending] = useState(false);
+  const [migration, setMigration] = useState<AccountMigrationState>(
+    accountMigrationService.getState(),
+  );
   const authenticated = session.state.status === "authenticated";
+  const migrationUnresolved = migration.status === "profile-conflict"
+    || (migration.status === "pending" && authenticated);
 
   const handleAuthentication = async () => {
     if (authPending) return;
     setAuthPending(true);
     if (authenticated) await authentication.signOut();
-    else await authentication.beginAuthentication();
+    else if (session.state.status === "guest" && session.state.persistence === "cloud") {
+      await accountMigrationService.startGuestUpgrade();
+    } else await authentication.beginAuthentication();
     setAuthPending(false);
   };
+
+  const resolveConflict = async (resolution: ProfileConflictResolution) => {
+    if (authPending) return;
+    setAuthPending(true);
+    await accountMigrationService.resolveConflict(resolution);
+    setAuthPending(false);
+  };
+
+  useEffect(() => accountMigrationService.subscribe(setMigration), []);
 
   useEffect(() => {
     const previousTitle = document.title;
@@ -82,10 +101,13 @@ function ProfilePage() {
           <div>
             <p className="profile-overline">{t("auth.account")}</p>
             <h2 id="profile-account-title">
-              {authenticated ? t("auth.signedInWithGoogle") : t("auth.guest")}
+              {migrationUnresolved
+                ? t("auth.googleSignInSuccessful")
+                : authenticated ? t("auth.signedInWithGoogle") : t("auth.guest")}
             </h2>
-            <p>{authenticated
-              ? t("auth.cloudProfile")
+            <p>{migrationUnresolved
+              ? t("auth.migrationPendingDescription")
+              : authenticated ? t("auth.cloudProfile")
               : session.state.status === "guest" && session.state.persistence === "cloud"
                 ? t("auth.cloudGuestWarning")
                 : t("auth.localGuestWarning")}</p>
@@ -93,21 +115,58 @@ function ProfilePage() {
               <p role="status">{t("auth.profileSyncConflict")}</p>
             )}
           </div>
-          {(authenticated || authentication.isAuthenticationAvailable()) && (
+          {!migrationUnresolved && (authenticated || authentication.isAuthenticationAvailable()) && (
             <button
               aria-busy={authPending}
               disabled={authPending}
               onClick={() => void handleAuthentication()}
               type="button"
             >
-              {authPending
+              {!authenticated && <GoogleMark />}
+              <span>{authPending
                 ? t("auth.connecting")
                 : authenticated
                   ? t("auth.signOut")
-                  : t("auth.continueWithGoogle")}
+                  : session.state.status === "guest" && session.state.persistence === "cloud"
+                    ? t("auth.connectGoogle")
+                    : t("auth.continueWithGoogle")}</span>
             </button>
           )}
         </section>
+
+        {migration.status === "profile-conflict" && (
+          <section aria-labelledby="profile-conflict-title" className="profile-conflict">
+            <header>
+              <p className="profile-overline">{t("auth.migrationEyebrow")}</p>
+              <h2 id="profile-conflict-title">{t("auth.chooseProgress")}</h2>
+              <p>{t("auth.noMergeWarning")}</p>
+            </header>
+            <div className="profile-conflict-grid">
+              {([
+                ["guest", migration.guest, "USE_GUEST_PROFILE"],
+                ["google", migration.google, "USE_GOOGLE_PROFILE"],
+              ] as const).map(([kind, summary, resolution]) => (
+                <article key={kind}>
+                  <h3>{t(`auth.${kind}Progress`)}</h3>
+                  <strong>{summary.displayName}</strong>
+                  <dl>
+                    <div><dt>{t("auth.level")}</dt><dd>{summary.level}</dd></div>
+                    <div><dt>{t("auth.games")}</dt><dd>{summary.gamesPlayed}</dd></div>
+                    <div><dt>XP</dt><dd>{summary.totalXp}</dd></div>
+                    <div><dt>{t("auth.rating")}</dt><dd>{summary.multiplayerRating}</dd></div>
+                  </dl>
+                  <button disabled={authPending} onClick={() => void resolveConflict(resolution)} type="button">
+                    {kind === "google" && <GoogleMark />}
+                    <span>{t(`auth.use${kind === "guest" ? "Guest" : "Google"}Progress`)}</span>
+                  </button>
+                </article>
+              ))}
+            </div>
+            {migration.failureCode && <p className="profile-migration-message" role="alert">{t(`auth.migrationErrors.${migration.failureCode}`)}</p>}
+          </section>
+        )}
+        {migration.status === "failed" && <p className="profile-migration-message" role="alert">{t(`auth.migrationErrors.${migration.failureCode}`)}</p>}
+        {migration.status === "completed" && <p className="profile-migration-message" role="status">{t("auth.migrationComplete")}</p>}
 
         <section
           aria-labelledby="player-identity-title"
@@ -235,10 +294,10 @@ function ProfilePage() {
 
         <footer className="profile-footer">
           <p>{t("profile.localDataNote")}</p>
-          <Link to="/play">
+          {!migrationUnresolved && <Link to="/play">
             {t("common.actions.play")}
             <span aria-hidden="true">→</span>
-          </Link>
+          </Link>}
         </footer>
       </div>
     </main>

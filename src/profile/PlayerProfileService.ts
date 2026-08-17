@@ -160,6 +160,26 @@ export class PlayerProfileService {
     return this.sync?.hasConflict() ?? false;
   }
 
+  public async prepareForAccountMigration(): Promise<boolean> {
+    return this.sync?.prepareForAccountMigration() ?? false;
+  }
+
+  public suspendForAccountMigration(): void {
+    this.sync?.suspendForAccountMigration();
+  }
+
+  public isAccountMigrationSuspended(): boolean {
+    return this.sync?.isAccountMigrationSuspended() ?? false;
+  }
+
+  public resumeAfterAccountMigrationFailure(): void {
+    this.sync?.resumeAfterAccountMigrationFailure();
+  }
+
+  public async adoptCanonicalAfterAccountMigration(expectedPlayerId?: string): Promise<void> {
+    await this.sync?.adoptCanonicalAfterAccountMigration(expectedPlayerId);
+  }
+
   public resetProfile(): PlayerProfileViewModel {
     if (this.isCloudProfileEstablished()) return this.getViewModel();
     this.repository.resetProfile();
@@ -290,6 +310,7 @@ export class PlayerProfileService {
     event: GameCompletedEvent,
     completedAtMs: number = Date.now()
   ): XpRewardBreakdown | null {
+    if (this.isAccountMigrationSuspended()) return null;
     if (session.completionResult) {
       return null;
     }

@@ -10,7 +10,7 @@ After a cloud profile is established, cloud progression is canonical. `LocalStor
 
 A profile is meaningful when bootstrap metadata exists or XP, game/roll totals, or piece counters are non-zero. An empty cloud profile plus meaningful local profile calls `bootstrap_local_profile` once. The server ledger makes retries idempotent and rating is untouched.
 
-If both an unknown cloud identity and the local cache contain meaningful progression, synchronization enters an explicit conflict state. Neither side is overwritten or arithmetically merged. DATA-01C owns Guest-to-Google linking and conflict resolution.
+If both an unknown cloud identity and the local cache contain meaningful progression, synchronization enters an explicit conflict state. Neither side is overwritten or arithmetically merged. This conflict must be cleared before DATA-01C starts. Account migration first flushes the pending operation queue and refuses to continue if any operation remains. After the server commits a survivor, the coordinator explicitly loads that current profile, verifies the survivor PlayerId, replaces the sync identity/cache with its snapshot, and only then resumes progression production. It does not route this trusted handoff through generic local/cloud conflict discovery.
 
 ## Casual progression operations
 

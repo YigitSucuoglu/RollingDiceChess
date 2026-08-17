@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { useAuthentication } from "./authentication-context";
 import "../styles/AuthenticationEntry.css";
+import GoogleMark from "../components/GoogleMark/GoogleMark";
 
 export default function AuthenticationEntry() {
   const { t } = useTranslation();
@@ -39,7 +40,8 @@ export default function AuthenticationEntry() {
             onClick={() => void signIn()}
             type="button"
           >
-            {pending ? t("auth.connecting") : t("auth.continueWithGoogle")}
+            <GoogleMark />
+            <span>{pending ? t("auth.connecting") : t("auth.continueWithGoogle")}</span>
           </button>
           <button
             aria-busy={pending}
