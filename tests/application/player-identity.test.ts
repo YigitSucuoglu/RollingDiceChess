@@ -44,6 +44,8 @@ describe("cloud player identity model", () => {
     expect(() => normalizeAccountDisplayName("Guest1842")).toThrow(/reserved/i);
     expect(() => normalizeAccountDisplayName("gUeSt1842")).toThrow(/reserved/i);
     expect(normalizeAccountDisplayName("Yigit")).toBe("Yigit");
+    expect([normalizeAccountDisplayName("Yigit"), normalizeAccountDisplayName("Yigit")])
+      .toEqual(["Yigit", "Yigit"]);
   });
 
   it("uses Google profile by retiring guest without arithmetic merge", () => {

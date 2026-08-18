@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import playerProfileService, {
@@ -9,6 +9,7 @@ import { useAuthentication } from "../auth/authentication-context";
 import accountMigrationService from "../application/accounts/AccountMigrationService";
 import type { AccountMigrationState, ProfileConflictResolution } from "../application/accounts/AccountMigration";
 import GoogleMark from "../components/GoogleMark/GoogleMark";
+import { UsernameValidationError } from "../application/players/PlayerContracts";
 
 const ACHIEVEMENT_PLACEHOLDERS = [
   "firstVictory", "hundredGames", "captureHundredKings", "tripleQueenRoll",
@@ -40,6 +41,10 @@ function ProfilePage() {
   const { authentication, session } = useAuthentication();
   const profile = playerProfileService.getViewModel(language);
   const [authPending, setAuthPending] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [renamePending, setRenamePending] = useState(false);
+  const [renameValue, setRenameValue] = useState(profile.displayName);
+  const [renameError, setRenameError] = useState<"invalid" | "reserved-guest" | "unavailable" | null>(null);
   const [migration, setMigration] = useState<AccountMigrationState>(
     accountMigrationService.getState(),
   );
@@ -62,6 +67,21 @@ function ProfilePage() {
     setAuthPending(true);
     await accountMigrationService.resolveConflict(resolution);
     setAuthPending(false);
+  };
+
+  const submitRename = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (renamePending) return;
+    setRenamePending(true);
+    setRenameError(null);
+    try {
+      await playerProfileService.renameCurrentAccount(renameValue);
+      setRenaming(false);
+    } catch (caught) {
+      setRenameError(caught instanceof UsernameValidationError ? caught.code : "unavailable");
+    } finally {
+      setRenamePending(false);
+    }
   };
 
   useEffect(() => accountMigrationService.subscribe(setMigration), []);
@@ -181,6 +201,38 @@ function ProfilePage() {
             <h2 id="player-identity-title">{profile.displayName}</h2>
             {profile.publicDiscriminator && (
               <p className="profile-public-discriminator">#{profile.publicDiscriminator}</p>
+            )}
+            {authenticated && !migrationUnresolved && (renaming ? (
+              <form className="profile-rename-form" onSubmit={(event) => void submitRename(event)}>
+                <label htmlFor="profile-username">{t("username.label")}</label>
+                <input
+                  aria-describedby={renameError ? "profile-rename-error" : undefined}
+                  aria-invalid={Boolean(renameError)}
+                  autoComplete="nickname"
+                  disabled={renamePending}
+                  id="profile-username"
+                  maxLength={24}
+                  onChange={(event) => setRenameValue(event.target.value)}
+                  value={renameValue}
+                />
+                {renameError && <p id="profile-rename-error" role="alert">{t(`username.errors.${renameError}`)}</p>}
+                <div>
+                  <button disabled={renamePending} type="submit">{renamePending ? t("username.saving") : t("username.save")}</button>
+                  <button disabled={renamePending} onClick={() => {
+                    setRenaming(false);
+                    setRenameError(null);
+                    setRenameValue(profile.displayName);
+                  }} type="button">{t("username.cancel")}</button>
+                </div>
+              </form>
+            ) : (
+              <button className="profile-rename-trigger" onClick={() => {
+                setRenameValue(profile.displayName);
+                setRenaming(true);
+              }} type="button">{t("username.change")}</button>
+            ))}
+            {!authenticated && (
+              <p className="profile-rename-hint">{t("username.guestHint")}</p>
             )}
             <div className="profile-rank">
               <span>{t("common.level", { level: progression.level })}</span>

@@ -2,6 +2,8 @@
 
 Cloud snapshots include the server-issued public discriminator and username-onboarding state. The local repository caches but never generates them. Local-only fallback profiles keep `null`; sync, canonical handoff, refresh, and offline reload preserve server values.
 
+Authenticated routing waits for a fresh canonical profile decision. A required username gate is therefore rendered before Home, Profile, Setup or Game can appear. Authorized onboarding/rename calls the caller-bound RPC and then reloads the canonical snapshot; only that snapshot replaces the local cache and notifies presentation. A failed read leaves the existing cache/progression intact and offers retry/sign-out rather than treating onboarding as complete.
+
 ## Runtime authority
 
 Configured `Play as Guest` uses Supabase Anonymous Auth. Supabase restores its managed session after reload, so the same Auth user resolves through `player_auth_owners` to the same UUID PlayerId. When configuration or network access is unavailable, the product remains usable through a clearly tagged local Guest fallback.
@@ -40,5 +42,6 @@ The migration `supabase/migrations/202608140001_data_01b_progression_sync.sql` m
 - Normal Playwright E2E builds to `dist-e2e` in Vite's dedicated `e2e` mode. An application-level adapter supplies an explicit cloud Guest (`Guest1234`, fixed UUID, rating 1000) or local fallback. Every normal E2E test fails if any `*.supabase.co` request occurs.
 - `npm.cmd run test:data:remote` is the only automated live Supabase security/integration path. It is opt-in and intentionally excluded from `test`, `validate`, normal Chromium CI, and cross-browser qualification.
 - Manual browser smoke verifies production configuration and real Anonymous Auth when deliberately required.
+- Normal E2E also provides deterministic account-onboarding-required and account-onboarding-complete snapshots. Rename persistence is fixture-local and the network guard continues to reject every live Supabase request.
 
 The E2E adapter selection is compile-time mode gated. Normal production `dist` contains neither the fixture marker/storage key nor impersonation behavior; release smoke enforces this. Vercel continues to use the real configured Supabase composition.

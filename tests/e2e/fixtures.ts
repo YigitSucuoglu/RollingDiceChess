@@ -14,6 +14,16 @@ export async function useCloudGuestFixture(page: Page): Promise<void> {
   }, { key: E2E_AUTH_FIXTURE_STORAGE_KEY });
 }
 
+export async function useAuthenticationFixture(
+  page: Page,
+  fixture: "account" | "onboarding",
+): Promise<void> {
+  await page.addInitScript(({ key, value }) => window.localStorage.setItem(key, value), {
+    key: E2E_AUTH_FIXTURE_STORAGE_KEY,
+    value: fixture,
+  });
+}
+
 export async function useAccountMigrationFixture(
   page: Page,
   fixture: "upgrade" | "conflict-guest" | "conflict-google" | "resolution-failure",

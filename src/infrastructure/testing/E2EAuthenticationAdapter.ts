@@ -22,6 +22,7 @@ export const E2E_AUTH_FIXTURE_STORAGE_KEY = "roulettechess.e2e-auth-fixture.v1";
 const FIXTURE_PLAYER_ID = "12345678-1234-4123-8123-123456789012";
 const FIXTURE_GOOGLE_PLAYER_ID = "87654321-4321-4321-8321-210987654321";
 const E2E_MIGRATION_RESULT_KEY = "roulettechess.e2e-migration-result.v1";
+const E2E_PROFILE_OVERRIDE_KEY = "roulettechess.e2e-profile-override.v1";
 
 function readMigrationResult(): "google" | "guest" | null {
   try {
@@ -37,10 +38,11 @@ function writeMigrationResult(value: "google" | "guest"): void {
   catch { /* Storage-denial E2E deliberately keeps the result runtime-only. */ }
 }
 
-type E2EAuthFixture = "cloud" | "local" | "upgrade" | "conflict-guest" | "conflict-google" | "resolution-failure";
+type E2EAuthFixture = "account" | "cloud" | "local" | "onboarding" | "upgrade" | "conflict-guest" | "conflict-google" | "resolution-failure";
 
 export function resolveE2EAuthFixture(value: string | null): E2EAuthFixture {
-  return value === "cloud" || value === "upgrade" || value === "conflict-guest"
+  return value === "account" || value === "cloud" || value === "onboarding"
+    || value === "upgrade" || value === "conflict-guest"
     || value === "conflict-google" || value === "resolution-failure" ? value : "local";
 }
 
@@ -77,11 +79,24 @@ export function createE2ECloudSnapshot(
 class E2ECloudPlayerSync implements CloudPlayerSyncPort {
   private snapshot: CloudProfileSnapshot;
 
-  public constructor() {
+  public constructor(fixture: E2EAuthFixture) {
     const result = readMigrationResult();
-    this.snapshot = result === "google"
+    this.snapshot = fixture === "onboarding"
+      ? createE2ECloudSnapshot(FIXTURE_PLAYER_ID, "Guest1234", 50, true)
+      : fixture === "account"
+        ? createE2ECloudSnapshot(FIXTURE_GOOGLE_PLAYER_ID, "Yigit", 70)
+        : result === "google"
       ? createE2ECloudSnapshot(FIXTURE_GOOGLE_PLAYER_ID, "Player", 70)
       : createE2ECloudSnapshot(FIXTURE_PLAYER_ID, "Guest1234", 50, result === "guest");
+    try {
+      const override = JSON.parse(window.localStorage.getItem(E2E_PROFILE_OVERRIDE_KEY) ?? "null") as {
+        displayName?: unknown; playerId?: unknown; usernameOnboardingRequired?: unknown;
+      } | null;
+      if (override?.playerId === this.snapshot.playerId && typeof override.displayName === "string") {
+        this.snapshot.profile.displayName = override.displayName;
+        this.snapshot.profile.usernameOnboardingRequired = override.usernameOnboardingRequired === true;
+      }
+    } catch { /* Invalid fixture state is ignored. */ }
   }
 
   public select(
@@ -109,14 +124,30 @@ class E2ECloudPlayerSync implements CloudPlayerSyncPort {
   public async applyOperation(): Promise<CloudProfileSnapshot> {
     return this.loadCurrent();
   }
+
+  public async renameCurrentPlayer(displayName: string): Promise<CloudProfileSnapshot> {
+    this.snapshot.profile.displayName = displayName;
+    this.snapshot.profile.usernameOnboardingRequired = false;
+    try {
+      window.localStorage.setItem(E2E_PROFILE_OVERRIDE_KEY, JSON.stringify({
+        displayName,
+        playerId: this.snapshot.playerId,
+        usernameOnboardingRequired: false,
+      }));
+    } catch { /* The in-memory fixture remains canonical for this runtime. */ }
+    return this.loadCurrent();
+  }
 }
 
 class E2EAuthenticationAdapter implements AuthenticationPort {
   private readonly listeners = new Set<AuthenticationStateListener>();
   private session: AuthenticationSession;
+  private readonly fixture: E2EAuthFixture;
 
   public constructor(fixture: E2EAuthFixture) {
-    const migrationResolved = readMigrationResult() !== null;
+    this.fixture = fixture;
+    const migrationResolved = readMigrationResult() !== null
+      || fixture === "account" || fixture === "onboarding";
     this.session = migrationResolved ? {
       schemaVersion: AUTH_SESSION_SCHEMA_VERSION,
       state: { status: "authenticated", account: {
@@ -131,7 +162,7 @@ class E2EAuthenticationAdapter implements AuthenticationPort {
       },
     };
     if (fixture !== "local") {
-      const cloudSync = new E2ECloudPlayerSync();
+      const cloudSync = new E2ECloudPlayerSync(fixture);
       playerProfileService.configureCloudSync(cloudSync, window.localStorage);
       accountMigrationService.configure(new E2EAccountMigrationAdapter(
         fixture,
@@ -156,14 +187,25 @@ class E2EAuthenticationAdapter implements AuthenticationPort {
   }
 
   public async chooseGuest(): Promise<AuthenticationSession> { return this.getSession(); }
-  public async beginAuthentication(): Promise<AuthenticationSession> { return this.getSession(); }
-  public async signOut(): Promise<AuthenticationSession> { return this.getSession(); }
+  public async beginAuthentication(): Promise<AuthenticationSession> {
+    if (this.fixture === "account" || this.fixture === "onboarding") this.authenticate();
+    return this.getSession();
+  }
+  public async signOut(): Promise<AuthenticationSession> {
+    this.session = { schemaVersion: AUTH_SESSION_SCHEMA_VERSION, state: {
+      status: "unselected",
+      guestSessionId: toGuestSessionId(`e2e-${this.fixture}-guest`),
+    } };
+    for (const listener of this.listeners) listener(this.getSession());
+    return this.getSession();
+  }
   public dispose(): void { this.listeners.clear(); }
 
   private authenticate(): void {
     this.session = { schemaVersion: AUTH_SESSION_SCHEMA_VERSION, state: {
       status: "authenticated", account: { accountId: toAccountId("e2e-google-account"), provider: "google" },
     } };
+    void playerProfileService.handleAuthenticationSession(this.session);
     for (const listener of this.listeners) listener(this.getSession());
   }
 }

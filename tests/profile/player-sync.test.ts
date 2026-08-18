@@ -9,7 +9,7 @@ import {
   type CloudPlayerSyncPort,
   type CloudProfileSnapshot,
 } from "../../src/profile/PlayerSync";
-import { toGuestSessionId } from "../../src/application/auth/AuthenticationContracts";
+import { AUTH_SESSION_SCHEMA_VERSION, toAccountId, toGuestSessionId } from "../../src/application/auth/AuthenticationContracts";
 
 function storage() {
   const values = new Map<string, string>();
@@ -37,6 +37,13 @@ function cloudGuest() {
   } };
 }
 
+function accountSession() {
+  return { schemaVersion: AUTH_SESSION_SCHEMA_VERSION, state: {
+    status: "authenticated" as const,
+    account: { accountId: toAccountId("account-1"), provider: "google" as const },
+  } };
+}
+
 describe("PlayerSyncCoordinator", () => {
   it("bootstraps a meaningful legacy profile once when cloud is empty", async () => {
     const localStorage = storage();
@@ -47,6 +54,7 @@ describe("PlayerSyncCoordinator", () => {
       loadCurrent: vi.fn().mockResolvedValueOnce(cloud()).mockResolvedValue(canonical),
       bootstrap: vi.fn(async () => canonical),
       applyOperation: vi.fn(),
+      renameCurrentPlayer: vi.fn(),
     };
     const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
     await sync.handleAuthentication(cloudGuest());
@@ -62,7 +70,7 @@ describe("PlayerSyncCoordinator", () => {
     repository.saveProfile(meaningful(repository.getProfile()));
     const remote: CloudPlayerSyncPort = {
       loadCurrent: vi.fn(async () => cloud(meaningful(createDefaultPlayerProfile()))),
-      bootstrap: vi.fn(), applyOperation: vi.fn(),
+      bootstrap: vi.fn(), applyOperation: vi.fn(), renameCurrentPlayer: vi.fn(),
     };
     const before = repository.getProfile().totalXp;
     const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
@@ -79,6 +87,7 @@ describe("PlayerSyncCoordinator", () => {
     const remote: CloudPlayerSyncPort = {
       loadCurrent: vi.fn(async () => canonical), bootstrap: vi.fn(),
       applyOperation: vi.fn().mockRejectedValueOnce(new Error("offline")).mockResolvedValue(canonical),
+      renameCurrentPlayer: vi.fn(),
     };
     const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
     await sync.handleAuthentication(cloudGuest());
@@ -112,6 +121,7 @@ describe("PlayerSyncCoordinator", () => {
     const remote: CloudPlayerSyncPort = {
       loadCurrent: vi.fn(async () => canonical), bootstrap: vi.fn(),
       applyOperation: vi.fn(async () => canonical),
+      renameCurrentPlayer: vi.fn(),
     };
     const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
     await sync.handleAuthentication(cloudGuest());
@@ -159,6 +169,7 @@ describe("PlayerSyncCoordinator", () => {
           active = next;
           return structuredClone(active);
         }),
+        renameCurrentPlayer: vi.fn(),
       };
       const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
       await sync.handleAuthentication(cloudGuest());
@@ -201,6 +212,7 @@ describe("PlayerSyncCoordinator", () => {
     const repository = new LocalStoragePlayerProfileRepository(localStorage);
     const remote: CloudPlayerSyncPort = {
       loadCurrent: vi.fn(async () => cloud()), bootstrap: vi.fn(), applyOperation: vi.fn(),
+      renameCurrentPlayer: vi.fn(),
     };
     const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
     await sync.handleAuthentication(cloudGuest());
@@ -213,5 +225,55 @@ describe("PlayerSyncCoordinator", () => {
     sync.recordCompletedMatch(before, after);
     expect(remote.applyOperation).not.toHaveBeenCalled();
     expect(JSON.parse(localStorage.getItem(PLAYER_SYNC_STORAGE_KEY)!).pending).toHaveLength(0);
+  });
+
+  it("adopts an atomic username update without changing identity or progression", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const profile = meaningful(createDefaultPlayerProfile());
+    profile.playerId = "account-player";
+    profile.displayName = "Guest1842";
+    profile.publicDiscriminator = "19F1P";
+    profile.usernameOnboardingRequired = true;
+    const initial = { ...cloud(profile), playerId: profile.playerId };
+    const renamed = structuredClone(initial);
+    renamed.profile.displayName = "RouletteKing";
+    renamed.profile.usernameOnboardingRequired = false;
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => structuredClone(initial)),
+      bootstrap: vi.fn(),
+      applyOperation: vi.fn(),
+      renameCurrentPlayer: vi.fn(async () => structuredClone(renamed)),
+    };
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+    await sync.handleAuthentication(accountSession());
+    const before = repository.getProfile();
+    await sync.renameCurrentPlayer("RouletteKing");
+    const after = repository.getProfile();
+    expect(remote.renameCurrentPlayer).toHaveBeenCalledWith("RouletteKing");
+    expect(after.displayName).toBe("RouletteKing");
+    expect(after.usernameOnboardingRequired).toBe(false);
+    expect(after.playerId).toBe(before.playerId);
+    expect(after.publicDiscriminator).toBe(before.publicDiscriminator);
+    expect(after.totalXp).toBe(before.totalXp);
+    expect(after.statistics).toEqual(before.statistics);
+  });
+
+  it("rejects a Guest rename before calling the remote boundary", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const profile = createDefaultPlayerProfile();
+    profile.playerId = "guest-player";
+    const canonical = { ...cloud(profile), playerId: profile.playerId };
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => canonical),
+      bootstrap: vi.fn(),
+      applyOperation: vi.fn(),
+      renameCurrentPlayer: vi.fn(),
+    };
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+    await sync.handleAuthentication(cloudGuest());
+    await expect(sync.renameCurrentPlayer("Yigit")).rejects.toThrow(/unavailable/i);
+    expect(remote.renameCurrentPlayer).not.toHaveBeenCalled();
   });
 });

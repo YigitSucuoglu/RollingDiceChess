@@ -62,6 +62,30 @@
       "temporarily-unavailable": "Account connection is temporarily unavailable. Your progress is safe."
     }
   },
+  "username": {
+    "label": "Username",
+    "continue": "Continue",
+    "saving": "Saving…",
+    "change": "Change Username",
+    "save": "Save",
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "guestHint": "Connect your Google account to change your username.",
+    "onboarding": {
+      "title": "Choose your username",
+      "description": "Complete your account identity before continuing.",
+      "helper": "You can change your username anytime from your Profile."
+    },
+    "unavailable": {
+      "title": "Your profile is temporarily unavailable",
+      "description": "We couldn't verify your account profile. Retry or sign out safely."
+    },
+    "errors": {
+      "invalid": "Enter a username between 2 and 24 characters without unsupported symbols.",
+      "reserved-guest": "This username is reserved for Guest accounts.",
+      "unavailable": "Your username could not be saved. Check your connection and try again."
+    }
+  },
   "setup": {
     "title": "Play Setup", "timeControl": "Time Control", "playAs": "Play As", "opponent": "Opponent", "bot": "Bot", "local": "Local", "online": "Online", "difficulty": "Bot Difficulty", "pieceSet": "Piece Set", "boardTheme": "Board Theme",
     "descriptions": { "easy": "Random legal moves", "medium": "Tactical move choices", "hard": "Plans the full turn" },

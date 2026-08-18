@@ -62,6 +62,30 @@
       "temporarily-unavailable": "Hesap bağlantısı geçici olarak kullanılamıyor. İlerlemen güvende."
     }
   },
+  "username": {
+    "label": "Kullanıcı adı",
+    "continue": "Devam Et",
+    "saving": "Kaydediliyor…",
+    "change": "Kullanıcı Adını Değiştir",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "retry": "Tekrar Dene",
+    "guestHint": "Kullanıcı adını değiştirmek için Google hesabını bağlayabilirsin.",
+    "onboarding": {
+      "title": "Kullanıcı Adını Seç",
+      "description": "Devam etmeden önce hesap kimliğini tamamla.",
+      "helper": "Kullanıcı adını daha sonra Profil sayfasından istediğin zaman değiştirebilirsin."
+    },
+    "unavailable": {
+      "title": "Profilin geçici olarak kullanılamıyor",
+      "description": "Hesap profilin doğrulanamadı. Tekrar deneyebilir veya güvenle çıkış yapabilirsin."
+    },
+    "errors": {
+      "invalid": "Desteklenmeyen semboller kullanmadan 2–24 karakterlik bir kullanıcı adı gir.",
+      "reserved-guest": "Bu kullanıcı adı Guest hesapları için ayrılmıştır.",
+      "unavailable": "Kullanıcı adın kaydedilemedi. Bağlantını kontrol edip tekrar dene."
+    }
+  },
   "setup": {
     "title": "Oyun Ayarları", "timeControl": "Süre Kontrolü", "playAs": "Tarafın", "opponent": "Rakip", "bot": "Bot", "local": "Yerel", "online": "Çevrimiçi", "difficulty": "Bot Zorluğu", "pieceSet": "Taş Seti", "boardTheme": "Tahta Teması",
     "descriptions": { "easy": "Rastgele yasal hamleler", "medium": "Taktik hamle seçimleri", "hard": "Tüm turu planlar" },

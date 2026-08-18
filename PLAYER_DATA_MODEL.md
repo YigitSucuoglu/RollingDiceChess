@@ -4,6 +4,8 @@
 
 `PlayerId` remains the immutable UUID canonical identity. `players.public_discriminator` is a separate immutable, globally unique five-character `A-Z0-9` identifier. Display names remain mutable/non-unique for accounts; Guest names are system-owned. Retired/replaced players retain their discriminator. `username_onboarding_required` records onboarding explicitly. See `PLAYER_IDENTITY.md`.
 
+An authenticated account whose canonical onboarding flag is true is application-gated until `rename_current_player` atomically sets its validated display name and clears the flag. Account names remain non-unique; case-insensitive `Guest####` is reserved. Guest callers cannot rename. No rename path accepts PlayerId or discriminator from the browser, and no progression/rating row participates in the operation.
+
 ## Deployment status
 
 `supabase/migrations/202608130001_auth_01c_player_identity.sql`: **APPLIED**.
@@ -16,7 +18,7 @@ The developer applied DATA-01A and the separate DATA-01B operation migration to 
 
 Supabase Anonymous Auth is the selected cloud Guest strategy. It supplies a server-recognized `auth.uid()` for RLS without email/password. Identity linking can preserve the same auth user and PlayerId. If browser auth storage is cleared, an unlinked Guest may become unrecoverable. A Google identity already owned by another auth user requires a short-lived server-recorded handoff and explicit conflict choice.
 
-Anonymous Sign-Ins are enabled and remote RLS was validated with two disposable anonymous client sessions. Configured Guest entry now requests a persistent Supabase anonymous session and falls back locally on failure. Manual identity linking remains disabled and deferred.
+Anonymous Sign-Ins are enabled and remote RLS was validated with two disposable anonymous client sessions. Configured Guest entry now requests a persistent Supabase anonymous session and falls back locally on failure. Manual identity linking is enabled and DATA-01C owns the verified migration boundary.
 
 ## Persisted model
 
@@ -40,7 +42,7 @@ RLS exposes only the current owner's private rows. Rename and one-time bootstrap
 - `USE_GOOGLE_PROFILE`: Google PlayerId survives; Guest PlayerId retires. Values are not added.
 - `USE_GUEST_PROFILE`: Guest PlayerId survives; Google ownership moves to it and the previous Google PlayerId retires. Values are not added.
 
-Names are non-unique and never authorization data. Basic length/control/HTML-delimiter validation is applied; moderation and reserved names are deferred.
+Names are non-unique and never authorization data. Length/control/HTML-delimiter validation is applied, and the system-owned `Guest####` namespace is reserved case-insensitively for Guests. Broader moderation remains deferred.
 
 ```text
 Supabase Auth session != cloud player rows != local PlayerProfile != settings

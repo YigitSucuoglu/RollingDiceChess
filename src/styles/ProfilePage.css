@@ -215,6 +215,35 @@
   margin-top: .35rem;
 }
 
+.profile-rename-trigger {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(225, 187, 113, .4);
+  color: #c9b992;
+  cursor: pointer;
+  font: inherit;
+  font-size: .72rem;
+  margin-top: .85rem;
+  padding: .2rem 0;
+}
+
+.profile-rename-trigger:focus-visible,
+.profile-rename-form input:focus-visible,
+.profile-rename-form button:focus-visible {
+  outline: 3px solid #f1ca78;
+  outline-offset: 3px;
+}
+
+.profile-rename-hint { color: #777064; font-size: .72rem; line-height: 1.45; margin-top: .85rem; max-width: 22rem; }
+.profile-rename-form { display: grid; gap: .55rem; margin-top: .9rem; max-width: 22rem; }
+.profile-rename-form label { color: #c9b992; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.profile-rename-form input { background: #0c0b09; border: 1px solid rgba(225, 187, 113, .4); color: #f5ead6; font: inherit; min-height: 2.7rem; padding: .55rem .7rem; }
+.profile-rename-form > p { color: #e7a28f; font-size: .75rem; }
+.profile-rename-form > div { display: flex; gap: .55rem; }
+.profile-rename-form button { background: transparent; border: 1px solid rgba(225, 187, 113, .4); color: #e6c98f; cursor: pointer; min-height: 2.35rem; padding: .45rem .75rem; }
+.profile-rename-form button:first-child { background: #c99745; color: #15100a; }
+.profile-rename-form button:disabled { cursor: wait; opacity: .65; }
+
 .profile-rank {
   align-items: center;
   color: #b9ad99;

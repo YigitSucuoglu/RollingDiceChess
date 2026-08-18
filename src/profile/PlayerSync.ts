@@ -20,7 +20,10 @@ export interface CloudPlayerSyncPort {
   loadCurrent(): Promise<CloudProfileSnapshot>;
   bootstrap(profile: PlayerProfile): Promise<CloudProfileSnapshot>;
   applyOperation(operation: ProgressionOperation): Promise<CloudProfileSnapshot>;
+  renameCurrentPlayer(displayName: string): Promise<CloudProfileSnapshot>;
 }
+
+export type CanonicalProfileStatus = "not-applicable" | "loading" | "ready" | "unavailable";
 
 interface SyncStorage {
   getItem(key: string): string | null;
@@ -100,6 +103,8 @@ export class PlayerSyncCoordinator {
   private flushing?: Promise<void>;
   private memoryState: PlayerSyncState = EMPTY_STATE;
   private migrationSuspended = false;
+  private canonicalProfileStatus: CanonicalProfileStatus = "not-applicable";
+  private accountAuthenticated = false;
 
   public constructor(local: PlayerProfileRepository, remote: CloudPlayerSyncPort, storage?: SyncStorage) {
     this.local = local;
@@ -119,6 +124,10 @@ export class PlayerSyncCoordinator {
     return this.migrationSuspended;
   }
 
+  public getCanonicalProfileStatus(): CanonicalProfileStatus {
+    return this.canonicalProfileStatus;
+  }
+
   public suspendForAccountMigration(): void {
     this.migrationSuspended = true;
   }
@@ -128,9 +137,14 @@ export class PlayerSyncCoordinator {
   }
 
   public async handleAuthentication(session: AuthenticationSession): Promise<void> {
+    this.accountAuthenticated = session.state.status === "authenticated";
     this.connected = session.state.status === "authenticated"
       || (session.state.status === "guest" && session.state.persistence === "cloud");
-    if (!this.connected) return;
+    if (!this.connected) {
+      this.canonicalProfileStatus = "not-applicable";
+      return;
+    }
+    this.canonicalProfileStatus = "loading";
     if (!this.initializing) {
       this.initializing = this.initialize().finally(() => { this.initializing = undefined; });
     }
@@ -191,6 +205,23 @@ export class PlayerSyncCoordinator {
     this.local.saveProfile(canonical.profile);
     this.connected = true;
     this.migrationSuspended = false;
+    this.canonicalProfileStatus = "ready";
+    return canonical;
+  }
+
+  public async renameCurrentPlayer(displayName: string): Promise<CloudProfileSnapshot> {
+    const before = this.local.getProfile();
+    const state = this.readState();
+    if (!this.accountAuthenticated || !this.connected || this.canonicalProfileStatus !== "ready"
+        || !state.cloudPlayerId || state.conflict || this.migrationSuspended) {
+      throw new Error("Canonical account profile is unavailable.");
+    }
+    const canonical = await this.remote.renameCurrentPlayer(displayName);
+    if (canonical.playerId !== before.playerId
+        || canonical.profile.publicDiscriminator !== before.publicDiscriminator) {
+      throw new Error("Identity changed during username update.");
+    }
+    this.local.saveProfile(canonical.profile);
     return canonical;
   }
 
@@ -202,6 +233,7 @@ export class PlayerSyncCoordinator {
       const knownCloud = state.cloudPlayerId === cloud.playerId;
       if (isMeaningfulCloudProfile(cloud) && isMeaningfulLocalProfile(local) && !knownCloud) {
         this.writeState({ ...state, conflict: true });
+        this.canonicalProfileStatus = "unavailable";
         return;
       }
       let canonical = cloud;
@@ -216,7 +248,9 @@ export class PlayerSyncCoordinator {
       });
       if (this.readState().pending.length > 0) await this.flushPending();
       else this.local.saveProfile(canonical.profile);
+      this.canonicalProfileStatus = "ready";
     } catch {
+      this.canonicalProfileStatus = "unavailable";
       // Local profile remains usable; reconnect or the next match retries safely.
     }
   }

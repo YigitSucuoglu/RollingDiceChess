@@ -10,6 +10,8 @@ describe("deterministic E2E authentication fixture", () => {
     expect(resolveE2EAuthFixture(null)).toBe("local");
     expect(resolveE2EAuthFixture("unexpected")).toBe("local");
     expect(resolveE2EAuthFixture("cloud")).toBe("cloud");
+    expect(resolveE2EAuthFixture("onboarding")).toBe("onboarding");
+    expect(resolveE2EAuthFixture("account")).toBe("account");
   });
 
   it("exposes a stable cloud Guest without credentials", () => {
@@ -17,7 +19,11 @@ describe("deterministic E2E authentication fixture", () => {
     expect(snapshot).toMatchObject({
       playerId: "12345678-1234-4123-8123-123456789012",
       multiplayerRating: 1000,
-      profile: { displayName: "Guest1234" },
+      profile: {
+        displayName: "Guest1234",
+        publicDiscriminator: "19F1P",
+        usernameOnboardingRequired: false,
+      },
     });
     expect(JSON.stringify(snapshot)).not.toMatch(/accessToken|refreshToken|password|supabase/i);
   });

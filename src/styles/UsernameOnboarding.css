@@ -1,0 +1,39 @@
+.username-gate {
+  align-items: center;
+  background: radial-gradient(circle at 50% 18%, #2b2013, #090909 58%);
+  color: #f5ead6;
+  display: flex;
+  min-height: 100dvh;
+  padding: 1.25rem;
+}
+
+.username-card {
+  background: rgba(18, 16, 13, 0.96);
+  border: 1px solid rgba(222, 176, 90, 0.35);
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.42);
+  margin: auto;
+  max-width: 31rem;
+  padding: clamp(2rem, 7vw, 3.5rem);
+  width: 100%;
+}
+
+.username-eyebrow { color: #d0a654; letter-spacing: .22em; text-align: center; text-transform: uppercase; }
+.username-card h1 { font-family: Georgia, serif; font-size: clamp(2rem, 8vw, 3.15rem); font-weight: 400; line-height: 1.05; margin: .8rem 0; text-align: center; }
+.username-description, .username-helper { color: #aaa092; line-height: 1.6; text-align: center; }
+.username-card form { margin-top: 1.75rem; }
+.username-card label { color: #d9c49e; display: block; font-size: .75rem; font-weight: 700; letter-spacing: .12em; margin-bottom: .55rem; text-transform: uppercase; }
+.username-card input { background: #0c0b09; border: 1px solid rgba(225, 187, 113, .45); border-radius: 2px; color: #f5ead6; font: inherit; min-height: 3.15rem; padding: .75rem .9rem; width: 100%; }
+.username-card input:focus-visible, .username-card button:focus-visible { outline: 3px solid #f1ca78; outline-offset: 3px; }
+.username-card input[aria-invalid="true"] { border-color: #e7a28f; }
+.username-helper { font-size: .78rem; margin: 1rem 0 1.3rem; }
+.username-error { color: #e7a28f; font-size: .82rem; margin-top: .65rem; }
+.username-card form button, .username-recovery-actions button { background: linear-gradient(135deg, #e1b761, #b47b30); border: 1px solid #efcc80; color: #15100a; cursor: pointer; font: inherit; font-weight: 800; min-height: 3.2rem; padding: .75rem 1rem; width: 100%; }
+.username-card button:disabled { cursor: wait; opacity: .65; }
+.username-sign-out { background: transparent; border: 0; color: #c9bdab; cursor: pointer; display: block; font: inherit; margin: 1.25rem auto 0; padding: .6rem 1rem; }
+.username-recovery-actions { display: grid; gap: .75rem; margin-top: 1.5rem; }
+.username-recovery-actions button:last-child { background: transparent; color: #e6c98f; }
+
+@media (max-width: 480px) {
+  .username-gate { align-items: stretch; padding: .75rem; }
+  .username-card { margin-block: auto; padding-inline: 1.35rem; }
+}

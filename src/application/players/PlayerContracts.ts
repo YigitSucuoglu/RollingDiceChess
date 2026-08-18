@@ -4,6 +4,18 @@ export const CLOUD_PLAYER_SCHEMA_VERSION = 1;
 export const DEFAULT_MULTIPLAYER_RATING = 1000;
 export const DISPLAY_NAME_MAX_LENGTH = 24;
 
+export type UsernameValidationCode = "invalid" | "reserved-guest";
+
+export class UsernameValidationError extends Error {
+  public readonly code: UsernameValidationCode;
+
+  public constructor(code: UsernameValidationCode, message: string) {
+    super(message);
+    this.name = "UsernameValidationError";
+    this.code = code;
+  }
+}
+
 declare const playerIdBrand: unique symbol;
 export type PlayerId = string & { readonly [playerIdBrand]: true };
 
@@ -78,9 +90,17 @@ export function normalizeDisplayName(value: string): string {
 }
 
 export function normalizeAccountDisplayName(value: string): string {
-  const normalized = normalizeDisplayName(value);
+  let normalized: string;
+  try {
+    normalized = normalizeDisplayName(value);
+  } catch {
+    throw new UsernameValidationError("invalid", "Display name is invalid.");
+  }
   if (/^Guest\d{4}$/iu.test(normalized)) {
-    throw new Error("Display name is reserved for Guest profiles.");
+    throw new UsernameValidationError(
+      "reserved-guest",
+      "Display name is reserved for Guest profiles.",
+    );
   }
   return normalized;
 }

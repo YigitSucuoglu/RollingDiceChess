@@ -14,7 +14,8 @@ import {
 } from "./PlayerProfile";
 import type { PlayerProfileRepository } from "./PlayerProfileRepository";
 import type { AuthenticationSession } from "../application/auth/AuthenticationContracts";
-import { PlayerSyncCoordinator, type CloudPlayerSyncPort } from "./PlayerSync";
+import { normalizeAccountDisplayName } from "../application/players/PlayerContracts";
+import { PlayerSyncCoordinator, type CanonicalProfileStatus, type CloudPlayerSyncPort } from "./PlayerSync";
 import {
   calculateLevelProgression,
   createMatchXpProgressionResult,
@@ -129,6 +130,7 @@ function formatPiece(pieceType: PieceType | null): string {
 
 export class PlayerProfileService {
   private readonly repository: PlayerProfileRepository;
+  private readonly listeners = new Set<() => void>();
   private sync?: PlayerSyncCoordinator;
 
   constructor(
@@ -147,7 +149,27 @@ export class PlayerProfileService {
   }
 
   public async handleAuthenticationSession(session: AuthenticationSession): Promise<void> {
-    await this.sync?.handleAuthentication(session);
+    const operation = this.sync?.handleAuthentication(session);
+    this.notify();
+    await operation;
+    this.notify();
+  }
+
+  public subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  public getCanonicalProfileStatus(): CanonicalProfileStatus {
+    return this.sync?.getCanonicalProfileStatus() ?? "not-applicable";
+  }
+
+  public async renameCurrentAccount(requestedName: string): Promise<PlayerProfileViewModel> {
+    const displayName = normalizeAccountDisplayName(requestedName);
+    if (!this.sync) throw new Error("Account profile is unavailable.");
+    await this.sync.renameCurrentPlayer(displayName);
+    this.notify();
+    return this.getViewModel();
   }
 
   public async reconnectCloudSync(): Promise<void> {
@@ -180,6 +202,11 @@ export class PlayerProfileService {
 
   public async adoptCanonicalAfterAccountMigration(expectedPlayerId?: string): Promise<void> {
     await this.sync?.adoptCanonicalAfterAccountMigration(expectedPlayerId);
+    this.notify();
+  }
+
+  private notify(): void {
+    for (const listener of this.listeners) listener();
   }
 
   public resetProfile(): PlayerProfileViewModel {

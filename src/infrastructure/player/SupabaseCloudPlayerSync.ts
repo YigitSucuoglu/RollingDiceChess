@@ -70,4 +70,12 @@ export class SupabaseCloudPlayerSync implements CloudPlayerSyncPort {
     if (error || !data) throw new Error("Progression synchronization failed.");
     return normalize(data as unknown as CloudRow);
   }
+
+  public async renameCurrentPlayer(displayName: string): Promise<CloudProfileSnapshot> {
+    const { error } = await this.client.rpc("rename_current_player", {
+      requested_name: displayName,
+    });
+    if (error) throw new Error("Username update failed.");
+    return this.loadCurrent();
+  }
 }
