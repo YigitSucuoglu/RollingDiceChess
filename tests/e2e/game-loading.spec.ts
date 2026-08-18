@@ -25,6 +25,9 @@ test("mobile setup scrolls to Start Game and waits for delayed critical assets",
   releaseMachine?.();
   await expect(page.locator(".board")).toBeVisible({ timeout: 10_000 });
   await page.goBack();
+  await page.getByRole("dialog").getByRole("button", {
+    name: /leave match|maçtan çık/i,
+  }).click();
   await expect(page.getByRole("button", { name: /start game|oyunu baÅŸlat/i })).toBeVisible();
   assertNoErrors();
 });

@@ -19,6 +19,7 @@ import { ROLL_TIMING } from "../../config/rollTiming";
 import soundManager from "../../services/SoundManager";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import MatchExitDialog from "../MatchExitDialog/MatchExitDialog";
 
 const HISTORY_TRANSITION_MS = 260;
 
@@ -65,6 +66,10 @@ function Board() {
   const lastSoundedMoveRef = useRef({ session, timestamp: 0 });
   const resultSoundGameRef = useRef<object | null>(null);
   const lastSkipSoundSequenceRef = useRef(0);
+  const historyGuardInstalledRef = useRef(false);
+  const historyGuardCollapsedRef = useRef(false);
+  const allowHistoryExitRef = useRef(false);
+  const exitButtonRef = useRef<HTMLButtonElement>(null);
   const rollPhase = matchSnapshot.roll.phase;
   const isInputLocked = !matchSnapshot.capabilities.canSelect;
   const moveHistory = matchSnapshot.moveHistory;
@@ -74,6 +79,43 @@ function Board() {
     () => session.subscribe(setMatchSnapshot),
     [session]
   );
+
+  useEffect(() => {
+    window.history.replaceState(
+      { ...window.history.state, rouletteChessMatchEntry: true },
+      "",
+      window.location.href,
+    );
+    window.history.pushState(
+      { ...window.history.state, rouletteChessMatchGuard: true },
+      "",
+      window.location.href,
+    );
+    historyGuardInstalledRef.current = true;
+    const handlePopState = () => {
+      if (allowHistoryExitRef.current || session.getSnapshot().lifecycle !== "active") return;
+      window.history.forward();
+      void session.requestAction({ schemaVersion: 1, type: "OPEN_EXIT_CONFIRMATION" });
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [session]);
+
+  useEffect(() => {
+    if (
+      matchSnapshot.lifecycle !== "completed" ||
+      historyGuardCollapsedRef.current ||
+      !historyGuardInstalledRef.current ||
+      !window.history.state?.rouletteChessMatchGuard
+    ) return;
+    historyGuardCollapsedRef.current = true;
+    allowHistoryExitRef.current = true;
+    window.addEventListener("popstate", () => {
+      historyGuardInstalledRef.current = false;
+      allowHistoryExitRef.current = false;
+    }, { once: true });
+    window.history.back();
+  }, [matchSnapshot.lifecycle]);
 
   useEffect(
     () => () => soundManager.stopAll(),
@@ -222,6 +264,35 @@ function Board() {
     navigate("/");
   };
 
+  const openExitConfirmation = () => {
+    void session.requestAction({ schemaVersion: 1, type: "OPEN_EXIT_CONFIRMATION" });
+  };
+
+  const returnToGame = async () => {
+    const result = await session.requestAction({
+      schemaVersion: 1,
+      type: "CANCEL_EXIT_CONFIRMATION",
+    });
+    if (result.accepted) exitButtonRef.current?.focus();
+  };
+
+  const leaveMatch = async () => {
+    const result = await session.requestAction({ schemaVersion: 1, type: "ABANDON_MATCH" });
+    if (!result.accepted) return;
+    soundManager.stopAll();
+    session.dispose();
+    if (historyGuardInstalledRef.current && window.history.state?.rouletteChessMatchGuard) {
+      allowHistoryExitRef.current = true;
+      window.addEventListener("popstate", () => {
+        historyGuardInstalledRef.current = false;
+        navigate("/play", { replace: true });
+      }, { once: true });
+      window.history.back();
+      return;
+    }
+    navigate("/play", { replace: true });
+  };
+
   const squares = [];
   const playerColor = session.configuration.playerColor;
   const opponentColor = playerColor === "white" ? "black" : "white";
@@ -330,8 +401,9 @@ function Board() {
     >
       <div className="game-layout">
       <div
-        aria-hidden={matchSnapshot.winner ? true : undefined}
+        aria-hidden={matchSnapshot.winner || matchSnapshot.exitConfirmationOpen ? true : undefined}
         className="turn-panel"
+        inert={matchSnapshot.exitConfirmationOpen ? true : undefined}
       >
         <div className="turn-header">
           <div className="turn-text">
@@ -339,6 +411,20 @@ function Board() {
           </div>
 
           <div className="game-toolbar">
+            {matchSnapshot.lifecycle === "active" && (
+              <button
+                aria-label={t("game.exit.accessibleLabel")}
+                className="game-toolbar-button game-exit-button"
+                onClick={openExitConfirmation}
+                ref={exitButtonRef}
+                title={t("game.exit.accessibleLabel")}
+                type="button"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="m6 6 12 12M18 6 6 18" />
+                </svg>
+              </button>
+            )}
             <button
               aria-label={t(isSoundEnabled ? "game.muteSound" : "game.enableSound")}
               aria-pressed={!isSoundEnabled}
@@ -460,9 +546,10 @@ function Board() {
       />
 
       <div
-        aria-hidden={matchSnapshot.winner ? true : undefined}
+        aria-hidden={matchSnapshot.winner || matchSnapshot.exitConfirmationOpen ? true : undefined}
         className="board"
         data-board-theme={boardTheme.id}
+        inert={matchSnapshot.exitConfirmationOpen ? true : undefined}
         style={boardTheme.style}
       >
         {squares}
@@ -500,6 +587,13 @@ function Board() {
           pieceSet={session.configuration.pieceSet}
           xpProgression={gameManager.getMatchXpProgression()!}
           winner={matchSnapshot.winner}
+        />
+      )}
+      {matchSnapshot.exitConfirmationOpen && !matchSnapshot.winner && (
+        <MatchExitDialog
+          mode="singleplayer-bot"
+          onLeave={() => void leaveMatch()}
+          onReturn={() => void returnToGame()}
         />
       )}
     </div>

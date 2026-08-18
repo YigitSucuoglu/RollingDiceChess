@@ -71,6 +71,12 @@ export default class LocalBotMatchSession implements MatchSession {
 
   private clockRefreshTimeout: unknown | null = null;
 
+  private terminationReason: "abandoned" | null = null;
+
+  private exitConfirmationOpen = false;
+
+  private pausedClockColor: Game["currentTurn"] | null = null;
+
   public constructor(
     game: Game,
     configuration: LocalBotMatchConfiguration,
@@ -93,7 +99,8 @@ export default class LocalBotMatchSession implements MatchSession {
     const history = this.game.moveHistory.getSnapshot();
     const hasPlayableMoves = this.game.hasPlayableMoves();
     const isHumanTurn = this.game.currentTurn === this.configuration.playerColor;
-    const canAct = !this.disposed && !this.game.winner && isHumanTurn &&
+    const canAct = !this.disposed && !this.game.winner && !this.terminationReason &&
+      !this.exitConfirmationOpen && isHumanTurn &&
       hasPlayableMoves && this.skipPhase === "none" && this.rollPhase === "resolved";
 
     return {
@@ -101,7 +108,9 @@ export default class LocalBotMatchSession implements MatchSession {
       mode: "bot",
       authority: "local",
       connection: "local",
-      lifecycle: this.game.winner ? "completed" : "active",
+      lifecycle: this.terminationReason ? "abandoned" : this.game.winner ? "completed" : "active",
+      terminationReason: this.terminationReason ?? this.game.resultReason,
+      exitConfirmationOpen: this.exitConfirmationOpen,
       currentPlayer: this.game.currentTurn,
       controller: isHumanTurn ? "human" : "bot",
       board: this.game.board.squares.map((row) => row.map((piece) => piece
@@ -147,11 +156,17 @@ export default class LocalBotMatchSession implements MatchSession {
 
     if (action.schemaVersion !== 1) return this.reject("invalid-action");
 
+    if (action.type === "OPEN_EXIT_CONFIRMATION") return this.openExitConfirmation();
+    if (action.type === "CANCEL_EXIT_CONFIRMATION") return this.cancelExitConfirmation();
+    if (action.type === "ABANDON_MATCH") return this.abandonMatch();
+
     if (action.type === "START_MANUAL_ROLL") {
       return this.startManualRoll();
     }
 
-    if (this.game.winner) return this.reject("invalid-action");
+    if (this.game.winner || this.terminationReason || this.exitConfirmationOpen) {
+      return this.reject("invalid-action");
+    }
 
     if (
       (action.type === "SELECT_SQUARE" ||
@@ -218,6 +233,65 @@ export default class LocalBotMatchSession implements MatchSession {
     this.game.dispose();
   }
 
+  private openExitConfirmation(): MatchActionResult {
+    if (this.game.winner || this.terminationReason) return this.reject("game-over");
+    if (this.exitConfirmationOpen) return this.reject("invalid-action");
+    this.exitConfirmationOpen = true;
+    this.pausedClockColor = this.game.clock.getSnapshot().activeColor;
+    this.game.clock.stop();
+    this.clearBotStartTimeout();
+    this.clearSkipTimeout();
+    this.skipPhase = "none";
+    this.clearClockRefreshTimeout();
+    this.botLifecycleGeneration++;
+    this.botAbortController?.abort();
+    this.botAbortController = null;
+    const snapshot = this.getSnapshot();
+    this.publish(snapshot);
+    return { accepted: true, snapshot };
+  }
+
+  private cancelExitConfirmation(): MatchActionResult {
+    if (!this.exitConfirmationOpen || this.game.winner || this.terminationReason) {
+      return this.reject(this.game.winner ? "game-over" : "invalid-action");
+    }
+    this.exitConfirmationOpen = false;
+    if (this.pausedClockColor === this.game.currentTurn && this.rollPhase === "resolved") {
+      this.game.startClockForCurrentTurn();
+    }
+    this.pausedClockColor = null;
+    this.synchronizeClockRefresh();
+    this.ensureSkipLifecycle();
+    if (this.game.isBotTurn()) {
+      if (this.rollPhase === "ready") this.ensureBotLifecycle();
+      else if (this.rollPhase === "resolved" && this.game.hasPlayableMoves()) {
+        this.runBotTurn(++this.botLifecycleGeneration);
+      }
+    }
+    const snapshot = this.getSnapshot();
+    this.publish(snapshot);
+    return { accepted: true, snapshot };
+  }
+
+  private abandonMatch(): MatchActionResult {
+    if (this.game.winner) return this.reject("game-over");
+    if (this.terminationReason || !this.exitConfirmationOpen) return this.reject("invalid-action");
+    this.terminationReason = "abandoned";
+    this.exitConfirmationOpen = false;
+    this.pausedClockColor = null;
+    this.clearRollTimeout();
+    this.clearBotStartTimeout();
+    this.clearSkipTimeout();
+    this.clearClockRefreshTimeout();
+    this.botLifecycleGeneration++;
+    this.botAbortController?.abort();
+    this.botAbortController = null;
+    this.game.dispose();
+    const snapshot = this.getSnapshot();
+    this.publish(snapshot);
+    return { accepted: true, snapshot };
+  }
+
   private publish(snapshot: MatchSnapshot = this.getSnapshot()): void {
     if (this.disposed) return;
     for (const listener of this.listeners) listener(snapshot);
@@ -249,6 +323,10 @@ export default class LocalBotMatchSession implements MatchSession {
       this.rollTimeout = null;
       if (this.disposed || this.game.winner || this.game.currentRoll !== turnRoll) return;
       this.rollPhase = "resolved";
+      if (this.exitConfirmationOpen) {
+        this.publish();
+        return;
+      }
       this.game.startClockForCurrentTurn();
       this.publish();
       this.synchronizeClockRefresh();
@@ -262,7 +340,8 @@ export default class LocalBotMatchSession implements MatchSession {
   }
 
   private canStartManualRoll(): boolean {
-    return !this.disposed && !this.game.winner &&
+    return !this.disposed && !this.game.winner && !this.terminationReason &&
+      !this.exitConfirmationOpen &&
       this.game.currentTurn === this.configuration.playerColor &&
       this.rollPhase === "ready";
   }
@@ -286,7 +365,8 @@ export default class LocalBotMatchSession implements MatchSession {
   private ensureBotLifecycle(): void {
     this.synchronizeRollTurn();
     if (
-      this.disposed || this.game.winner || !this.game.isBotTurn() ||
+      this.disposed || this.game.winner || this.terminationReason ||
+      this.exitConfirmationOpen || !this.game.isBotTurn() ||
       this.rollPhase !== "ready" || this.botStartTimeout !== null ||
       this.botAbortController !== null
     ) return;
@@ -324,7 +404,8 @@ export default class LocalBotMatchSession implements MatchSession {
   }
 
   private isCurrentGeneration(generation: number): boolean {
-    return !this.disposed && generation === this.botLifecycleGeneration;
+    return !this.disposed && !this.terminationReason && !this.exitConfirmationOpen
+      && generation === this.botLifecycleGeneration;
   }
 
   private clearBotStartTimeout(): void {
@@ -361,7 +442,8 @@ export default class LocalBotMatchSession implements MatchSession {
   }
 
   private isSameActiveRoll(turnRoll: Game["currentRoll"]): boolean {
-    return !this.disposed && !this.game.winner && this.game.currentRoll === turnRoll;
+    return !this.disposed && !this.game.winner && !this.terminationReason &&
+      !this.exitConfirmationOpen && this.game.currentRoll === turnRoll;
   }
 
   private clearSkipTimeout(): void {
@@ -399,6 +481,8 @@ export default class LocalBotMatchSession implements MatchSession {
 
   private handleGameNotification(): void {
     if (this.game.winner) {
+      this.exitConfirmationOpen = false;
+      this.pausedClockColor = null;
       this.clearRollTimeout();
       this.clearBotStartTimeout();
       this.clearSkipTimeout();

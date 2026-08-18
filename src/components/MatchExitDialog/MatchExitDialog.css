@@ -1,0 +1,12 @@
+.match-exit-overlay { background: rgba(5,4,3,.72); backdrop-filter: blur(3px); display: grid; inset: 0; padding: 20px; place-items: center; position: fixed; z-index: 30; }
+.match-exit-dialog { background: radial-gradient(circle at 50% 20%,rgba(139,88,30,.23),transparent 42%),linear-gradient(180deg,#27221c,#12100e); border: 1px solid rgba(224,175,79,.82); border-radius: 16px; box-shadow: 0 24px 70px rgba(0,0,0,.58); color: #fff4d2; max-width: 440px; padding: clamp(24px,5vw,36px); text-align: center; width: min(92vw,440px); }
+.match-exit-eyebrow { color: #caa056; font-size: 11px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+.match-exit-dialog h2 { color: #fff4cd; font-family: Georgia,"Times New Roman",serif; font-size: clamp(28px,5vw,38px); font-weight: 400; margin: 10px 0; }
+.match-exit-dialog #match-exit-description { color: #cdbd9f; font-size: 14px; line-height: 1.6; margin: 0 auto 24px; }
+.match-exit-actions { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+.match-exit-actions button { border-radius: 8px; cursor: pointer; font: inherit; font-size: 13px; font-weight: 800; min-height: 48px; padding: 10px 14px; }
+.match-exit-return { background: linear-gradient(180deg,#38332c,#24201b); border: 1px solid #aa8142; color: #fff3cf; }
+.match-exit-leave { background: linear-gradient(180deg,#9b3f25,#5e2013); border: 1px solid #c66e4d; color: #fff1e8; }
+.match-exit-actions button:focus-visible { outline: 3px solid #ffe5a4; outline-offset: 3px; }
+@media (max-width: 480px) { .match-exit-overlay { padding: 14px; } .match-exit-dialog { padding: 24px 18px; width: 100%; } .match-exit-actions { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .match-exit-overlay, .match-exit-dialog { animation: none; } }

@@ -20,6 +20,7 @@ v1.0.0
 ## Completed
 
 ### Quality
+- GAME-EXIT-01 — Add safe active-match exit and abandon lifecycle
 - PROFILE-IDENTITY-01B — Implement account username onboarding and profile rename UX
 - PROFILE-IDENTITY-01A — Add immutable public player discriminator and account username policy foundation
 - DATA-01C-HF1 — Fix canonical profile handoff after account conflict resolution
@@ -114,6 +115,7 @@ v1.0.0
 ## Current Sprint
 
 Completed:
+- GAME-EXIT-01 — Add safe active-match exit and abandon lifecycle
 - PROFILE-IDENTITY-01B — Implement account username onboarding and profile rename UX
 - PROFILE-IDENTITY-01A — Add immutable public player discriminator and account username policy foundation
 - DATA-01C-HF1 — Fix canonical profile handoff after account conflict resolution
@@ -161,7 +163,7 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. RATING-01 — Design authoritative multiplayer rating
+1. RATING-01 — Design and implement authoritative multiplayer rating model
 
 Roadmap:
 - DATA-01A — Apply Supabase player schema and validate RLS/security
@@ -239,6 +241,7 @@ Performance Backlog:
 - DATA-01C-HF1 replaces the stale post-conflict reinitialization path with an explicit server-confirmed canonical profile adoption. The survivor PlayerId and cloud snapshot now replace sync state and local cache before progression resumes; unresolved conflicts show a migration-pending account state without normal Sign Out/Play actions and remain safely resumable without choosing or retiring either profile.
 - PROFILE-IDENTITY-01A adds a server-generated, immutable, globally unique five-character public discriminator without exposing or replacing PlayerId. Existing rows were backfilled in place; account names remain non-unique but cannot enter the reserved `Guest####` namespace, Guest names remain system-owned, and durable username onboarding state is carried with the canonical profile. The remote migration, 51-row schema verification, deterministic collision check, and publishable-key security harness passed.
 - PROFILE-IDENTITY-01B gates all normal routes behind canonical account username onboarding when required, provides Sign Out without a Skip path, and adds account-only Profile rename through the existing caller-authorized atomic RPC. Refresh/direct routes cannot bypass the server-owned flag; Guest rename remains blocked in application and database boundaries, while UUID PlayerId, discriminator, progression, statistics and rating remain unchanged.
+- GAME-EXIT-01 routes exit confirmation and abandonment through MatchSession. Local bot abandonment is distinct from a completed loss, grants no XP or completed-game statistics, and cancels local roll, bot, skip, and clock work. Future ranked forfeit and rating effects remain server-authoritative; refresh/tab-close reliability is intentionally deferred to online presence and reconnect semantics.
 
 ### Versioning Policy
 

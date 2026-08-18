@@ -95,7 +95,17 @@
   "game": {
     "toMove": "Hamle sırası {{color}}da", "turnSkipped": "Oynanabilir taş yok — Tur atlandı", "muteSound": "Sesi kapat", "enableSound": "Sesi aç", "openHistory": "Hamle geçmişini aç", "closeHistory": "Hamle geçmişini kapat",
     "emptySquare": "boş", "squareLabel": "{{square}}: {{piece}}",
-    "clockPlayer": "{{color}} · Sen", "clockBot": "{{color}} · Bot", "you": "Sen", "clockAria": "{{color}} oyuncu saati: {{minutes}} dakika {{seconds}} saniye", "history": "Hamle Geçmişi", "historyEmpty": "Henüz hamle yok", "historyAria": "Hamle geçmişi turları", "movesInTurn": "{{turn}}. turdaki {{color}} hamleleri", "reelSpinning": "{{reel}}. rulet dönüyor", "reelResult": "{{reel}}. rulet: {{piece}}"
+    "clockPlayer": "{{color}} · Sen", "clockBot": "{{color}} · Bot", "you": "Sen", "clockAria": "{{color}} oyuncu saati: {{minutes}} dakika {{seconds}} saniye", "history": "Hamle Geçmişi", "historyEmpty": "Henüz hamle yok", "historyAria": "Hamle geçmişi turları", "movesInTurn": "{{turn}}. turdaki {{color}} hamleleri", "reelSpinning": "{{reel}}. rulet dönüyor", "reelResult": "{{reel}}. rulet: {{piece}}",
+    "exit": {
+      "accessibleLabel": "Maçtan çık",
+      "title": "Maçtan çıkmak istiyor musun?",
+      "rankedTitle": "Ranked maçtan çıkmak istiyor musun?",
+      "botDescription": "Şimdi çıkarsan bu maç terk edilmiş sayılacak ve bu maçtan XP kazanamayacaksın.",
+      "unrankedDescription": "Bu maçtan XP kazanamazsın. Rating değerin değişmez.",
+      "rankedDescription": "Maçtan ayrılmak mağlubiyet sayılır ve rating kaybetmene neden olabilir. Bu maçtan XP kazanamazsın.",
+      "return": "Oyuna Dön",
+      "leave": "Maçtan Çık"
+    }
   },
   "result": {
     "gameOver": "Oyun bitti", "wins": "{{color}} kazandı", "kingCaptured": "Şah yakalandı", "timeout": "{{color}}ın süresi doldu", "experienceEarned": "Kazanılan deneyim", "progressToward": "Seviye {{level}} için XP ilerlemesi", "nextLevel": "Sonraki seviye", "levelUp": "Seviye atlandı"

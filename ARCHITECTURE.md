@@ -30,9 +30,9 @@ Bootstrap is the composition root and may see application + infrastructure.
 
 `GameMode` is descriptive (`bot | online`), never a multiplayer boolean. `LocalBotMatchConfiguration` is a discriminated, versioned, JSON-safe DTO containing stable IDs and numeric milliseconds; it contains no labels, functions, assets, or browser objects. `OnlineMatchConfiguration` requires an authoritative match ID but has no implementation.
 
-`MatchSession` exposes `getSnapshot`, `subscribe`, `requestAction`, and `dispose`. `LocalBotMatchSession` wraps the existing `Game`, owns listener cleanup, publishes immutable DTO snapshots for accepted actions/timeouts, and preserves profile completion lookup. `MatchAction` currently covers selection, move, unplayable-turn skip, and clock start. Unsupported online commands are intentionally absent.
+`MatchSession` exposes `getSnapshot`, `subscribe`, `requestAction`, and `dispose`. `LocalBotMatchSession` wraps the existing `Game`, owns listener cleanup, publishes immutable DTO snapshots for accepted actions/timeouts, and preserves profile completion lookup. `MatchAction` covers selection, move, manual roll, and the confirmed exit lifecycle. Unsupported online commands are intentionally absent.
 
-Snapshots are schema-versioned and JSON-safe. Board pieces, moves, selection, rights, history, and clock values are copied; mutable engine objects are never returned. Clock values are milliseconds. Transient reel/lever animation phase remains presentation-owned because it is not durable authoritative state. A reconnecting client should render an authoritative snapshot and choose whether a presentation animation is appropriate rather than replaying historical animations.
+Snapshots are schema-versioned and JSON-safe. Board pieces, moves, selection, rights, history, clock values, lifecycle, and termination reason are copied; mutable engine objects are never returned. Clock values are milliseconds. The session-owned roll phase coordinates presentation, while reel frames, lever transforms, and sounds remain presentation effects. A reconnecting client should render an authoritative snapshot and choose whether an animation is appropriate rather than replaying historical animations.
 
 ## Platform ports and composition
 
@@ -90,6 +90,15 @@ Other follow-ups:
 3. Add room/lobby DTOs only alongside an agreed protocol.
 
 No WebSocket, polling, room, authentication, server mock, networking dependency, multiplayer UI, or mobile UI is included.
+
+## Exit and termination semantics
+
+GAME-EXIT-01 adds `active`, `completed`, and `abandoned` lifecycle semantics behind
+`MatchSession`. A confirmed local-bot abandon is deliberately not a normal game result:
+it has no winner, emits no match-completed progression event, and disposes every local
+timer/planner boundary. Future unranked/ranked leave policy is modeled separately, but
+online forfeits, reconnect grace, and rating effects must be server-authoritative. The
+full policy and browser lifecycle limitations are recorded in `MATCH_LIFECYCLE.md`.
 
 ## Architecture guard
 

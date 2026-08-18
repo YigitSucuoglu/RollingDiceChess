@@ -120,6 +120,34 @@ describe("session-owned bot lifecycle", () => {
     expect(game.board.squares.map((row) => row.map((piece) => piece?.id ?? null))).toEqual(before);
   });
 
+  it("aborts an in-flight bot planner when the match is confirmed abandoned", async () => {
+    let release: (() => void) | undefined;
+    const planning = new Promise<void>((resolve) => { release = resolve; });
+    const bot: Bot = {
+      color: "white",
+      playTurn: vi.fn(async (game) => {
+        const plannedMove = game.getSelectableMoves()[0];
+        await planning;
+        if (plannedMove) game.makeMove(plannedMove);
+      }),
+    };
+    const { game, scheduler, session } = createBotSession(bot);
+    scheduler.runNext();
+    scheduler.runNext();
+    expect(bot.playTurn).toHaveBeenCalledOnce();
+    const before = game.board.squares.map((row) => row.map((piece) => piece?.id ?? null));
+
+    await session.requestAction({ schemaVersion: 1, type: "OPEN_EXIT_CONFIRMATION" });
+    const result = await session.requestAction({ schemaVersion: 1, type: "ABANDON_MATCH" });
+    release?.();
+    await Promise.resolve();
+
+    expect(result).toMatchObject({ accepted: true, snapshot: { lifecycle: "abandoned" } });
+    expect(game.board.squares.map((row) => row.map((piece) => piece?.id ?? null))).toEqual(before);
+    expect(scheduler.pendingCount).toBe(0);
+    session.dispose();
+  });
+
   it("owns no-move review, message and automatic transition without invoking the planner", async () => {
     const bot = createCompletingBot();
     const { game, scheduler, session } = createBotSession(bot);

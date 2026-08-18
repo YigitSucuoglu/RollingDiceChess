@@ -95,7 +95,17 @@
   "game": {
     "toMove": "{{color}} to move", "turnSkipped": "No playable pieces — Turn skipped", "muteSound": "Mute sound", "enableSound": "Enable sound", "openHistory": "Open move history", "closeHistory": "Close move history",
     "emptySquare": "empty", "squareLabel": "{{square}}: {{piece}}",
-    "clockPlayer": "{{color}} · You", "clockBot": "{{color}} · Bot", "you": "You", "clockAria": "{{color}} player clock: {{minutes}} minutes {{seconds}} seconds", "history": "Move History", "historyEmpty": "No moves yet", "historyAria": "Move history turns", "movesInTurn": "{{color}} moves in turn {{turn}}", "reelSpinning": "Reel {{reel}} spinning", "reelResult": "Reel {{reel}}: {{piece}}"
+    "clockPlayer": "{{color}} · You", "clockBot": "{{color}} · Bot", "you": "You", "clockAria": "{{color}} player clock: {{minutes}} minutes {{seconds}} seconds", "history": "Move History", "historyEmpty": "No moves yet", "historyAria": "Move history turns", "movesInTurn": "{{color}} moves in turn {{turn}}", "reelSpinning": "Reel {{reel}} spinning", "reelResult": "Reel {{reel}}: {{piece}}",
+    "exit": {
+      "accessibleLabel": "Leave match",
+      "title": "Leave this match?",
+      "rankedTitle": "Leave this ranked match?",
+      "botDescription": "If you leave now, this match will be abandoned and you will not earn XP from it.",
+      "unrankedDescription": "You will not earn XP from this match. Your rating will not change.",
+      "rankedDescription": "Leaving will count as a loss and may reduce your rating. You will not earn XP from this match.",
+      "return": "Return to Game",
+      "leave": "Leave Match"
+    }
   },
   "result": {
     "gameOver": "Game over", "wins": "{{color}} wins", "kingCaptured": "King captured", "timeout": "{{color}} ran out of time", "experienceEarned": "Experience earned", "progressToward": "XP progress toward Level {{level}}", "nextLevel": "Next level", "levelUp": "Level up"

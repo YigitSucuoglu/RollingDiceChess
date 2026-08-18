@@ -86,6 +86,8 @@ export interface MatchTurnHistory {
 }
 
 export type MatchRollPhase = "ready" | "spinning" | "resolved";
+export type MatchLifecycle = "active" | "completed" | "abandoned";
+export type MatchTerminationReason = GameResultReason | "abandoned";
 
 export interface MatchRollSnapshot {
   readonly phase: MatchRollPhase;
@@ -114,7 +116,9 @@ export interface MatchSnapshot {
   readonly mode: GameMode;
   readonly authority: "local" | "server";
   readonly connection: ConnectionState;
-  readonly lifecycle: "active" | "completed";
+  readonly lifecycle: MatchLifecycle;
+  readonly terminationReason: MatchTerminationReason | null;
+  readonly exitConfirmationOpen: boolean;
   readonly currentPlayer: PieceColor;
   readonly controller: MatchController;
   readonly board: readonly (readonly (MatchPieceSnapshot | null)[])[];
@@ -142,7 +146,10 @@ export type MatchAction =
       readonly from: Readonly<Position>;
       readonly to: Readonly<Position>;
     }
-  | { readonly schemaVersion: 1; readonly type: "START_MANUAL_ROLL" };
+  | { readonly schemaVersion: 1; readonly type: "START_MANUAL_ROLL" }
+  | { readonly schemaVersion: 1; readonly type: "OPEN_EXIT_CONFIRMATION" }
+  | { readonly schemaVersion: 1; readonly type: "CANCEL_EXIT_CONFIRMATION" }
+  | { readonly schemaVersion: 1; readonly type: "ABANDON_MATCH" };
 
 export type MatchActionRejectionReason =
   | "illegal-move"
