@@ -129,8 +129,8 @@ describe("PlayerSyncCoordinator", () => {
   });
 
   for (const scenario of [
-    { name: "Keep Google", survivorId: "google-b", survivorXp: 70 },
-    { name: "Keep Guest", survivorId: "guest-a", survivorXp: 50 },
+    { name: "Keep Google", survivorId: "google-b", survivorXp: 70, discriminator: "7K2M9" },
+    { name: "Keep Guest", survivorId: "guest-a", survivorXp: 50, discriminator: "19F1P" },
   ]) {
     it(`adopts the ${scenario.name} survivor before the next progression operation`, async () => {
       const localStorage = storage();
@@ -169,11 +169,14 @@ describe("PlayerSyncCoordinator", () => {
       survivor.playerId = scenario.survivorId;
       survivor.displayName = scenario.name === "Keep Google" ? "Player" : "Guest1234";
       survivor.totalXp = scenario.survivorXp;
+      survivor.publicDiscriminator = scenario.discriminator;
+      survivor.usernameOnboardingRequired = scenario.name === "Keep Guest";
       active = { ...cloud(survivor), playerId: scenario.survivorId };
       await sync.adoptCanonicalAfterAccountMigration(scenario.survivorId);
 
       expect(repository.getProfile().playerId).toBe(scenario.survivorId);
       expect(repository.getProfile().totalXp).toBe(scenario.survivorXp);
+      expect(repository.getProfile().publicDiscriminator).toBe(scenario.discriminator);
       const before = repository.getProfile();
       const after = structuredClone(before);
       after.totalXp += 25;
@@ -189,6 +192,7 @@ describe("PlayerSyncCoordinator", () => {
       await refreshed.handleAuthentication(cloudGuest());
       expect(refreshedRepository.getProfile().playerId).toBe(scenario.survivorId);
       expect(refreshedRepository.getProfile().totalXp).toBe(scenario.survivorXp + 25);
+      expect(refreshedRepository.getProfile().publicDiscriminator).toBe(scenario.discriminator);
     });
   }
 

@@ -36,7 +36,13 @@ export function resolveProfileConflictModel(
   }
 
   return {
-    guest: { ...state.guest, ownership: state.google.ownership },
+    guest: {
+      ...state.guest,
+      ownership: state.google.ownership,
+      usernameOnboardingRequired:
+        state.guest.usernameOnboardingRequired
+        || /^Guest\d{4}$/iu.test(state.guest.displayName),
+    },
     google: { ...state.google, lifecycle: "retired" },
     completedResolution: resolution,
     survivingPlayerId: state.guest.playerId,

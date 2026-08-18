@@ -1,5 +1,7 @@
 # RouletteChess Player Synchronization
 
+Cloud snapshots include the server-issued public discriminator and username-onboarding state. The local repository caches but never generates them. Local-only fallback profiles keep `null`; sync, canonical handoff, refresh, and offline reload preserve server values.
+
 ## Runtime authority
 
 Configured `Play as Guest` uses Supabase Anonymous Auth. Supabase restores its managed session after reload, so the same Auth user resolves through `player_auth_owners` to the same UUID PlayerId. When configuration or network access is unavailable, the product remains usable through a clearly tagged local Guest fallback.

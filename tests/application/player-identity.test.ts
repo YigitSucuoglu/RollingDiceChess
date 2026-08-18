@@ -5,6 +5,7 @@ import { resolveProfileConflictModel } from "../../src/application/players/Playe
 import {
   CLOUD_PLAYER_SCHEMA_VERSION,
   createGuestDisplayName,
+  normalizeAccountDisplayName,
   normalizeDisplayName,
   toPlayerId,
   type CloudPlayerProfile,
@@ -16,6 +17,8 @@ function profile(id: string, owner: "guest" | "account", xp: number, rating: num
     schemaVersion: CLOUD_PLAYER_SCHEMA_VERSION,
     playerId: toPlayerId(id),
     displayName: owner === "guest" ? "Guest0123" : "Google Player",
+    publicDiscriminator: owner === "guest" ? "19F1P" : "7K2M9",
+    usernameOnboardingRequired: owner === "account",
     ownership: owner === "guest" ? { kind: "guest" } : { kind: "account", accountId: toAccountId("account-1") },
     lifecycle: "active",
     progression: { totalXp: xp, gamesPlayed: 4, wins: 2, losses: 2 },
@@ -38,6 +41,9 @@ describe("cloud player identity model", () => {
     expect(normalizeDisplayName("Guest0123")).toBe("Guest0123");
     expect(() => normalizeDisplayName(" ")).toThrow();
     expect(() => normalizeDisplayName("<script>")).toThrow();
+    expect(() => normalizeAccountDisplayName("Guest1842")).toThrow(/reserved/i);
+    expect(() => normalizeAccountDisplayName("gUeSt1842")).toThrow(/reserved/i);
+    expect(normalizeAccountDisplayName("Yigit")).toBe("Yigit");
   });
 
   it("uses Google profile by retiring guest without arithmetic merge", () => {
@@ -48,6 +54,7 @@ describe("cloud player identity model", () => {
     expect(result.guest.lifecycle).toBe("retired");
     expect(result.google.progression.totalXp).toBe(1200);
     expect(result.google.rating.multiplayerRating).toBe(1320);
+    expect(result.google.publicDiscriminator).toBe("7K2M9");
     expect(resolveProfileConflictModel(result, "USE_GOOGLE_PROFILE")).toBe(result);
   });
 
@@ -60,8 +67,21 @@ describe("cloud player identity model", () => {
     expect(result.guest.ownership.kind).toBe("account");
     expect(result.guest.progression.totalXp).toBe(5000);
     expect(result.guest.rating.multiplayerRating).toBe(1450);
+    expect(result.guest.publicDiscriminator).toBe("19F1P");
+    expect(result.guest.usernameOnboardingRequired).toBe(true);
     expect(result.google.lifecycle).toBe("retired");
     expect(() => resolveProfileConflictModel(result, "USE_GOOGLE_PROFILE")).toThrow();
+  });
+
+  it("defines server allocated immutable discriminator and reserved Guest rename SQL", () => {
+    const sql = readFileSync("supabase/migrations/202608180001_profile_identity_01a_public_identity.sql", "utf8");
+    expect(sql).toContain("players_public_discriminator_unique");
+    expect(sql).toContain("^[A-Z0-9]{5}$");
+    expect(sql).toContain("pg_advisory_xact_lock");
+    expect(sql).toContain("public discriminator is immutable");
+    expect(sql).toContain("reserved guest display name");
+    expect(sql).toContain("ownership_kind='account'");
+    expect(sql).not.toMatch(/update public\.players[^;]+where public_discriminator/is);
   });
 
   it("keeps rating outside browser-writable SQL policy paths", () => {

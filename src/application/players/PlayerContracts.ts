@@ -28,6 +28,8 @@ export interface CloudPlayerProfile {
   readonly schemaVersion: typeof CLOUD_PLAYER_SCHEMA_VERSION;
   readonly playerId: PlayerId;
   readonly displayName: string;
+  readonly publicDiscriminator: string;
+  readonly usernameOnboardingRequired: boolean;
   readonly ownership: PlayerOwnership;
   readonly lifecycle: "active" | "retired";
   readonly progression: PlayerProgressionSnapshot;
@@ -71,6 +73,14 @@ export function normalizeDisplayName(value: string): string {
   });
   if (/[/\\<>]/u.test(normalized) || containsControlCharacter) {
     throw new Error("Display name contains unsupported characters.");
+  }
+  return normalized;
+}
+
+export function normalizeAccountDisplayName(value: string): string {
+  const normalized = normalizeDisplayName(value);
+  if (/^Guest\d{4}$/iu.test(normalized)) {
+    throw new Error("Display name is reserved for Guest profiles.");
   }
   return normalized;
 }

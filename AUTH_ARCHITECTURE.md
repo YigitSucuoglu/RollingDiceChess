@@ -66,4 +66,6 @@ The application defines a provider-independent `PlayerId` plus focused player re
 
 Supabase Anonymous Auth is the selected secure cloud Guest primitive because RLS can recognize `auth.uid()` without trusting a client-provided UUID. Supported identity linking is the normal Guest-to-Google path. A pre-existing Google identity uses an explicit transactional replacement choice, never arithmetic merge. See `PLAYER_DATA_MODEL.md` and the versioned migration.
 
+PROFILE-IDENTITY-01A adds a public discriminator without changing authentication identity. Rename still resolves the owned UUID PlayerId from `auth.uid()`; the discriminator is never an authorization or mutation target. PROFILE-IDENTITY-01B owns the future onboarding UI.
+
 DATA-01A and the DATA-01B progression-operation migration are **APPLIED**. DATA-01B adds configured cloud Guest creation and a cloud-canonical/cache synchronization coordinator; catalog and two-client remote security verification passed. DATA-01C uses Supabase Manual Linking through a dedicated migration adapter on the same composed client; details are in `ACCOUNT_MIGRATION.md`.

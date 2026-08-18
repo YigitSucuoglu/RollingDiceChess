@@ -166,6 +166,13 @@ export class LocalStoragePlayerProfileRepository
         typeof source.displayName === "string" && source.displayName.trim()
           ? source.displayName.trim()
           : fallback.displayName,
+      publicDiscriminator:
+        typeof source.publicDiscriminator === "string"
+          && /^[A-Z0-9]{5}$/.test(source.publicDiscriminator)
+          ? source.publicDiscriminator
+          : null,
+      usernameOnboardingRequired:
+        source.usernameOnboardingRequired === true,
       createdAt:
         typeof source.createdAt === "string" &&
         !Number.isNaN(Date.parse(source.createdAt))

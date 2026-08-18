@@ -4,6 +4,8 @@
 
 RouletteChess identity is the UUID `PlayerId`. Google authenticates an account; it is not the player identity. Display names remain mutable and non-unique.
 
+Each PlayerId owns one immutable public discriminator. No-conflict linking and Keep Guest preserve the Guest discriminator; Keep Google preserves the Google discriminator. Retired losing PlayerIds retain their historical discriminator. A surviving system-named Guest enters username-onboarding-required state when it becomes account-owned.
+
 ## Runtime flow
 
 1. A cloud Guest flushes every acknowledged/pending DATA-01B progression operation.

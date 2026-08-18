@@ -20,6 +20,7 @@ v1.0.0
 ## Completed
 
 ### Quality
+- PROFILE-IDENTITY-01A — Add immutable public player discriminator and account username policy foundation
 - DATA-01C-HF1 — Fix canonical profile handoff after account conflict resolution
 - DATA-01C — Implement Guest-to-Google identity linking and profile conflict resolution
 - DATA-01B-HF1 — Decouple normal browser E2E from live Supabase Guest creation
@@ -112,6 +113,7 @@ v1.0.0
 ## Current Sprint
 
 Completed:
+- PROFILE-IDENTITY-01A — Add immutable public player discriminator and account username policy foundation
 - DATA-01C-HF1 — Fix canonical profile handoff after account conflict resolution
 - DATA-01C — Implement Guest-to-Google identity linking and profile conflict resolution
 - DATA-01B-HF1 — Decouple normal browser E2E from live Supabase Guest creation
@@ -157,7 +159,7 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. PROFILE-IDENTITY-01 — Add a public 5-character player discriminator
+1. PROFILE-IDENTITY-01B — Implement account username onboarding and profile rename UX
 
 Roadmap:
 - DATA-01A — Apply Supabase player schema and validate RLS/security
@@ -233,6 +235,7 @@ Performance Backlog:
 - DATA-01B-HF1 keeps normal Chromium E2E self-contained through compile-time E2E cloud/local fixtures and a strict Supabase request guard. Live Supabase validation remains opt-in through `test:data:remote`; production and Vercel retain the real DATA-01B adapters.
 - DATA-01C connects a cloud Guest to Google through Supabase Manual Linking while preserving the Guest PlayerId when no conflict exists. Existing Google progression triggers an explicit Keep Guest/Keep Google choice; profiles are never arithmetically merged, the losing PlayerId is retired/replaced, and the surviving rating remains unchanged. Migration intents are expiry-aware, hash-backed, bound to Guest ownership and the permanent account, and same-decision replay is idempotent while contradictory replay is rejected. The migration and catalog verification were applied successfully; the publishable-key remote harness passed its safe automated gates. Real Google OAuth and destructive conflict choices remain explicitly manual verification.
 - DATA-01C-HF1 replaces the stale post-conflict reinitialization path with an explicit server-confirmed canonical profile adoption. The survivor PlayerId and cloud snapshot now replace sync state and local cache before progression resumes; unresolved conflicts show a migration-pending account state without normal Sign Out/Play actions and remain safely resumable without choosing or retiring either profile.
+- PROFILE-IDENTITY-01A adds a server-generated, immutable, globally unique five-character public discriminator without exposing or replacing PlayerId. Existing rows were backfilled in place; account names remain non-unique but cannot enter the reserved `Guest####` namespace, Guest names remain system-owned, and durable username onboarding state is carried with the canonical profile. The remote migration, 51-row schema verification, deterministic collision check, and publishable-key security harness passed.
 
 ### Versioning Policy
 

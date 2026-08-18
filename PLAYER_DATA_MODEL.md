@@ -1,5 +1,9 @@
 # RouletteChess Player Data Model
 
+## Public identity foundation
+
+`PlayerId` remains the immutable UUID canonical identity. `players.public_discriminator` is a separate immutable, globally unique five-character `A-Z0-9` identifier. Display names remain mutable/non-unique for accounts; Guest names are system-owned. Retired/replaced players retain their discriminator. `username_onboarding_required` records onboarding explicitly. See `PLAYER_IDENTITY.md`.
+
 ## Deployment status
 
 `supabase/migrations/202608130001_auth_01c_player_identity.sql`: **APPLIED**.

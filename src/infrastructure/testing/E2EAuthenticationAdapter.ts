@@ -56,10 +56,13 @@ export function createE2ECloudSnapshot(
   playerId = FIXTURE_PLAYER_ID,
   displayName = "Guest1234",
   totalXp = 50,
+  usernameOnboardingRequired = false,
 ): CloudProfileSnapshot {
   const profile = createDefaultPlayerProfile(new Date("2026-01-01T00:00:00.000Z"));
   profile.playerId = playerId;
   profile.displayName = displayName;
+  profile.publicDiscriminator = playerId === FIXTURE_GOOGLE_PLAYER_ID ? "7K2M9" : "19F1P";
+  profile.usernameOnboardingRequired = usernameOnboardingRequired;
   profile.totalXp = totalXp;
   profile.statistics.gamesPlayed = 1;
   profile.statistics.wins = 1;
@@ -78,11 +81,21 @@ class E2ECloudPlayerSync implements CloudPlayerSyncPort {
     const result = readMigrationResult();
     this.snapshot = result === "google"
       ? createE2ECloudSnapshot(FIXTURE_GOOGLE_PLAYER_ID, "Player", 70)
-      : createE2ECloudSnapshot();
+      : createE2ECloudSnapshot(FIXTURE_PLAYER_ID, "Guest1234", 50, result === "guest");
   }
 
-  public select(playerId: string, displayName: string, totalXp: number): void {
-    this.snapshot = createE2ECloudSnapshot(playerId, displayName, totalXp);
+  public select(
+    playerId: string,
+    displayName: string,
+    totalXp: number,
+    usernameOnboardingRequired = false,
+  ): void {
+    this.snapshot = createE2ECloudSnapshot(
+      playerId,
+      displayName,
+      totalXp,
+      usernameOnboardingRequired,
+    );
   }
 
   public async loadCurrent(): Promise<CloudProfileSnapshot> {
@@ -172,6 +185,7 @@ class E2EAccountMigrationAdapter implements AccountMigrationPort {
   public async startGuestUpgrade(): Promise<void> {
     playerProfileService.suspendForAccountMigration();
     if (this.fixture === "upgrade") {
+      this.cloudSync.select(FIXTURE_PLAYER_ID, "Guest1234", 50, true);
       writeMigrationResult("guest");
       await playerProfileService.adoptCanonicalAfterAccountMigration(FIXTURE_PLAYER_ID);
       this.authenticate();
@@ -199,6 +213,7 @@ class E2EAccountMigrationAdapter implements AccountMigrationPort {
       keepGoogle ? FIXTURE_GOOGLE_PLAYER_ID : FIXTURE_PLAYER_ID,
       keepGoogle ? "Player" : "Guest1234",
       keepGoogle ? 70 : 50,
+      !keepGoogle,
     );
     writeMigrationResult(keepGoogle ? "google" : "guest");
     await playerProfileService.adoptCanonicalAfterAccountMigration(

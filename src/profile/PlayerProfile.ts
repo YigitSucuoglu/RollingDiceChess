@@ -38,6 +38,8 @@ export interface PlayerProfile {
   schemaVersion: number;
   playerId: string;
   displayName: string;
+  publicDiscriminator: string | null;
+  usernameOnboardingRequired: boolean;
   createdAt: string;
   totalXp: number;
   statistics: PlayerStatistics;
@@ -70,6 +72,8 @@ export function createDefaultPlayerProfile(
     schemaVersion: PLAYER_PROFILE_SCHEMA_VERSION,
     playerId: createPlayerId(),
     displayName: "Player",
+    publicDiscriminator: null,
+    usernameOnboardingRequired: false,
     createdAt: now.toISOString(),
     totalXp: 0,
     statistics: {

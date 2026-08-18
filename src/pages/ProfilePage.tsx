@@ -179,6 +179,9 @@ function ProfilePage() {
           <div className="profile-identity-copy">
             <p className="profile-overline">{t("profile.player")}</p>
             <h2 id="player-identity-title">{profile.displayName}</h2>
+            {profile.publicDiscriminator && (
+              <p className="profile-public-discriminator">#{profile.publicDiscriminator}</p>
+            )}
             <div className="profile-rank">
               <span>{t("common.level", { level: progression.level })}</span>
               <span aria-hidden="true">◆</span>

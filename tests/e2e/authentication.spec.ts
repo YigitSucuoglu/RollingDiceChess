@@ -8,6 +8,7 @@ test("cloud Guest profile remains usable for gameplay entry", async ({
   await page.goto("/profile");
   await expect(page.getByRole("heading", { name: "Guest", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: /^Guest\d{4}$/ })).toBeVisible();
+  await expect(page.getByText("#19F1P")).toBeVisible();
   await expect(page.getByText(/browser\/site data is cleared/i)).toBeVisible();
   await page.getByRole("link", { name: "Play" }).click();
   await expect(page).toHaveURL(/\/play$/);
@@ -56,6 +57,9 @@ for (const scenario of [
     await expect(page.getByText(
       scenario.fixture === "conflict-google" ? /70\s*\/\s*100 XP/ : /50\s*\/\s*100 XP/,
     )).toBeVisible();
+    await expect(page.getByText(
+      scenario.fixture === "conflict-google" ? "#7K2M9" : "#19F1P",
+    )).toBeVisible();
     await page.reload();
     await expect(page.getByRole("heading", {
       name: scenario.fixture === "conflict-google" ? "Player" : "Guest1234",
@@ -63,6 +67,9 @@ for (const scenario of [
     })).toBeVisible();
     await expect(page.getByText(
       scenario.fixture === "conflict-google" ? /70\s*\/\s*100 XP/ : /50\s*\/\s*100 XP/,
+    )).toBeVisible();
+    await expect(page.getByText(
+      scenario.fixture === "conflict-google" ? "#7K2M9" : "#19F1P",
     )).toBeVisible();
     assertNoErrors();
   });

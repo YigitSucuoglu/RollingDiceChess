@@ -47,7 +47,7 @@ async function readOwnState(client, identity, label) {
   const playerId = ownership.data.player_id;
 
   const [player, progression, pieces, rating] = await Promise.all([
-    client.from("players").select("player_id,display_name,lifecycle,ownership_kind").eq("player_id", playerId).single(),
+    client.from("players").select("player_id,display_name,public_discriminator,username_onboarding_required,lifecycle,ownership_kind").eq("player_id", playerId).single(),
     client.from("player_progression").select("*").eq("player_id", playerId).single(),
     client.from("player_piece_statistics").select("piece_type,rolls,moves,captures").eq("player_id", playerId),
     client.from("player_ratings").select("player_id,multiplayer_rating,rated_games,rating_version").eq("player_id", playerId).single(),
@@ -56,11 +56,12 @@ async function readOwnState(client, identity, label) {
     if (result.error) throw new Error(`${label} ${name} read failed: ${result.error.message}`);
   }
   assert(player.data.player_id === playerId, `${label} player mismatch`);
+  assert(/^[A-Z0-9]{5}$/.test(player.data.public_discriminator), `${label} discriminator format is invalid`);
   assert(progression.data.player_id === playerId, `${label} progression mismatch`);
   assert(rating.data.multiplayer_rating === 1000, `${label} initial rating is not 1000`);
   assert(pieces.data.length === PIECE_TYPES.length, `${label} expected six piece rows`);
   assert(PIECE_TYPES.every((piece) => pieces.data.some((row) => row.piece_type === piece)), `${label} piece rows are incomplete`);
-  return { playerId, displayName: player.data.display_name };
+  return { playerId, displayName: player.data.display_name, publicDiscriminator: player.data.public_discriminator };
 }
 
 async function assertCrossReadsEmpty(client, foreignAuthUserId, foreignPlayerId, label) {
@@ -80,6 +81,9 @@ async function assertCrossReadsEmpty(client, foreignAuthUserId, foreignPlayerId,
 
 async function assertDirectMutationsDenied(client, authUserId, ownPlayerId, foreignPlayerId) {
   assertPermissionDenied("direct player update", await client.from("players").update({ display_name: "Forged" }).eq("player_id", ownPlayerId));
+  assertPermissionDenied("direct discriminator update", await client.from("players").update({
+    public_discriminator: "ZZZZZ",
+  }).eq("player_id", ownPlayerId));
   assertPermissionDenied("direct player insert", await client.from("players").insert({
     player_id: crypto.randomUUID(), display_name: "Forged", ownership_kind: "guest",
   }));
@@ -156,6 +160,8 @@ async function run() {
     const ownA = await readOwnState(clientA, identityA, "A");
     pass("A own player read");
     const ownB = await readOwnState(clientB, identityB, "B");
+    assert(ownA.publicDiscriminator !== ownB.publicDiscriminator, "disposable players share a discriminator");
+    pass("Public discriminator allocation", "PASS (unique 5-char)");
     pass("B own player read");
 
     await assertCrossReadsEmpty(clientA, identityB.authUserId, ownB.playerId, "A -> B");
@@ -229,28 +235,14 @@ async function run() {
     pass("Malformed/negative/huge operation", "PASS (rejected)");
     pass("Operation ledger direct write", "PASS (denied)");
 
-    const sharedName = `Data01A-${Date.now().toString().slice(-8)}`;
-    const renameA = await clientA.rpc("rename_current_player", { requested_name: sharedName });
-    if (renameA.error) throw new Error(`A rename failed: ${renameA.error.message}`);
-    assert(renameA.data.player_id === ownA.playerId, "A rename changed PlayerId");
-    const renameB = await clientB.rpc("rename_current_player", { requested_name: sharedName });
-    if (renameB.error) throw new Error(`B duplicate rename failed: ${renameB.error.message}`);
-    assert(renameB.data.player_id === ownB.playerId, "B rename changed PlayerId");
-    pass("Own rename / PlayerId preserved");
-    pass("Duplicate display name");
-
-    for (const invalidName of ["", "   ", "x".repeat(25), "Bad\u0007Name"]) {
-      const invalid = await clientA.rpc("rename_current_player", { requested_name: invalidName });
-      assert(Boolean(invalid.error), "invalid rename unexpectedly succeeded");
+    for (const requestedName of ["Yigit", "Guest1842", "gUeSt1842"]) {
+      const rename = await clientA.rpc("rename_current_player", { requested_name: requestedName });
+      assert(Boolean(rename.error), `Guest rename unexpectedly succeeded for ${requestedName}`);
     }
-    const forgedRename = await clientA.rpc("rename_current_player", {
-      requested_name: "Forged Other", player_id: ownB.playerId,
-    });
-    assert(Boolean(forgedRename.error), "rename RPC accepted an arbitrary target PlayerId");
-    const finalB = await clientB.from("players").select("display_name").single();
-    assert(!finalB.error && finalB.data.display_name === sharedName, "B changed during cross-player rename attempt");
-    pass("Invalid rename");
-    pass("Cross-player rename boundary");
+    const afterRenameDenial = await readOwnState(clientA, identityA, "A after rename denial");
+    assert(afterRenameDenial.displayName === ownA.displayName, "Guest display name changed");
+    assert(afterRenameDenial.publicDiscriminator === ownA.publicDiscriminator, "Guest discriminator changed");
+    pass("Guest rename and reserved namespace", "PASS (denied)");
 
     const intentA = await clientA.rpc("create_guest_upgrade_intent");
     if (intentA.error) throw new Error(`Guest intent creation failed: ${intentA.error.message}`);

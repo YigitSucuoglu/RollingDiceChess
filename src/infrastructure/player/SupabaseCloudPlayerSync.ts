@@ -8,6 +8,8 @@ interface CloudRow {
   bootstrapApplied: boolean;
   createdAt: string;
   displayName: string;
+  publicDiscriminator: string;
+  usernameOnboardingRequired: boolean;
   pieceStatistics: Record<string, { captures: number; moves: number; rolls: number }>;
   playerId: string;
   progression: Record<string, number>;
@@ -34,6 +36,8 @@ function normalize(row: CloudRow): CloudProfileSnapshot {
   };
   const profile: PlayerProfile = {
     schemaVersion: 1, playerId: row.playerId, displayName: row.displayName,
+    publicDiscriminator: row.publicDiscriminator,
+    usernameOnboardingRequired: row.usernameOnboardingRequired,
     createdAt: row.createdAt, totalXp: p.total_xp, statistics, processedMatchIds: [],
   };
   return { bootstrapApplied: row.bootstrapApplied, playerId: row.playerId,

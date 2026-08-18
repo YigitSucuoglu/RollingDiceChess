@@ -30,6 +30,8 @@ const MAX_PROCESSED_MATCH_IDS = 100;
 
 export interface PlayerProfileViewModel {
   readonly displayName: string;
+  readonly publicDiscriminator: string | null;
+  readonly usernameOnboardingRequired: boolean;
   readonly monogram: string;
   readonly joinedLabel: string;
   readonly progression: {
@@ -203,6 +205,8 @@ export class PlayerProfileService {
     const mostSuccessfulPieceType = resolveMostFrequent(stats.capturesByPiece);
     return {
       displayName: profile.displayName,
+      publicDiscriminator: profile.publicDiscriminator,
+      usernameOnboardingRequired: profile.usernameOnboardingRequired,
       monogram: monogram || "P",
       joinedLabel: new Intl.DateTimeFormat(locale, {
         month: "long",
