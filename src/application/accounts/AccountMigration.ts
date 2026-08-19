@@ -41,5 +41,6 @@ export interface AccountMigrationPort {
   restoreContinuation(): Promise<boolean>;
   resolveConflict(resolution: ProfileConflictResolution): Promise<void>;
   cancelConflict(): void;
+  clearLocalRecovery(): void;
   dispose(): void;
 }

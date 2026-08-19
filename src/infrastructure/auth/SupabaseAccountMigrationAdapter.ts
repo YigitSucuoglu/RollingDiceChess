@@ -15,6 +15,23 @@ const CONTINUATION_KEY = "roulettechess.account-migration.v1";
 interface Continuation {
   readonly handoffToken: string;
   readonly phase: "linking" | "sign-in-existing";
+  readonly accountAuthUserId?: string;
+  readonly sourceAuthUserId?: string;
+  readonly requestedResolution?: ProfileConflictResolution;
+}
+
+interface ContinuationStorage {
+  getItem(key: string): string | null;
+  removeItem(key: string): void;
+  setItem(key: string, value: string): void;
+}
+
+export interface AccountMigrationProfileCoordinator {
+  adoptCanonicalAfterAccountMigration(expectedPlayerId?: string): Promise<void>;
+  hasProfileSyncConflict(): boolean;
+  prepareForAccountMigration(): Promise<boolean>;
+  resumeAfterAccountMigrationFailure(): void;
+  suspendForAccountMigration(): void;
 }
 
 interface ConflictPayload {
@@ -49,13 +66,21 @@ export class SupabaseAccountMigrationAdapter implements AccountMigrationPort {
   private state: AccountMigrationState = { status: "idle" };
   private readonly client: SupabaseClient;
   private readonly origin: string;
+  private readonly storage?: ContinuationStorage;
+  private readonly profiles: AccountMigrationProfileCoordinator;
 
   public constructor(
     client: SupabaseClient,
     origin: string,
+    storage: ContinuationStorage | undefined = typeof window === "undefined"
+      ? undefined
+      : window.sessionStorage,
+    profiles: AccountMigrationProfileCoordinator = playerProfileService,
   ) {
     this.client = client;
     this.origin = origin;
+    this.storage = storage;
+    this.profiles = profiles;
   }
 
   public getState(): AccountMigrationState { return this.state; }
@@ -68,25 +93,32 @@ export class SupabaseAccountMigrationAdapter implements AccountMigrationPort {
 
   public async startGuestUpgrade(): Promise<void> {
     if (!navigator.onLine) return this.fail("offline");
-    if (playerProfileService.hasProfileSyncConflict()) return this.fail("pending-progression");
+    if (this.profiles.hasProfileSyncConflict()) return this.fail("pending-progression");
     this.publish({ status: "pending", phase: "start" });
-    if (!await playerProfileService.prepareForAccountMigration()) {
+    if (!await this.profiles.prepareForAccountMigration()) {
       return this.fail("pending-progression");
     }
-    playerProfileService.suspendForAccountMigration();
+    this.profiles.suspendForAccountMigration();
     const { data, error } = await this.client.rpc("create_guest_upgrade_intent");
     const intent = Array.isArray(data) ? data[0] : data;
     if (error || !intent || typeof intent.handoff_token !== "string") {
       return this.fail("temporarily-unavailable");
     }
-    this.writeContinuation({ handoffToken: intent.handoff_token, phase: "linking" });
+    const { data: sessionData } = await this.client.auth.getSession();
+    const sourceAuthUserId = sessionData.session?.user.id;
+    if (!sourceAuthUserId) return this.fail("temporarily-unavailable");
+    this.writeContinuation({
+      handoffToken: intent.handoff_token,
+      phase: "linking",
+      sourceAuthUserId,
+    });
     const { error: linkError } = await this.client.auth.linkIdentity({
       provider: "google",
       options: { redirectTo: `${this.origin}/profile` },
     });
     if (linkError) {
       this.clearContinuation();
-      playerProfileService.resumeAfterAccountMigrationFailure();
+      this.profiles.resumeAfterAccountMigrationFailure();
       this.fail("provider-failed");
     }
   }
@@ -94,26 +126,41 @@ export class SupabaseAccountMigrationAdapter implements AccountMigrationPort {
   public async restoreContinuation(): Promise<boolean> {
     const continuation = this.readContinuation();
     if (!continuation) return false;
-    playerProfileService.suspendForAccountMigration();
+    this.profiles.suspendForAccountMigration();
     this.publish({ status: "pending", phase: "oauth-return" });
     const { data: sessionData } = await this.client.auth.getSession();
     const user = sessionData.session?.user;
     if (!user) return this.failAndReturn("provider-failed");
 
+    if (continuation.accountAuthUserId && continuation.accountAuthUserId !== user.id) {
+      this.clearLocalRecovery();
+      return false;
+    }
+    if (user.is_anonymous && continuation.sourceAuthUserId
+        && continuation.sourceAuthUserId !== user.id) {
+      this.clearLocalRecovery();
+      return false;
+    }
+
     if (!user.is_anonymous) {
+      const boundContinuation = continuation.accountAuthUserId
+        ? continuation
+        : { ...continuation, accountAuthUserId: user.id };
+      this.writeContinuation(boundContinuation);
       if (continuation.phase === "linking") {
         const { data, error } = await this.client.rpc("complete_linked_guest_upgrade", {
           handoff_token: continuation.handoffToken,
         });
         if (!error) {
-          await this.complete(typeof data === "string" ? data : undefined);
-          return true;
-        }
-        if (!/guest ownership|already linked|account player/i.test(error.message)) {
-          return this.failAndReturn(failureCode(error.message));
+          try {
+            await this.complete(typeof data === "string" ? data : undefined);
+            return true;
+          } catch {
+            return this.failAndReturn("temporarily-unavailable");
+          }
         }
       }
-      return this.inspectConflict(continuation.handoffToken);
+      return this.inspectConflict(boundContinuation);
     }
 
     if (continuation.phase === "linking") {
@@ -131,15 +178,26 @@ export class SupabaseAccountMigrationAdapter implements AccountMigrationPort {
   public async resolveConflict(resolution: ProfileConflictResolution): Promise<void> {
     const continuation = this.readContinuation();
     if (!continuation) return this.fail("intent-expired");
-    this.publish({ status: "pending", phase: "resolve" });
+    if (continuation.requestedResolution && continuation.requestedResolution !== resolution) {
+      if (this.state.status === "profile-conflict") {
+        this.publish({ ...this.state, failureCode: "resolution-failed" });
+      }
+      return;
+    }
+    const retryableContinuation = { ...continuation, requestedResolution: resolution };
+    this.writeContinuation(retryableContinuation);
     const previous = this.state.status === "profile-conflict" ? this.state : undefined;
+    this.publish({ status: "pending", phase: "resolve" });
     const { data, error } = await this.client.rpc("resolve_profile_conflict", {
       handoff_token: continuation.handoffToken,
       requested_resolution: resolution,
     });
     if (error) {
-      if (previous) this.publish({ ...previous, failureCode: "resolution-failed" });
-      else this.fail("resolution-failed");
+      const reconciled = await this.inspectConflict(retryableContinuation);
+      if (reconciled && this.state.status === "completed") return;
+      if (previous && this.state.status === "profile-conflict") {
+        this.publish({ ...this.state, failureCode: "resolution-failed" });
+      } else if (!reconciled) this.fail("resolution-failed");
       return;
     }
     try {
@@ -154,17 +212,33 @@ export class SupabaseAccountMigrationAdapter implements AccountMigrationPort {
     if (this.state.status === "profile-conflict") this.publish(this.state);
   }
 
+  public clearLocalRecovery(): void {
+    this.clearContinuation();
+    this.profiles.resumeAfterAccountMigrationFailure();
+    this.publish({ status: "idle" });
+  }
+
   public dispose(): void { this.listeners.clear(); }
 
-  private async inspectConflict(handoffToken: string): Promise<boolean> {
+  private async inspectConflict(continuation: Continuation): Promise<boolean> {
     const { data, error } = await this.client.rpc("inspect_profile_conflict", {
-      handoff_token: handoffToken,
+      handoff_token: continuation.handoffToken,
     });
-    if (error) return this.failAndReturn(failureCode(error.message));
+    if (error) {
+      if (/belongs to another account|invalid migration/i.test(error.message)) {
+        this.clearLocalRecovery();
+        return false;
+      }
+      return this.failAndReturn(failureCode(error.message));
+    }
     const payload = data as unknown as ConflictPayload;
     if (payload.status === "resolved") {
-      await this.complete(payload.survivingPlayerId);
-      return true;
+      try {
+        await this.complete(payload.survivingPlayerId);
+        return true;
+      } catch {
+        return this.failAndReturn("temporarily-unavailable");
+      }
     }
     if (!payload.guest || !payload.google) return this.failAndReturn("conflict-inspection-failed");
     this.publish({
@@ -176,29 +250,39 @@ export class SupabaseAccountMigrationAdapter implements AccountMigrationPort {
   }
 
   private async complete(expectedPlayerId?: string): Promise<void> {
-    await playerProfileService.adoptCanonicalAfterAccountMigration(expectedPlayerId);
+    await this.profiles.adoptCanonicalAfterAccountMigration(expectedPlayerId);
     this.clearContinuation();
     this.publish({ status: "completed" });
   }
 
   private readContinuation(): Continuation | undefined {
     try {
-      const value = JSON.parse(window.sessionStorage.getItem(CONTINUATION_KEY) ?? "null") as Partial<Continuation> | null;
+      const value = JSON.parse(this.storage?.getItem(CONTINUATION_KEY) ?? "null") as Partial<Continuation> | null;
       if (value && typeof value.handoffToken === "string"
           && (value.phase === "linking" || value.phase === "sign-in-existing")) {
-        return value as Continuation;
+        return {
+          handoffToken: value.handoffToken,
+          phase: value.phase,
+          ...(typeof value.accountAuthUserId === "string"
+            ? { accountAuthUserId: value.accountAuthUserId } : {}),
+          ...(typeof value.sourceAuthUserId === "string"
+            ? { sourceAuthUserId: value.sourceAuthUserId } : {}),
+          ...(value.requestedResolution === "USE_GUEST_PROFILE"
+              || value.requestedResolution === "USE_GOOGLE_PROFILE"
+            ? { requestedResolution: value.requestedResolution } : {}),
+        };
       }
     } catch { /* Invalid or denied storage is treated as no continuation. */ }
     return undefined;
   }
 
   private writeContinuation(value: Continuation): void {
-    try { window.sessionStorage.setItem(CONTINUATION_KEY, JSON.stringify(value)); }
+    try { this.storage?.setItem(CONTINUATION_KEY, JSON.stringify(value)); }
     catch { this.fail("temporarily-unavailable"); }
   }
 
   private clearContinuation(): void {
-    try { window.sessionStorage.removeItem(CONTINUATION_KEY); } catch { /* no-op */ }
+    try { this.storage?.removeItem(CONTINUATION_KEY); } catch { /* no-op */ }
   }
 
   private fail(code: AccountMigrationFailureCode): void {

@@ -8,6 +8,7 @@ import AuthenticationProvider from "./auth/AuthenticationProvider";
 import { useAuthentication } from "./auth/authentication-context";
 import UsernameOnboarding, { AccountProfileUnavailable } from "./auth/UsernameOnboarding";
 import playerProfileService from "./profile/PlayerProfileService";
+import accountMigrationService from "./application/accounts/AccountMigrationService";
 const GamePage = lazy(() => import("./pages/GamePage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
@@ -20,8 +21,13 @@ const ObservabilityVerificationPage = __OBSERVABILITY_TEST_MODE__
 function ApplicationRoutes() {
   const { initialized, session } = useAuthentication();
   const [, setProfileRevision] = useState(0);
+  const [migrationState, setMigrationState] = useState(() => accountMigrationService.getState());
   useEffect(
     () => playerProfileService.subscribe(() => setProfileRevision((value) => value + 1)),
+    [],
+  );
+  useEffect(
+    () => accountMigrationService.subscribe(setMigrationState),
     [],
   );
   if (!initialized) {
@@ -31,6 +37,17 @@ function ApplicationRoutes() {
     return <AuthenticationEntry />;
   }
   if (session.state.status === "authenticated") {
+    if (migrationState.status === "profile-conflict") {
+      return (
+        <BrowserRouter>
+          <Suspense fallback={<div aria-label="Loading" className="route-loading" role="status" />}>
+            <Routes>
+              <Route path="*" element={<ProfilePage />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      );
+    }
     const profileStatus = playerProfileService.getCanonicalProfileStatus();
     if (profileStatus === "loading" || profileStatus === "not-applicable") {
       return <div aria-label="Loading" className="route-loading" role="status" />;

@@ -31,10 +31,16 @@ An unresolved conflict is not presented as a completed account connection. Norma
 
 After linking, sign-out does not delete either cloud data or the canonical PlayerId. Signing in with the same Google account on another browser resolves to that canonical profile. Clearing browser data therefore no longer orphans the linked profile.
 
+PROFILE-IDENTITY-01B-HF1 makes interrupted conflicts convergent. The 15-minute handoff expiry still rejects an unbound token, but it no longer makes a conflict permanently unrecoverable after the server has bound it to the authenticated account (or verified the exact linked Guest auth owner). Startup and Retry restore the Supabase session, inspect the server migration, and then restore the unresolved choice UI, adopt an already-resolved survivor, discard continuation metadata proven to belong to another account, or report a genuine infrastructure failure.
+
+The continuation records its source and target auth-user binding plus the first requested resolution. A different auth user cannot inherit it and a contradictory retry is rejected. Sign Out clears only browser continuation/migration state; it does not modify the server intent or either profile. PlayerSync detaches pending operations from the signed-out PlayerId instead of applying them to a new session.
+
 ## Required remote configuration
 
 Supabase Dashboard → Authentication → Providers → Manual Linking must be enabled. Redirect URLs remain governed by the existing localhost, production, and approved preview allowlist.
 
 Apply `supabase/migrations/202608170001_data_01c_account_migration.sql`, then run `supabase/tests/data_01c_schema_verification.sql` in SQL Editor before considering DATA-01C complete.
+
+PROFILE-IDENTITY-01B-HF1 migration `202608180002_profile_identity_01b_hf1_migration_recovery.sql` is **APPLIED**. Its schema verification completed with all three privilege/recovery assertions returning `true`.
 
 Real Google OAuth and destructive conflict choices must be verified manually with disposable profiles. Automated normal E2E uses deterministic adapters and never contacts Supabase.

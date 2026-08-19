@@ -80,14 +80,17 @@ export default function UsernameOnboarding() {
 
 export function AccountProfileUnavailable() {
   const { t } = useTranslation();
-  const { authentication, session } = useAuthentication();
+  const { authentication } = useAuthentication();
   const [pending, setPending] = useState(false);
 
   const retry = async () => {
     if (pending) return;
     setPending(true);
-    await playerProfileService.handleAuthenticationSession(session);
-    setPending(false);
+    try {
+      await authentication.restoreSession();
+    } finally {
+      setPending(false);
+    }
   };
 
   return (

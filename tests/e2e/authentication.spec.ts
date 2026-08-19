@@ -162,6 +162,51 @@ test("lost resolution response can be retried without changing the choice", asyn
   assertNoErrors();
 });
 
+test("interrupted migration restores unresolved conflict instead of profile unavailable", async ({
+  page,
+  assertNoErrors,
+}) => {
+  await useAccountMigrationFixture(page, "recovery-unresolved");
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Choose which progress to keep" })).toBeVisible();
+  await expect(page.getByText("Guest6660", { exact: true })).toBeVisible();
+  await expect(page.getByText("Yigit", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /temporarily unavailable/i })).toHaveCount(0);
+  assertNoErrors();
+});
+
+test("resolved migration automatically adopts the canonical Google survivor after refresh", async ({
+  page,
+  assertNoErrors,
+}) => {
+  await useAccountMigrationFixture(page, "recovery-resolved-google");
+  await page.goto("/profile");
+  await expect(page.getByRole("heading", { name: "Yigit", exact: true })).toBeVisible();
+  await expect(page.getByText("#7K2M9")).toBeVisible();
+  await expect(page.getByText(/70\s*\/\s*100 XP/)).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Yigit", exact: true })).toBeVisible();
+  await expect(page.getByText("#7K2M9")).toBeVisible();
+  assertNoErrors();
+});
+
+test("lost Google resolution response converges to the server survivor on Retry", async ({
+  page,
+  assertNoErrors,
+}) => {
+  await useAccountMigrationFixture(page, "recovery-response-loss-google");
+  await page.goto("/profile");
+  const chooseGoogle = page.getByRole("button", { name: "Use Google Progress" });
+  await chooseGoogle.click();
+  await expect(page.getByRole("alert")).toContainText(/retry safely/i);
+  await chooseGoogle.click();
+  await expect(page.getByRole("heading", { name: "Yigit", exact: true })).toBeVisible();
+  await expect(page.getByText("#7K2M9")).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Yigit", exact: true })).toBeVisible();
+  assertNoErrors();
+});
+
 test("local fallback Guest remains usable without Supabase configuration", async ({
   page,
   assertNoErrors,

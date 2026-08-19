@@ -200,6 +200,11 @@ export class PlayerProfileService {
     this.sync?.resumeAfterAccountMigrationFailure();
   }
 
+  public resetAfterAuthenticationSignOut(): void {
+    this.sync?.resetAfterAuthenticationSignOut();
+    this.notify();
+  }
+
   public async adoptCanonicalAfterAccountMigration(expectedPlayerId?: string): Promise<void> {
     await this.sync?.adoptCanonicalAfterAccountMigration(expectedPlayerId);
     this.notify();

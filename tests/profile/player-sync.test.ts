@@ -80,6 +80,73 @@ describe("PlayerSyncCoordinator", () => {
     expect(repository.getProfile().totalXp).toBe(before);
   });
 
+  it("adopts the server canonical account when local sync still references the pre-migration Guest", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const guest = meaningful(repository.getProfile());
+    guest.playerId = "guest-player";
+    repository.saveProfile(guest);
+    localStorage.setItem(PLAYER_SYNC_STORAGE_KEY, JSON.stringify({
+      schemaVersion: 1,
+      cloudPlayerId: "guest-player",
+      bootstrapSourceProfileId: "guest-player",
+      pending: [],
+      conflict: true,
+    }));
+    const google = meaningful(createDefaultPlayerProfile());
+    google.playerId = "google-player";
+    google.displayName = "Yigit";
+    google.publicDiscriminator = "A1B2C";
+    google.totalXp = 136;
+    const canonical = { ...cloud(google), playerId: google.playerId, multiplayerRating: 1042 };
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => structuredClone(canonical)),
+      bootstrap: vi.fn(), applyOperation: vi.fn(), renameCurrentPlayer: vi.fn(),
+    };
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+
+    await sync.handleAuthentication(accountSession());
+
+    expect(sync.getCanonicalProfileStatus()).toBe("ready");
+    expect(sync.hasConflict()).toBe(false);
+    expect(repository.getProfile()).toMatchObject({
+      playerId: "google-player",
+      displayName: "Yigit",
+      publicDiscriminator: "A1B2C",
+      totalXp: 136,
+    });
+    expect(remote.bootstrap).not.toHaveBeenCalled();
+  });
+
+  it("detaches old-owner pending operations on sign-out instead of applying them to a new session", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const oldCanonical = cloud(repository.getProfile());
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => oldCanonical), bootstrap: vi.fn(),
+      applyOperation: vi.fn().mockRejectedValue(new Error("offline")), renameCurrentPlayer: vi.fn(),
+    };
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+    await sync.handleAuthentication(accountSession());
+    const before = repository.getProfile();
+    const after = structuredClone(before);
+    after.totalXp += 25;
+    after.statistics.gamesPlayed++;
+    after.statistics.wins++;
+    sync.recordCompletedMatch(before, after);
+    await vi.waitFor(() => expect(remote.applyOperation).toHaveBeenCalledOnce());
+
+    sync.resetAfterAuthenticationSignOut();
+
+    const saved = JSON.parse(localStorage.getItem(PLAYER_SYNC_STORAGE_KEY)!);
+    expect(saved).toMatchObject({ pending: [], conflict: false });
+    expect(saved).not.toHaveProperty("cloudPlayerId");
+    expect(saved.deferredPending).toEqual([{
+      playerId: oldCanonical.playerId,
+      operations: [expect.objectContaining({ operationId: expect.any(String) })],
+    }]);
+  });
+
   it("keeps a failed operation pending and removes it after a successful replay", async () => {
     const localStorage = storage();
     const repository = new LocalStoragePlayerProfileRepository(localStorage);

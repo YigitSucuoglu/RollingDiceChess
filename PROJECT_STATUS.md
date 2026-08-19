@@ -20,6 +20,7 @@ v1.0.0
 ## Completed
 
 ### Quality
+- PROFILE-IDENTITY-01B-HF1 — Recover interrupted account/profile migration state
 - GAME-EXIT-01 — Add safe active-match exit and abandon lifecycle
 - PROFILE-IDENTITY-01B — Implement account username onboarding and profile rename UX
 - PROFILE-IDENTITY-01A — Add immutable public player discriminator and account username policy foundation
@@ -115,6 +116,7 @@ v1.0.0
 ## Current Sprint
 
 Completed:
+- PROFILE-IDENTITY-01B-HF1 — Recover interrupted account/profile migration state
 - GAME-EXIT-01 — Add safe active-match exit and abandon lifecycle
 - PROFILE-IDENTITY-01B — Implement account username onboarding and profile rename UX
 - PROFILE-IDENTITY-01A — Add immutable public player discriminator and account username policy foundation
@@ -242,6 +244,7 @@ Performance Backlog:
 - PROFILE-IDENTITY-01A adds a server-generated, immutable, globally unique five-character public discriminator without exposing or replacing PlayerId. Existing rows were backfilled in place; account names remain non-unique but cannot enter the reserved `Guest####` namespace, Guest names remain system-owned, and durable username onboarding state is carried with the canonical profile. The remote migration, 51-row schema verification, deterministic collision check, and publishable-key security harness passed.
 - PROFILE-IDENTITY-01B gates all normal routes behind canonical account username onboarding when required, provides Sign Out without a Skip path, and adds account-only Profile rename through the existing caller-authorized atomic RPC. Refresh/direct routes cannot bypass the server-owned flag; Guest rename remains blocked in application and database boundaries, while UUID PlayerId, discriminator, progression, statistics and rating remain unchanged.
 - GAME-EXIT-01 routes exit confirmation and abandonment through MatchSession. Local bot abandonment is distinct from a completed loss, grants no XP or completed-game statistics, and cancels local roll, bot, skip, and clock work. Future ranked forfeit and rating effects remain server-authoritative; refresh/tab-close reliability is intentionally deferred to online presence and reconnect semantics.
+- PROFILE-IDENTITY-01B-HF1 makes interrupted Guest-to-Google migration deterministic and retry-safe. Bound unresolved intents remain recoverable after the original handoff expiry, completed server choices converge through canonical adoption, stale cross-account continuation is discarded locally, and sign-out keeps server profiles intact while isolating pending progression by PlayerId. The recovery migration and its three schema/privilege assertions were applied successfully.
 
 ### Versioning Policy
 

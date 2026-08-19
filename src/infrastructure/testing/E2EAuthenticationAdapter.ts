@@ -38,12 +38,16 @@ function writeMigrationResult(value: "google" | "guest"): void {
   catch { /* Storage-denial E2E deliberately keeps the result runtime-only. */ }
 }
 
-type E2EAuthFixture = "account" | "cloud" | "local" | "onboarding" | "upgrade" | "conflict-guest" | "conflict-google" | "resolution-failure";
+type E2EAuthFixture = "account" | "cloud" | "local" | "onboarding" | "upgrade"
+  | "conflict-guest" | "conflict-google" | "resolution-failure"
+  | "recovery-unresolved" | "recovery-resolved-google" | "recovery-response-loss-google";
 
 export function resolveE2EAuthFixture(value: string | null): E2EAuthFixture {
   return value === "account" || value === "cloud" || value === "onboarding"
     || value === "upgrade" || value === "conflict-guest"
-    || value === "conflict-google" || value === "resolution-failure" ? value : "local";
+    || value === "conflict-google" || value === "resolution-failure"
+    || value === "recovery-unresolved" || value === "recovery-resolved-google"
+    || value === "recovery-response-loss-google" ? value : "local";
 }
 
 function readFixture(): E2EAuthFixture {
@@ -83,7 +87,7 @@ class E2ECloudPlayerSync implements CloudPlayerSyncPort {
     const result = readMigrationResult();
     this.snapshot = fixture === "onboarding"
       ? createE2ECloudSnapshot(FIXTURE_PLAYER_ID, "Guest1234", 50, true)
-      : fixture === "account"
+      : fixture === "account" || fixture === "recovery-resolved-google"
         ? createE2ECloudSnapshot(FIXTURE_GOOGLE_PLAYER_ID, "Yigit", 70)
         : result === "google"
       ? createE2ECloudSnapshot(FIXTURE_GOOGLE_PLAYER_ID, "Player", 70)
@@ -146,8 +150,10 @@ class E2EAuthenticationAdapter implements AuthenticationPort {
 
   public constructor(fixture: E2EAuthFixture) {
     this.fixture = fixture;
+    const recoveryAuthenticated = fixture === "recovery-unresolved"
+      || fixture === "recovery-resolved-google" || fixture === "recovery-response-loss-google";
     const migrationResolved = readMigrationResult() !== null
-      || fixture === "account" || fixture === "onboarding";
+      || fixture === "account" || fixture === "onboarding" || recoveryAuthenticated;
     this.session = migrationResolved ? {
       schemaVersion: AUTH_SESSION_SCHEMA_VERSION,
       state: { status: "authenticated", account: {
@@ -176,7 +182,10 @@ class E2EAuthenticationAdapter implements AuthenticationPort {
   public getSession(): AuthenticationSession { return cloneAuthenticationSession(this.session); }
 
   public async restoreSession(): Promise<AuthenticationSession> {
-    await playerProfileService.handleAuthenticationSession(this.session);
+    const migrationHandled = await accountMigrationService.restoreContinuation();
+    if (!migrationHandled || accountMigrationService.getState().status === "completed") {
+      await playerProfileService.handleAuthenticationSession(this.session);
+    }
     return this.getSession();
   }
 
@@ -239,8 +248,38 @@ class E2EAccountMigrationAdapter implements AccountMigrationPort {
       google: { displayName: "Player", gamesPlayed: 30, level: 8, totalXp: 2700, multiplayerRating: 1000 },
     });
   }
-  public async restoreContinuation(): Promise<boolean> { return false; }
+  public async restoreContinuation(): Promise<boolean> {
+    if (this.fixture === "recovery-resolved-google") {
+      this.cloudSync.select(FIXTURE_GOOGLE_PLAYER_ID, "Yigit", 70);
+      await playerProfileService.adoptCanonicalAfterAccountMigration(FIXTURE_GOOGLE_PLAYER_ID);
+      this.publish({ status: "completed" });
+      return true;
+    }
+    if (this.fixture === "recovery-unresolved" || this.fixture === "recovery-response-loss-google") {
+      playerProfileService.suspendForAccountMigration();
+      this.publish({ status: "profile-conflict",
+        guest: { displayName: "Guest6660", gamesPlayed: 2, level: 2, totalXp: 136, multiplayerRating: 1000 },
+        google: { displayName: "Yigit", gamesPlayed: 2, level: 2, totalXp: 136, multiplayerRating: 1000 },
+      });
+      return true;
+    }
+    return false;
+  }
   public async resolveConflict(resolution: ProfileConflictResolution): Promise<void> {
+    if (this.fixture === "recovery-response-loss-google" && !this.resolutionFailedOnce) {
+      this.resolutionFailedOnce = true;
+      writeMigrationResult("google");
+      if (this.state.status === "profile-conflict") {
+        this.publish({ ...this.state, failureCode: "resolution-failed" });
+      }
+      return;
+    }
+    if (this.fixture === "recovery-response-loss-google" && readMigrationResult() === "google") {
+      this.cloudSync.select(FIXTURE_GOOGLE_PLAYER_ID, "Yigit", 70);
+      await playerProfileService.adoptCanonicalAfterAccountMigration(FIXTURE_GOOGLE_PLAYER_ID);
+      this.publish({ status: "completed" });
+      return;
+    }
     if (this.fixture === "resolution-failure" && !this.resolutionFailedOnce) {
       this.resolutionFailedOnce = true;
       if (this.state.status === "profile-conflict") {
@@ -264,6 +303,7 @@ class E2EAccountMigrationAdapter implements AccountMigrationPort {
     this.authenticate(); this.publish({ status: "completed" });
   }
   public cancelConflict(): void { if (this.state.status === "profile-conflict") this.publish(this.state); }
+  public clearLocalRecovery(): void { this.publish({ status: "idle" }); }
   public dispose(): void { this.listeners.clear(); }
   private publish(state: AccountMigrationState): void { this.state = state; for (const listener of this.listeners) listener(state); }
 }

@@ -104,4 +104,18 @@ describe("cloud player identity model", () => {
     expect(readFileSync("supabase/tests/data_01a_schema_verification.sql", "utf8"))
       .toContain("Browser role has a forbidden direct mutation grant");
   });
+
+  it("keeps expired handoffs recoverable only after ownership binding", () => {
+    const sql = readFileSync(
+      "supabase/migrations/202608180002_profile_identity_01b_hf1_migration_recovery.sql",
+      "utf8",
+    );
+    expect(sql).toContain("intent.expires_at < now() and intent.account_auth_user_id is null");
+    expect(sql).toContain("intent.account_auth_user_id <> auth.uid()");
+    expect(sql).toContain("auth.uid() <> intent.guest_auth_user_id");
+    expect(sql).toContain("migration already resolved differently");
+    expect(sql).toContain("set search_path = ''");
+    expect(sql).toContain("for update");
+    expect(sql).not.toMatch(/update public\.player_(?:progression|ratings)/i);
+  });
 });

@@ -35,7 +35,13 @@ interface PlayerSyncState {
   readonly cloudPlayerId?: string;
   readonly bootstrapSourceProfileId?: string;
   readonly pending: readonly ProgressionOperation[];
+  readonly deferredPending?: readonly DeferredProgressionOperations[];
   readonly conflict: boolean;
+}
+
+interface DeferredProgressionOperations {
+  readonly playerId: string;
+  readonly operations: readonly ProgressionOperation[];
 }
 
 const EMPTY_STATE: PlayerSyncState = { schemaVersion: 1, pending: [], conflict: false };
@@ -136,6 +142,36 @@ export class PlayerSyncCoordinator {
     this.migrationSuspended = false;
   }
 
+  public resetAfterAuthenticationSignOut(): void {
+    const state = this.readState();
+    const deferredPending = [...(state.deferredPending ?? [])];
+    if (state.cloudPlayerId && state.pending.length > 0) {
+      const existing = deferredPending.find((entry) => entry.playerId === state.cloudPlayerId);
+      const operations = [
+        ...(existing?.operations ?? []),
+        ...state.pending,
+      ].filter((operation, index, all) =>
+        all.findIndex((candidate) => candidate.operationId === operation.operationId) === index);
+      const withoutOwner = deferredPending.filter((entry) => entry.playerId !== state.cloudPlayerId);
+      deferredPending.splice(0, deferredPending.length, ...withoutOwner, {
+        playerId: state.cloudPlayerId,
+        operations,
+      });
+    }
+    this.writeState({
+      schemaVersion: 1,
+      pending: [],
+      deferredPending,
+      conflict: false,
+    });
+    this.connected = false;
+    this.accountAuthenticated = false;
+    this.migrationSuspended = false;
+    this.canonicalProfileStatus = "not-applicable";
+    this.initializing = undefined;
+    this.flushing = undefined;
+  }
+
   public async handleAuthentication(session: AuthenticationSession): Promise<void> {
     this.accountAuthenticated = session.state.status === "authenticated";
     this.connected = session.state.status === "authenticated"
@@ -229,9 +265,28 @@ export class PlayerSyncCoordinator {
     try {
       const cloud = await this.remote.loadCurrent();
       const local = this.local.getProfile();
-      const state = this.readState();
+      let state = this.readState();
+      const deferred = state.deferredPending?.find((entry) => entry.playerId === cloud.playerId);
+      if (deferred) {
+        state = {
+          ...state,
+          pending: deferred.operations,
+          deferredPending: state.deferredPending?.filter((entry) => entry.playerId !== cloud.playerId),
+        };
+      }
       const knownCloud = state.cloudPlayerId === cloud.playerId;
-      if (isMeaningfulCloudProfile(cloud) && isMeaningfulLocalProfile(local) && !knownCloud) {
+      if (this.accountAuthenticated && !knownCloud && state.cloudPlayerId && state.pending.length > 0) {
+        state = {
+          ...state,
+          pending: [],
+          deferredPending: [
+            ...(state.deferredPending ?? []).filter((entry) => entry.playerId !== state.cloudPlayerId),
+            { playerId: state.cloudPlayerId, operations: state.pending },
+          ],
+        };
+      }
+      if (!this.accountAuthenticated && isMeaningfulCloudProfile(cloud)
+          && isMeaningfulLocalProfile(local) && !knownCloud) {
         this.writeState({ ...state, conflict: true });
         this.canonicalProfileStatus = "unavailable";
         return;
@@ -277,7 +332,12 @@ export class PlayerSyncCoordinator {
       if (!raw) return this.memoryState;
       const value = JSON.parse(raw) as Partial<PlayerSyncState>;
       if (value.schemaVersion !== 1 || !Array.isArray(value.pending)) return EMPTY_STATE;
-      return { schemaVersion: 1, pending: value.pending, conflict: value.conflict === true,
+      const deferredPending = Array.isArray(value.deferredPending)
+        ? value.deferredPending.filter((entry): entry is DeferredProgressionOperations =>
+          Boolean(entry && typeof entry.playerId === "string" && Array.isArray(entry.operations)))
+        : [];
+      return { schemaVersion: 1, pending: value.pending, deferredPending,
+        conflict: value.conflict === true,
         ...(typeof value.cloudPlayerId === "string" ? { cloudPlayerId: value.cloudPlayerId } : {}),
         ...(typeof value.bootstrapSourceProfileId === "string" ? { bootstrapSourceProfileId: value.bootstrapSourceProfileId } : {}) };
     } catch { return EMPTY_STATE; }

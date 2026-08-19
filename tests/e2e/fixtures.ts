@@ -26,7 +26,8 @@ export async function useAuthenticationFixture(
 
 export async function useAccountMigrationFixture(
   page: Page,
-  fixture: "upgrade" | "conflict-guest" | "conflict-google" | "resolution-failure",
+  fixture: "upgrade" | "conflict-guest" | "conflict-google" | "resolution-failure"
+    | "recovery-unresolved" | "recovery-resolved-google" | "recovery-response-loss-google",
 ): Promise<void> {
   await page.addInitScript(({ key, value }) => window.localStorage.setItem(key, value), {
     key: E2E_AUTH_FIXTURE_STORAGE_KEY,

@@ -52,7 +52,9 @@ export default class ConfiguredAuthentication implements AuthenticationPort {
     const delegate = await this.getDelegate();
     this.session = await delegate.restoreSession();
     const migrationHandled = await accountMigrationService.restoreContinuation();
-    if (!migrationHandled) await playerProfileService.handleAuthenticationSession(this.session);
+    if (!migrationHandled || accountMigrationService.getState().status === "completed") {
+      await playerProfileService.handleAuthenticationSession(this.session);
+    }
     this.publish();
     return this.getSession();
   }
@@ -78,7 +80,12 @@ export default class ConfiguredAuthentication implements AuthenticationPort {
   }
 
   public async signOut(): Promise<AuthenticationSession> {
-    return (await this.getDelegate()).signOut();
+    accountMigrationService.clearLocalRecovery();
+    playerProfileService.resetAfterAuthenticationSignOut();
+    this.session = await (await this.getDelegate()).signOut();
+    await playerProfileService.handleAuthenticationSession(this.session);
+    this.publish();
+    return this.getSession();
   }
 
   public dispose(): void {

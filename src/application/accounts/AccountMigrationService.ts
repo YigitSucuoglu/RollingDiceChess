@@ -48,6 +48,11 @@ class AccountMigrationService implements AccountMigrationPort {
 
   public cancelConflict(): void { this.delegate?.cancelConflict(); }
 
+  public clearLocalRecovery(): void {
+    this.delegate?.clearLocalRecovery();
+    this.publish({ status: "idle" });
+  }
+
   public dispose(): void {
     this.delegateUnsubscribe?.();
     this.delegate?.dispose();
