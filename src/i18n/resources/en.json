@@ -1,6 +1,6 @@
 {
   "common": {
-    "actions": { "play": "Play", "playAgain": "Play again", "mainMenu": "Main menu", "back": "Back", "backToHome": "Back to Home", "cancel": "Cancel", "reset": "Reset", "resetProfile": "Reset Profile", "startGame": "Start Game", "roll": "ROLL" },
+    "actions": { "play": "Play", "playAgain": "Play again", "mainMenu": "Main menu", "back": "Back", "backToHome": "Back to Home", "cancel": "Cancel", "retry": "Retry", "reset": "Reset", "resetProfile": "Reset Profile", "startGame": "Start Game", "roll": "ROLL" },
     "colors": { "white": "White", "black": "Black" },
     "pieces": { "pawn": "Pawn", "knight": "Knight", "bishop": "Bishop", "rook": "Rook", "queen": "Queen", "king": "King" },
     "difficulties": { "easy": "Easy", "medium": "Medium", "hard": "Hard" },
@@ -8,7 +8,7 @@
     "boardThemes": { "wood": "Wood", "marble": "Marble", "dark": "Dark" },
     "timeCategories": { "bullet": "Bullet", "blitz": "Blitz", "rapid": "Rapid", "classical": "Classical" },
     "navigation": { "mainMenu": "Main menu", "profile": "Profile navigation", "settings": "Settings navigation", "howToPlay": "How to Play navigation" },
-    "status": { "comingSoon": "Coming soon", "selected": "Selected", "on": "On", "off": "Off" },
+    "status": { "comingSoon": "Coming soon", "loading": "Loading…", "selected": "Selected", "on": "On", "off": "Off" },
     "level": "Level {{level}}",
     "xpValue": "{{current}} / {{required}} XP"
   },
@@ -16,7 +16,7 @@
   "home": {
     "browserTitle": "RouletteChess", "eyebrow": "Strategy meets chance", "tagline": "Spin the pieces. Rewrite the board.",
     "summary": "Every turn deals three pieces. Read the position, play your rights, and capture the king.",
-    "settings": "Settings", "profile": "Profile", "howToPlay": "How to Play",
+    "settings": "Settings", "profile": "Profile", "howToPlay": "How to Play", "multiplayer": "Multiplayer",
     "heroLabel": "Roulette machine with Gold and Obsidian chess pieces", "caption": "Three pieces. One turn. Every move matters."
   },
   "auth": {
@@ -127,6 +127,18 @@
     "localPlayerData": "Local player data", "data": "Data", "resetOfflineProfile": "Reset Offline Profile", "resetDescription": "Erase local XP, progression, and all statistics.", "resetComplete": "Offline profile reset complete.", "cloudResetUnavailable": "Cloud profile reset unavailable",
     "dialog": { "eyebrow": "Confirm reset", "title": "Reset Offline Profile?", "description": "This will permanently erase your XP, progression, and all offline statistics. This action cannot be undone." },
     "languageChanged": "Language changed to English."
+  },
+  "multiplayer": {
+    "browserTitle": "Multiplayer | RouletteChess", "title": "Multiplayer", "actions": "Multiplayer actions", "availableMatches": "Available matches",
+    "createLobby": "Create Lobby", "joinPrivate": "Join Private Lobby", "openLobbies": "Open Lobbies", "noOpenLobbies": "No open lobbies right now.", "emptyHint": "Create one and wait for another player.",
+    "public": "Public", "private": "Private", "visibility": "Visibility", "mode": "Mode", "ranked": "Ranked", "unranked": "Unranked", "timeControl": "Time Control", "side": "Side", "white": "White", "black": "Black", "random": "Random", "locked": "Locked",
+    "rankedHint": "Ranked matches affect your rating.", "unrankedHint": "Unranked matches do not affect your rating.", "create": "Create Lobby", "creating": "Creating…", "join": "Join", "joining": "Joining…", "refresh": "Refresh",
+    "lobbyCode": "Lobby Code", "sixDigitCode": "Six-digit lobby code: {{code}}", "copyCode": "Copy Code", "copied": "Copied", "waitingOpponent": "Waiting for opponent…", "host": "Host", "opponent": "Opponent", "matchSettings": "Match settings",
+    "publicLobby": "Public Lobby", "privateLobby": "Private Lobby", "kickPlayer": "Kick Player", "startMatch": "Start Match", "starting": "Starting…", "leaveLobby": "Leave Lobby", "closeLobby": "Close Lobby", "reconnecting": "Reconnecting…",
+    "rating": "Rating {{rating}}", "randomSide": "Random Side", "hostSide": "Host: {{side}}", "matchCreated": "Match created", "matchPreparing": "The secure game connection is being prepared.",
+    "onlineRequired": "Multiplayer requires an online player profile.", "playSingleplayer": "Play Singleplayer",
+    "notices": { "kicked": "The host removed you from the lobby.", "hostClosed": "The host closed the lobby.", "unavailable": "This lobby is no longer available." },
+    "errors": { "alreadyActive": "You already have an active lobby or match.", "forbidden": "You cannot perform this lobby action.", "invalidCode": "Enter a valid six-digit lobby code.", "full": "The lobby is already full.", "unavailable": "This lobby is no longer available.", "network": "The multiplayer service is temporarily unavailable. Please retry.", "onlineRequired": "Multiplayer requires an online player profile.", "unknown": "Something went wrong. Please retry." }
   },
   "guide": {
     "browserTitle": "How to Play | RouletteChess", "eyebrow": "Rules and strategy", "title": "How to Play", "intro": "Learn the rules of RouletteChess, understand your movement rights, and capture the enemy king.", "startHere": "Start here", "fourRules": "The Game in Four Rules",

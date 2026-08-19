@@ -8,6 +8,8 @@ interface SafeBrowserStorage {
   setItem(key: string, value: string): void;
 }
 
+let cachedClient: { readonly key: string; readonly client: SupabaseClient } | undefined;
+
 function createSafeBrowserStorage(): SafeBrowserStorage {
   const memory = new Map<string, string>();
   return {
@@ -39,7 +41,9 @@ export function createSupabaseAuthClient(
   url: string,
   publishableKey: string,
 ): SupabaseClient {
-  return createClient(url, publishableKey, {
+  const key = `${url}\u0000${publishableKey}`;
+  if (cachedClient?.key === key) return cachedClient.client;
+  const client = createClient(url, publishableKey, {
     auth: {
       autoRefreshToken: true,
       detectSessionInUrl: true,
@@ -47,4 +51,6 @@ export function createSupabaseAuthClient(
       storage: createSafeBrowserStorage(),
     },
   });
+  cachedClient = { key, client };
+  return client;
 }

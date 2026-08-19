@@ -1,6 +1,6 @@
 {
   "common": {
-    "actions": { "play": "Oyna", "playAgain": "Tekrar oyna", "mainMenu": "Ana menü", "back": "Geri", "backToHome": "Ana Menüye Dön", "cancel": "İptal", "reset": "Sıfırla", "resetProfile": "Profili Sıfırla", "startGame": "Oyunu Başlat", "roll": "ÇEVİR" },
+    "actions": { "play": "Oyna", "playAgain": "Tekrar oyna", "mainMenu": "Ana menü", "back": "Geri", "backToHome": "Ana Menüye Dön", "cancel": "İptal", "retry": "Tekrar Dene", "reset": "Sıfırla", "resetProfile": "Profili Sıfırla", "startGame": "Oyunu Başlat", "roll": "ÇEVİR" },
     "colors": { "white": "Beyaz", "black": "Siyah" },
     "pieces": { "pawn": "Piyon", "knight": "At", "bishop": "Fil", "rook": "Kale", "queen": "Vezir", "king": "Şah" },
     "difficulties": { "easy": "Kolay", "medium": "Orta", "hard": "Zor" },
@@ -8,7 +8,7 @@
     "boardThemes": { "wood": "Ahşap", "marble": "Mermer", "dark": "Koyu" },
     "timeCategories": { "bullet": "Mermi", "blitz": "Yıldırım", "rapid": "Hızlı", "classical": "Klasik" },
     "navigation": { "mainMenu": "Ana menü", "profile": "Profil navigasyonu", "settings": "Ayarlar navigasyonu", "howToPlay": "Nasıl Oynanır navigasyonu" },
-    "status": { "comingSoon": "Yakında", "selected": "Seçildi", "on": "Açık", "off": "Kapalı" },
+    "status": { "comingSoon": "Yakında", "loading": "Yükleniyor…", "selected": "Seçildi", "on": "Açık", "off": "Kapalı" },
     "level": "Seviye {{level}}",
     "xpValue": "{{current}} / {{required}} XP"
   },
@@ -16,7 +16,7 @@
   "home": {
     "browserTitle": "RouletteChess", "eyebrow": "Strateji şansla buluşuyor", "tagline": "Taşları çevir. Tahtayı yeniden yaz.",
     "summary": "Her tur üç taş türü getirir. Konumu oku, haklarını kullan ve rakip şahı yakala.",
-    "settings": "Ayarlar", "profile": "Profil", "howToPlay": "Nasıl Oynanır",
+    "settings": "Ayarlar", "profile": "Profil", "howToPlay": "Nasıl Oynanır", "multiplayer": "Çok Oyunculu",
     "heroLabel": "Altın ve Obsidyen satranç taşları bulunan rulet makinesi", "caption": "Üç taş. Bir tur. Her hamle önemli."
   },
   "auth": {
@@ -127,6 +127,18 @@
     "localPlayerData": "Yerel oyuncu verileri", "data": "Veriler", "resetOfflineProfile": "Çevrimdışı Profili Sıfırla", "resetDescription": "Yerel XP, ilerleme ve tüm istatistikleri sil.", "resetComplete": "Çevrimdışı profil sıfırlandı.", "cloudResetUnavailable": "Bulut profili sıfırlanamaz",
     "dialog": { "eyebrow": "Sıfırlamayı onayla", "title": "Çevrimdışı Profil Sıfırlansın mı?", "description": "XP'niz, ilerlemeniz ve tüm çevrimdışı istatistikleriniz kalıcı olarak silinecek. Bu işlem geri alınamaz." },
     "languageChanged": "Dil Türkçe olarak değiştirildi."
+  },
+  "multiplayer": {
+    "browserTitle": "Çok Oyunculu | RouletteChess", "title": "Çok Oyunculu", "actions": "Çok oyunculu işlemleri", "availableMatches": "Uygun maçlar",
+    "createLobby": "Lobi Oluştur", "joinPrivate": "Özel Lobiye Katıl", "openLobbies": "Açık Lobiler", "noOpenLobbies": "Şu anda açık lobi yok.", "emptyHint": "Bir lobi oluştur ve başka bir oyuncuyu bekle.",
+    "public": "Herkese Açık", "private": "Özel", "visibility": "Görünürlük", "mode": "Mod", "ranked": "Dereceli", "unranked": "Derecesiz", "timeControl": "Süre Kontrolü", "side": "Taraf", "white": "Beyaz", "black": "Siyah", "random": "Rastgele", "locked": "Kilitli",
+    "rankedHint": "Dereceli maçlar puanını etkiler.", "unrankedHint": "Derecesiz maçlar puanını etkilemez.", "create": "Lobi Oluştur", "creating": "Oluşturuluyor…", "join": "Katıl", "joining": "Katılınıyor…", "refresh": "Yenile",
+    "lobbyCode": "Lobi Kodu", "sixDigitCode": "Altı haneli lobi kodu: {{code}}", "copyCode": "Kodu Kopyala", "copied": "Kopyalandı", "waitingOpponent": "Rakip bekleniyor…", "host": "Kurucu", "opponent": "Rakip", "matchSettings": "Maç ayarları",
+    "publicLobby": "Herkese Açık Lobi", "privateLobby": "Özel Lobi", "kickPlayer": "Oyuncuyu Çıkar", "startMatch": "Maçı Başlat", "starting": "Başlatılıyor…", "leaveLobby": "Lobiden Ayrıl", "closeLobby": "Lobiyi Kapat", "reconnecting": "Yeniden bağlanıyor…",
+    "rating": "Puan {{rating}}", "randomSide": "Rastgele Taraf", "hostSide": "Kurucu: {{side}}", "matchCreated": "Maç oluşturuldu", "matchPreparing": "Güvenli oyun bağlantısı hazırlanıyor.",
+    "onlineRequired": "Çok oyunculu mod için çevrimiçi oyuncu profili gerekir.", "playSingleplayer": "Tek Oyunculu Oyna",
+    "notices": { "kicked": "Lobi kurucusu seni lobiden çıkardı.", "hostClosed": "Lobi kurucusu lobiyi kapattı.", "unavailable": "Bu lobi artık kullanılamıyor." },
+    "errors": { "alreadyActive": "Zaten aktif bir lobin veya maçın var.", "forbidden": "Bu lobi işlemini yapamazsın.", "invalidCode": "Geçerli altı haneli bir lobi kodu gir.", "full": "Lobi zaten dolu.", "unavailable": "Bu lobi artık kullanılamıyor.", "network": "Çok oyunculu hizmete şu anda ulaşılamıyor. Tekrar dene.", "onlineRequired": "Çok oyunculu mod için çevrimiçi oyuncu profili gerekir.", "unknown": "Bir sorun oluştu. Tekrar dene." }
   },
   "guide": {
     "browserTitle": "Nasıl Oynanır | RouletteChess", "eyebrow": "Kurallar ve strateji", "title": "Nasıl Oynanır", "intro": "RouletteChess kurallarını, hareket haklarını ve rakip şahı nasıl yakalayacağını öğren.", "startHere": "Buradan başla", "fourRules": "Dört Kuralda Oyun",

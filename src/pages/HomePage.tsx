@@ -38,6 +38,13 @@ function HomePage() {
             </button>
             <button
               className="home-action home-action-secondary"
+              onClick={() => navigate("/multiplayer")}
+              type="button"
+            >
+              {t("home.multiplayer")}
+            </button>
+            <button
+              className="home-action home-action-secondary"
               onClick={() => navigate("/settings")}
               type="button"
             >

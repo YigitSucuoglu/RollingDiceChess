@@ -57,10 +57,22 @@ async function run() {
       requested_side_preference: "white",
     }, "private lobby create");
     assert(/^\d{6}$/u.test(privateLobby.privateCode), "private code is not exactly six digits");
+    const restoredHostLobby = await rpc(hostClient, "get_current_multiplayer_context", {}, "host lobby restore");
+    assert(restoredHostLobby.kind === "lobby" && restoredHostLobby.role === "host"
+      && restoredHostLobby.lobby.lobbyId === privateLobby.lobbyId, "host canonical lobby was not restored");
     let listing = await rpc(thirdClient, "list_open_multiplayer_lobbies", {}, "listing with private lobby");
     assert(!listing.some((entry) => entry.lobby_id === privateLobby.lobbyId), "private lobby leaked into public listing");
     await rpc(opponentClient, "join_multiplayer_lobby", { requested_private_code: privateLobby.privateCode }, "private code join");
+    const restoredOpponentLobby = await rpc(opponentClient, "get_current_multiplayer_context", {}, "opponent lobby restore");
+    assert(restoredOpponentLobby.kind === "lobby" && restoredOpponentLobby.role === "opponent", "opponent canonical lobby was not restored");
+    const hostEvents = await hostClient.from("multiplayer_lobby_events").select("scope,lobby_id,event_kind").eq("lobby_id", privateLobby.lobbyId);
+    const foreignPrivateEvents = await thirdClient.from("multiplayer_lobby_events").select("scope,lobby_id,event_kind").eq("lobby_id", privateLobby.lobbyId);
+    assert(!hostEvents.error && hostEvents.data.some((event) => event.event_kind === "joined"),
+      `participant realtime invalidation is missing: ${hostEvents.error?.message ?? JSON.stringify(hostEvents.data)}`);
+    assert(!foreignPrivateEvents.error && foreignPrivateEvents.data.length === 0, "private participant realtime event leaked");
     await rpc(hostClient, "kick_multiplayer_lobby_opponent", { requested_lobby_id: privateLobby.lobbyId }, "private host kick");
+    const kickedContext = await rpc(opponentClient, "get_current_multiplayer_context", {}, "kicked context restore");
+    assert(kickedContext === null, "kicked opponent retained canonical lobby membership");
     await rpc(hostClient, "leave_multiplayer_lobby", { requested_lobby_id: privateLobby.lobbyId }, "private host close");
     const closedCode = await thirdClient.rpc("join_multiplayer_lobby", { requested_private_code: privateLobby.privateCode });
     assert(Boolean(closedCode.error), "closed private code remained usable");
@@ -97,6 +109,8 @@ async function run() {
     const forgedLobby = await hostClient.from("multiplayer_lobbies").update({ status: "closed" }).eq("lobby_id", publicLobby.lobbyId);
     const forgedMatch = await hostClient.from("multiplayer_matches").update({ status: "active", revision: 999 }).eq("match_id", matchId);
     assert(Boolean(forgedLobby.error) && Boolean(forgedMatch.error), "browser directly mutated authority tables");
+    const forgedEvent = await hostClient.from("multiplayer_lobby_events").insert({ scope: "public-list", event_kind: "created" });
+    assert(Boolean(forgedEvent.error), "browser inserted a forged lobby event");
 
     console.log("MULTIPLAYER-01A REMOTE SECURITY");
     console.log("Private code/visibility/closure....... PASS");
@@ -108,6 +122,8 @@ async function run() {
     console.log("Participant snapshot isolation........ PASS");
     console.log("Trusted activation from browser....... PASS (denied)");
     console.log("Direct authority-table mutation....... PASS (denied)");
+    console.log("Canonical lobby restoration........... PASS");
+    console.log("Realtime event privacy/mutation....... PASS");
     console.log("\nDisposable Auth users (manual Dashboard cleanup required):");
     console.log(`Host: ${host.authUserId}`);
     console.log(`Opponent: ${opponent.authUserId}`);

@@ -20,6 +20,7 @@ v1.0.0
 ## Completed
 
 ### Quality
+- MULTIPLAYER-01B — Implement public/private multiplayer lobby experience
 - MULTIPLAYER-01A — Establish authoritative multiplayer match/session foundation
 - RATING-01 — Design and implement authoritative multiplayer rating model
 - PROFILE-IDENTITY-01B-HF1 — Recover interrupted account/profile migration state
@@ -118,6 +119,7 @@ v1.0.0
 ## Current Sprint
 
 Completed:
+- MULTIPLAYER-01B — Implement public/private multiplayer lobby experience
 - MULTIPLAYER-01A — Establish authoritative multiplayer match/session foundation
 - RATING-01 — Design and implement authoritative multiplayer rating model
 - PROFILE-IDENTITY-01B-HF1 — Recover interrupted account/profile migration state
@@ -169,7 +171,7 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. MULTIPLAYER-01B — Implement public/private multiplayer lobby experience
+1. MULTIPLAYER-01C — Integrate real two-player authoritative gameplay and multiplayer Game UI
 
 Roadmap:
 - DATA-01A — Apply Supabase player schema and validate RLS/security
@@ -251,9 +253,11 @@ Performance Backlog:
 - PROFILE-IDENTITY-01B-HF1 makes interrupted Guest-to-Google migration deterministic and retry-safe. Bound unresolved intents remain recoverable after the original handoff expiry, completed server choices converge through canonical adoption, stale cross-account continuation is discarded locally, and sign-out keeps server profiles intact while isolating pending progression by PlayerId. The recovery migration and its three schema/privilege assertions were applied successfully.
 - RATING-01 locks the ranked formula at a 1000 starting rating, ±15 for equal opponents, a 200-point effective-difference cap, and nominal movement from 5 to 25. Bot, unranked, technical-abort, XP, and streak paths have zero rating effect. Trusted settlement is private/service-only, atomically locks both rating rows, uses an append-only match-id ledger for replay safety, and preserves browser denial for direct rating/history mutation; the migration, schema verification, and two-client publishable-key security harness passed.
 
-### Versioning Policy
+- MULTIPLAYER-01B adds the real public/private Supabase lobby experience with cloud-profile gating, ranked/unranked and side/time controls, six-digit private codes, public browse cards, canonical waiting/ready restoration, host Kick/Start, pre-match Leave/Close, EN/TR responsive UI, and privacy-safe Realtime invalidation/refetch. Normal E2E remains fully isolated from live Supabase; schema verification and the expanded three-client remote security harness passed. The actual authoritative two-player board and multiplayer machine sizing remain MULTIPLAYER-01C scope.
 
 - MULTIPLAYER-01A establishes versioned lobby and authoritative-match contracts, a deterministic trusted-runtime prototype, and a private Supabase authority schema. Public/private lobby visibility, six-digit private codes, membership concurrency, host-only idempotent Start, participant-only snapshots, browser write denial, and trusted activation boundaries passed schema and three-client remote security verification. Supabase Postgres/Auth/Realtime are sufficient for the initial architecture when rule execution remains in a trusted TypeScript runtime; lobby UI, network gameplay, presence transport, and rating settlement integration remain deferred.
+
+### Versioning Policy
 
 - v1.0.0 is the first official singleplayer release.
 - v1.0.x is reserved for real bugfix and hotfix releases.

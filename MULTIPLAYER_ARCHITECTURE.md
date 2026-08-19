@@ -133,9 +133,28 @@ rating. `private.activate_multiplayer_match` and `private.settle_ranked_match` a
 service-only. UUID PlayerIds, auth IDs, private codes, tokens, and raw snapshots must not be
 sent to Sentry; coarse phase/failure categories are sufficient.
 
+## MULTIPLAYER-01B lobby experience
+
+The provider-independent `MultiplayerLobbyPort` now separates presentation from the
+Supabase adapter. The adapter owns safe RPC normalization, error categories, canonical
+current-membership restoration, and one privacy-filtered Realtime invalidation channel.
+React renders browse/create/private-code/waiting/ready/Start states but never imports the
+Supabase SDK or treats an event as canonical state. Focus, online recovery, and a conservative
+30-second reconciliation pass repair missed events and multi-tab changes.
+
+`multiplayer_lobby_events` exposes only global public-list invalidations or caller-bound
+participant invalidations. RLS maps the authenticated owner without granting browser access
+to the private identity helper; browser roles have SELECT only and cannot forge events.
+The public listing and UI expose no UUID PlayerId, auth ID, email, provider payload, or private
+code. Full product flow details are in `MULTIPLAYER_LOBBY.md`.
+
+Normal E2E uses a deterministic adapter and makes no live Supabase request. The remote
+three-client harness proves canonical restore, private-event isolation, direct event/table
+write denial, visibility, atomic join, host authorization, and idempotent Start.
+
 ## Deferred work
 
-01A does not implement lobby/code UI, two-player rendering, complete move persistence,
-Realtime wiring, production reconnect UI, matchmaking, friends, leaderboard, or multiplayer
-machine resizing. MULTIPLAYER-01B is next for the public/private lobby experience; trusted
-move/turn authority must be completed before public ranked play.
+01B does not implement two-player board rendering, complete move persistence, production
+reconnect UI, rating settlement execution, matchmaking, friends, leaderboard, or multiplayer
+machine resizing. MULTIPLAYER-01C consumes the trusted activation boundary and connects the
+safe Start result to the authoritative online Game UI.

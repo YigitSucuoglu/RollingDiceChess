@@ -100,6 +100,19 @@ clock, result, or rating.
 
 No WebSocket, polling, room, authentication, server mock, networking dependency, multiplayer UI, or mobile UI is included.
 
+## MULTIPLAYER-01B lobby boundary
+
+The `/multiplayer` presentation calls a provider-independent `MultiplayerLobbyPort`.
+Production composes a Supabase infrastructure adapter from the same cached browser client as
+authentication; E2E composes a deterministic adapter, so normal CI performs no live Supabase
+requests. React never imports provider types or raw rows/errors.
+
+The adapter uses caller-bound RPCs for list/create/join/restore/kick/leave/Start and treats
+Realtime rows only as invalidation hints. Canonical refetch follows notifications, focus,
+network restoration, and the bounded recovery interval. One server membership row remains
+the multi-tab authority. The full flow and privacy rules are documented in
+`MULTIPLAYER_LOBBY.md`.
+
 ## Exit and termination semantics
 
 GAME-EXIT-01 adds `active`, `completed`, and `abandoned` lifecycle semantics behind

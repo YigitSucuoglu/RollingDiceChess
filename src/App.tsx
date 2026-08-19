@@ -14,6 +14,7 @@ const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const PlaySetupPage = lazy(() => import("./pages/PlaySetupPage"));
 const HowToPlayPage = lazy(() => import("./pages/HowToPlayPage"));
+const MultiplayerPage = lazy(() => import("./pages/MultiplayerPage"));
 const ObservabilityVerificationPage = __OBSERVABILITY_TEST_MODE__
   ? lazy(() => import("./observability/ObservabilityVerificationPage"))
   : null;
@@ -68,6 +69,7 @@ function ApplicationRoutes() {
           <Route path="/game" element={<GamePage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/multiplayer" element={<MultiplayerPage />} />
           {ObservabilityVerificationPage ? (
             <Route path="/__observability-test" element={<ObservabilityVerificationPage />} />
           ) : null}
