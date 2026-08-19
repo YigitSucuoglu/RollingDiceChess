@@ -37,6 +37,13 @@ rating mutation, disconnect protocol, or server forfeit implementation in GAME-E
 A future online adapter must let the server decide disconnect grace, reconnect, forfeit,
 result ordering, and ranked rating effects; client navigation cannot be authoritative.
 
+MULTIPLAYER-01A defines that future boundary: waiting/ready/starting lobby activity is
+penalty-free, and only trusted atomic activation creates an ACTIVE match. Active explicit
+Leave becomes a forfeit intent. Disconnect starts an independent 30-second grace deadline
+without pausing the authoritative clock; timely reconnect restores the canonical snapshot.
+One expired player is forfeit-eligible, while an unresolvable dual/infrastructure failure is
+a technical abort rather than a draw. Final production adjudication remains deferred.
+
 ## Browser navigation boundary
 
 While a local match is active, an in-app exit control and supported SPA Back navigation

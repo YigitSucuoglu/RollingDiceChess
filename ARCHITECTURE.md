@@ -89,6 +89,15 @@ Other follow-ups:
 2. Move profile match-ID/time generation behind injected ports; it is infrastructure and not part of game authority.
 3. Add room/lobby DTOs only alongside an agreed protocol.
 
+## MULTIPLAYER-01A authority direction
+
+The agreed multiplayer protocol and lobby/session foundation are documented in
+`MULTIPLAYER_ARCHITECTURE.md`. Supabase PostgreSQL owns durable transactions, membership,
+revision, and snapshots; Realtime/Presence are notification signals only. A trusted
+TypeScript runtime will reuse the deterministic engine and persist through service-only
+functions. Browser clients remain intent/snapshot adapters and cannot own board, roll,
+clock, result, or rating.
+
 No WebSocket, polling, room, authentication, server mock, networking dependency, multiplayer UI, or mobile UI is included.
 
 ## Exit and termination semantics

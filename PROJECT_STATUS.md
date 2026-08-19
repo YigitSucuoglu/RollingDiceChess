@@ -20,6 +20,7 @@ v1.0.0
 ## Completed
 
 ### Quality
+- MULTIPLAYER-01A — Establish authoritative multiplayer match/session foundation
 - RATING-01 — Design and implement authoritative multiplayer rating model
 - PROFILE-IDENTITY-01B-HF1 — Recover interrupted account/profile migration state
 - GAME-EXIT-01 — Add safe active-match exit and abandon lifecycle
@@ -117,6 +118,7 @@ v1.0.0
 ## Current Sprint
 
 Completed:
+- MULTIPLAYER-01A — Establish authoritative multiplayer match/session foundation
 - RATING-01 — Design and implement authoritative multiplayer rating model
 - PROFILE-IDENTITY-01B-HF1 — Recover interrupted account/profile migration state
 - GAME-EXIT-01 — Add safe active-match exit and abandon lifecycle
@@ -167,7 +169,7 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. MULTIPLAYER-01 — Establish authoritative multiplayer match/session foundation
+1. MULTIPLAYER-01B — Implement public/private multiplayer lobby experience
 
 Roadmap:
 - DATA-01A — Apply Supabase player schema and validate RLS/security
@@ -250,6 +252,8 @@ Performance Backlog:
 - RATING-01 locks the ranked formula at a 1000 starting rating, ±15 for equal opponents, a 200-point effective-difference cap, and nominal movement from 5 to 25. Bot, unranked, technical-abort, XP, and streak paths have zero rating effect. Trusted settlement is private/service-only, atomically locks both rating rows, uses an append-only match-id ledger for replay safety, and preserves browser denial for direct rating/history mutation; the migration, schema verification, and two-client publishable-key security harness passed.
 
 ### Versioning Policy
+
+- MULTIPLAYER-01A establishes versioned lobby and authoritative-match contracts, a deterministic trusted-runtime prototype, and a private Supabase authority schema. Public/private lobby visibility, six-digit private codes, membership concurrency, host-only idempotent Start, participant-only snapshots, browser write denial, and trusted activation boundaries passed schema and three-client remote security verification. Supabase Postgres/Auth/Realtime are sufficient for the initial architecture when rule execution remains in a trusted TypeScript runtime; lobby UI, network gameplay, presence transport, and rating settlement integration remain deferred.
 
 - v1.0.0 is the first official singleplayer release.
 - v1.0.x is reserved for real bugfix and hotfix releases.

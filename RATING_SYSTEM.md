@@ -90,6 +90,11 @@ or write the ledger. No browser-callable "I won" RPC exists, and no service-role
 belongs in the frontend. Real match-result authority remains deferred to the future
 multiplayer server/session foundation.
 
+MULTIPLAYER-01A defines the handoff: only a trusted ACTIVE ranked match ending in a normal
+win or authoritative forfeit may invoke `private.settle_ranked_match`. Pre-ACTIVE lobby
+leave/kick, Unranked outcomes, and technical abort never create settlement intent. Browser
+code can call neither trusted match activation nor rating settlement.
+
 ## Identity lifecycle and retention
 
 Guest-to-Google conflict resolution never merges ratings: the surviving `PlayerId` keeps
