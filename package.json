@@ -18,6 +18,7 @@
     "test:sound": "node scripts/sound-tests.cjs",
     "test:architecture": "node scripts/architecture-tests.cjs",
     "test:data:remote": "node --use-system-ca scripts/data-01a-remote-security.mjs",
+    "test:rating:remote": "node --use-system-ca scripts/rating-01-remote-security.mjs",
     "test:release-smoke": "node scripts/release-smoke-tests.cjs",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",

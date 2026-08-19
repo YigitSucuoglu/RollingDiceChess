@@ -1,4 +1,7 @@
 import type { AccountId } from "../auth/AuthenticationContracts";
+import type { PlayerId } from "../../domain/contracts/PlayerIdentity";
+
+export type { PlayerId } from "../../domain/contracts/PlayerIdentity";
 
 export const CLOUD_PLAYER_SCHEMA_VERSION = 1;
 export const DEFAULT_MULTIPLAYER_RATING = 1000;
@@ -15,9 +18,6 @@ export class UsernameValidationError extends Error {
     this.code = code;
   }
 }
-
-declare const playerIdBrand: unique symbol;
-export type PlayerId = string & { readonly [playerIdBrand]: true };
 
 export type PlayerOwnership =
   | { readonly kind: "guest" }
