@@ -34,8 +34,11 @@ jobs:
 
   e2e:
     name: Chromium browser regression
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --user 1001
 
     steps:
       - name: Check out repository
@@ -51,7 +54,11 @@ jobs:
         run: npm ci
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: |
+          if ! timeout --foreground --kill-after=30s 3m npx playwright install chromium; then
+            echo "::error::Chromium installation did not complete within 3 minutes."
+            exit 1
+          fi
 
       - name: Build production application
         run: npm run build
@@ -71,8 +78,11 @@ jobs:
 
   cross-browser:
     name: Cross-browser beta qualification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --user 1001
 
     steps:
       - name: Check out repository
@@ -88,7 +98,11 @@ jobs:
         run: npm ci
 
       - name: Install qualification browsers
-        run: npx playwright install --with-deps chromium firefox webkit
+        run: |
+          if ! timeout --foreground --kill-after=30s 3m npx playwright install chromium firefox webkit; then
+            echo "::error::Qualification browser installation did not complete within 3 minutes."
+            exit 1
+          fi
 
       - name: Build production application
         run: npm run build
