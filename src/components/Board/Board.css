@@ -286,6 +286,24 @@
     gap:var(--machine-roll-gap);
 }
 
+.multiplayer-match-meta{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    color:#cdbb94;
+    font-size:11px;
+    letter-spacing:.06em;
+}
+
+.multiplayer-game-shell{
+    --roll-button-height:0px;
+    --slot-frame-height:clamp(136px,15dvh,164px);
+}
+
+.multiplayer-game-shell .slot-machine-frame{
+    --machine-height-correction:0px;
+}
+
 .slot-machine-frame{
     --machine-natural-ratio:1.786;
     --machine-scale-x:1.35;

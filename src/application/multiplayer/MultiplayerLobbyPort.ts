@@ -18,7 +18,8 @@ export interface OpenMultiplayerLobby {
 
 export type CurrentMultiplayerContext =
   | { readonly kind: "lobby"; readonly role: MultiplayerLobbyRole; readonly lobby: MultiplayerLobbySnapshot }
-  | { readonly kind: "match"; readonly matchId: string };
+  | { readonly kind: "match"; readonly matchId: string }
+  | { readonly kind: "legacy-match"; readonly matchId: string };
 
 export interface MultiplayerStartResult {
   readonly matchId: string;
@@ -60,6 +61,7 @@ export interface MultiplayerLobbyPort {
   joinPrivateLobby(code: string): Promise<Extract<CurrentMultiplayerContext, { kind: "lobby" }>>;
   kickOpponent(lobbyId: string): Promise<Extract<CurrentMultiplayerContext, { kind: "lobby" }>>;
   leaveLobby(lobbyId: string): Promise<void>;
+  recoverLegacyMatch(matchId: string): Promise<void>;
   startMatch(lobbyId: string): Promise<MultiplayerStartResult>;
   subscribe(listener: (event: MultiplayerInvalidation) => void): () => void;
   dispose(): void;

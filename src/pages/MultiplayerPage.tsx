@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { useAuthentication } from "../auth/authentication-context";
@@ -70,6 +70,15 @@ export default function MultiplayerPage() {
     try {
       const current = await multiplayerLobby.getCurrentContext();
       if (!mounted.current) return;
+      if (current?.kind === "legacy-match") {
+        await multiplayerLobby.recoverLegacyMatch(current.matchId);
+        if (!mounted.current) return;
+        setContext(null);
+        setLobbies(await multiplayerLobby.listOpenLobbies());
+        setNotice(t("multiplayer.notices.legacyRecovered"));
+        setDegraded(false);
+        return;
+      }
       setContext(current);
       if (!current) setLobbies(await multiplayerLobby.listOpenLobbies());
       setDegraded(false);
@@ -163,11 +172,7 @@ export default function MultiplayerPage() {
   }
 
   if (context?.kind === "match") {
-    return <main className="multiplayer-page"><section className="multiplayer-transition" role="status">
-      <span className="multiplayer-spinner" aria-hidden="true" />
-      <h1>{t("multiplayer.matchCreated")}</h1><p>{t("multiplayer.matchPreparing")}</p>
-      <button onClick={() => navigate("/")} type="button">{t("common.actions.mainMenu")}</button>
-    </section></main>;
+    return <Navigate replace to={`/game/${context.matchId}`} />;
   }
 
   if (context?.kind === "lobby") {

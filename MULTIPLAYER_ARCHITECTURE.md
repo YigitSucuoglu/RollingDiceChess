@@ -158,3 +158,17 @@ write denial, visibility, atomic join, host authorization, and idempotent Start.
 reconnect UI, rating settlement execution, matchmaking, friends, leaderboard, or multiplayer
 machine resizing. MULTIPLAYER-01C consumes the trusted activation boundary and connects the
 safe Start result to the authoritative online Game UI.
+
+## MULTIPLAYER-01C runtime
+
+The selected worker is a Vercel TypeScript Serverless Function using server-only
+`SUPABASE_URL` and `SUPABASE_SECRET_KEY`. It verifies each Supabase access token and resolves
+PlayerId through ownership data; client-submitted PlayerId is rejected. Shared ChessBoard,
+DiceEngine, TurnRights, TurnResolver, Simulation and notation code validate and apply
+minimal from/to intents. PostgreSQL owns revision locking, clocks, reconnect deadlines,
+first-terminal-wins behavior, and the idempotent RATING-01 handoff.
+
+Participant-scoped Realtime rows announce activation, revision and termination only. The
+browser always refetches canonical state and retains polling recovery. Multiplayer uses the
+shared Board presentation with automatic roll visualization, no Roll button, and a larger
+machine modifier; Singleplayer remains unchanged.

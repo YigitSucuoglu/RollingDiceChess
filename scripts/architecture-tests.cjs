@@ -82,6 +82,38 @@ if (/rating|multiplayerRating/i.test(playerPort.replace(/\/\/.*rating.*$/gim, ""
   violations.push("src/application/players/PlayerProfilePort.ts: browser rating mutation surface");
 }
 
+const trustedMultiplayerApi = fs.readFileSync("api/multiplayer.ts", "utf8");
+if (/VITE_SUPABASE_|SUPABASE_SERVICE_ROLE_KEY/.test(trustedMultiplayerApi)) {
+  violations.push("api/multiplayer.ts: trusted runtime uses a browser or legacy service-role variable");
+}
+if (!/process\.env\.SUPABASE_SECRET_KEY/.test(trustedMultiplayerApi)
+    || !/client\.auth\.getUser\(accessToken\)/.test(trustedMultiplayerApi)
+    || !/player_auth_owners/.test(trustedMultiplayerApi)) {
+  violations.push("api/multiplayer.ts: missing server secret, verified token, or canonical PlayerId boundary");
+}
+if (/console\.(?:log|error|warn)|response[^\n]+(?:secret|accessToken)/i.test(trustedMultiplayerApi)) {
+  violations.push("api/multiplayer.ts: credential-bearing logging or response risk");
+}
+if (!trustedMultiplayerApi.includes("trusted_recover_legacy_multiplayer_match")
+    || !trustedMultiplayerApi.includes("resolveCallerPlayerId")) {
+  violations.push("api/multiplayer.ts: legacy recovery must stay behind verified trusted identity");
+}
+const legacyRecoveryMigration = fs.readFileSync(
+  "supabase/migrations/202608200004_multiplayer_01c_hf1_legacy_recovery.sql",
+  "utf8",
+);
+for (const invariant of [
+  "auth.role() <> 'service_role'",
+  "requested_caller_player_id not in (match_row.player_a_id, match_row.player_b_id)",
+  "match_row.status <> 'initializing'",
+  "match_row.canonical_state is not null",
+  "match_row.created_at >= now() - interval '5 minutes'",
+]) {
+  if (!legacyRecoveryMigration.includes(invariant)) {
+    violations.push(`legacy recovery migration: missing narrow guard ${invariant}`);
+  }
+}
+
 assert.deepEqual(violations, [], `Architecture boundary violations:\n${violations.join("\n")}`);
 
 const boardSource = fs.readFileSync("src/components/Board/Board.tsx", "utf8");

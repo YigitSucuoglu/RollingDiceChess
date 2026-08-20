@@ -1,7 +1,8 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import type { KeyboardEvent } from "react";
 import { resolvePieceVisual } from "../../config/pieceSets";
-import type { GameResultReason, PieceColor } from "../../types/Chess";
+import type { PieceColor } from "../../types/Chess";
+import type { MatchTerminationReason } from "../../domain/contracts/MatchContracts";
 import type { PieceSet } from "../../types/PieceSet";
 import type { MatchXpProgressionResult } from "../../profile/ProfileProgression";
 import ResultXpProgress from "./ResultXpProgress";
@@ -9,12 +10,13 @@ import "./GameResultModal.css";
 import { useTranslation } from "react-i18next";
 
 interface GameResultModalProps {
-  endReason: GameResultReason;
+  endReason: MatchTerminationReason;
   onMainMenu: () => void;
   onPlayAgain: () => void;
   pieceSet: PieceSet;
-  xpProgression: MatchXpProgressionResult;
+  xpProgression: MatchXpProgressionResult | null;
   winner: PieceColor;
+  showPlayAgain?: boolean;
 }
 
 type ResultPieceStyle = CSSProperties & {
@@ -30,13 +32,17 @@ function GameResultModal({
   pieceSet,
   xpProgression,
   winner,
+  showPlayAgain = true,
 }: GameResultModalProps) {
   const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   const playAgainRef = useRef<HTMLButtonElement>(null);
   const loser = winner === "white" ? "black" : "white";
-  const endReasonLabel =
-    endReason === "timeout" ? t("result.timeout", { color: t(`common.colors.${loser}`) }) : t("result.kingCaptured");
+  const endReasonLabel = endReason === "timeout"
+    ? t("result.timeout", { color: t(`common.colors.${loser}`) })
+    : endReason === "forfeit" || endReason === "disconnect-forfeit"
+      ? t("result.forfeit")
+      : t("result.kingCaptured");
   const kingVisual = resolvePieceVisual({
     context: "result",
     pieceColor: winner,
@@ -111,17 +117,17 @@ function GameResultModal({
 
         <p id="game-result-reason">{endReasonLabel}</p>
 
-        <ResultXpProgress progression={xpProgression} />
+        {xpProgression ? <ResultXpProgress progression={xpProgression} /> : null}
 
         <div className="game-result-actions">
-          <button
+          {showPlayAgain ? <button
             className="game-result-button primary"
             onClick={onPlayAgain}
             ref={playAgainRef}
             type="button"
           >
             {t("common.actions.playAgain")}
-          </button>
+          </button> : null}
 
           <button
             className="game-result-button secondary"

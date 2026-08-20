@@ -102,3 +102,11 @@ its own rating. Retired/replaced PlayerIds must later be excluded from active le
 identity while retained for historical references. Future Guest cleanup should prefer
 inactive/retired/anonymized retention over destructive deletion when rating or match history
 references exist.
+
+## Authoritative multiplayer integration
+
+The Vercel trusted runtime is the only caller that connects terminal match state to
+`private.settle_ranked_match`. Ranked king capture, timeout, explicit forfeit and
+disconnect-forfeit settle from canonical participant IDs. Unranked and technical-abort
+paths never invoke settlement. The append-only match-ID ledger makes retries and concurrent
+terminal attempts exactly-once.

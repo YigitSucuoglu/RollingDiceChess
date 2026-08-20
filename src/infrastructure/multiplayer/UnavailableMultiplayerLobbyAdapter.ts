@@ -14,6 +14,7 @@ export class UnavailableMultiplayerLobbyAdapter implements MultiplayerLobbyPort 
   public async joinPrivateLobby(): Promise<never> { return this.fail(); }
   public async kickOpponent(): Promise<never> { return this.fail(); }
   public async leaveLobby(): Promise<never> { return this.fail(); }
+  public async recoverLegacyMatch(): Promise<never> { return this.fail(); }
   public async startMatch(): Promise<never> { return this.fail(); }
   public subscribe(): () => void { return () => undefined; }
   public dispose(): void { /* No resources. */ }

@@ -16,7 +16,7 @@
   "home": {
     "browserTitle": "RouletteChess", "eyebrow": "Strategy meets chance", "tagline": "Spin the pieces. Rewrite the board.",
     "summary": "Every turn deals three pieces. Read the position, play your rights, and capture the king.",
-    "settings": "Settings", "profile": "Profile", "howToPlay": "How to Play", "multiplayer": "Multiplayer",
+    "singleplayer": "Singleplayer", "settings": "Settings", "profile": "Profile", "leaderboard": "Leaderboard", "howToPlay": "How to Play", "multiplayer": "Multiplayer",
     "heroLabel": "Roulette machine with Gold and Obsidian chess pieces", "caption": "Three pieces. One turn. Every move matters."
   },
   "auth": {
@@ -108,6 +108,7 @@
     }
   },
   "result": {
+    "forfeit": "Match won by forfeit",
     "gameOver": "Game over", "wins": "{{color}} wins", "kingCaptured": "King captured", "timeout": "{{color}} ran out of time", "experienceEarned": "Experience earned", "progressToward": "XP progress toward Level {{level}}", "nextLevel": "Next level", "levelUp": "Level up"
   },
   "errors": {
@@ -129,6 +130,7 @@
     "languageChanged": "Language changed to English."
   },
   "multiplayer": {
+    "gameBrowserTitle": "Multiplayer Game | RouletteChess", "matchDetails": "Multiplayer match details", "technicalAbort": "Match interrupted", "technicalAbortDescription": "The match ended safely because the server could not determine a legitimate winner.", "backToMultiplayer": "Back to Multiplayer",
     "browserTitle": "Multiplayer | RouletteChess", "title": "Multiplayer", "actions": "Multiplayer actions", "availableMatches": "Available matches",
     "createLobby": "Create Lobby", "joinPrivate": "Join Private Lobby", "openLobbies": "Open Lobbies", "noOpenLobbies": "No open lobbies right now.", "emptyHint": "Create one and wait for another player.",
     "public": "Public", "private": "Private", "visibility": "Visibility", "mode": "Mode", "ranked": "Ranked", "unranked": "Unranked", "timeControl": "Time Control", "side": "Side", "white": "White", "black": "Black", "random": "Random", "locked": "Locked",
@@ -137,7 +139,7 @@
     "publicLobby": "Public Lobby", "privateLobby": "Private Lobby", "kickPlayer": "Kick Player", "startMatch": "Start Match", "starting": "Starting…", "leaveLobby": "Leave Lobby", "closeLobby": "Close Lobby", "reconnecting": "Reconnecting…",
     "rating": "Rating {{rating}}", "randomSide": "Random Side", "hostSide": "Host: {{side}}", "matchCreated": "Match created", "matchPreparing": "The secure game connection is being prepared.",
     "onlineRequired": "Multiplayer requires an online player profile.", "playSingleplayer": "Play Singleplayer",
-    "notices": { "kicked": "The host removed you from the lobby.", "hostClosed": "The host closed the lobby.", "unavailable": "This lobby is no longer available." },
+    "notices": { "kicked": "The host removed you from the lobby.", "hostClosed": "The host closed the lobby.", "unavailable": "This lobby is no longer available.", "legacyRecovered": "An incompatible development match was safely closed. Your rating and profile were not changed." },
     "errors": { "alreadyActive": "You already have an active lobby or match.", "forbidden": "You cannot perform this lobby action.", "invalidCode": "Enter a valid six-digit lobby code.", "full": "The lobby is already full.", "unavailable": "This lobby is no longer available.", "network": "The multiplayer service is temporarily unavailable. Please retry.", "onlineRequired": "Multiplayer requires an online player profile.", "unknown": "Something went wrong. Please retry." }
   },
   "guide": {

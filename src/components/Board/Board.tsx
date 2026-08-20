@@ -13,13 +13,14 @@ import SlotReel from "../SlotReel/SlotReel";
 import GameResultModal from "../GameResultModal/GameResultModal";
 import MoveHistoryPanel from "../MoveHistory/MoveHistoryPanel";
 import ChessClockPanel from "../ChessClock/ChessClockPanel";
-import type { MatchSnapshot } from "../../domain/contracts/MatchContracts";
+import type { MatchConfiguration, MatchSession, MatchSnapshot } from "../../domain/contracts/MatchContracts";
 import { BOARD_THEME_CATALOG } from "../../config/boardThemes";
 import { ROLL_TIMING } from "../../config/rollTiming";
 import soundManager from "../../services/SoundManager";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import MatchExitDialog from "../MatchExitDialog/MatchExitDialog";
+import type { OnlineMatchPresentation } from "../../application/matches/OnlineMatchSession";
 
 const HISTORY_TRANSITION_MS = 260;
 
@@ -44,8 +45,16 @@ type LeverAnimationStyle = CSSProperties & {
   "--lever-animation-duration": string;
 };
 
-function Board() {
-  const session = gameManager.getSession();
+type RenderableMatchSession = MatchSession & { readonly configuration: MatchConfiguration };
+
+interface BoardProps {
+  readonly onlinePresentation?: OnlineMatchPresentation;
+  readonly sessionOverride?: RenderableMatchSession;
+}
+
+function Board({ onlinePresentation, sessionOverride }: BoardProps) {
+  const session = sessionOverride ?? gameManager.getSession();
+  const isOnline = session.configuration.mode === "online";
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -103,6 +112,7 @@ function Board() {
 
   useEffect(() => {
     if (
+      isOnline ||
       matchSnapshot.lifecycle !== "completed" ||
       historyGuardCollapsedRef.current ||
       !historyGuardInstalledRef.current ||
@@ -115,7 +125,7 @@ function Board() {
       allowHistoryExitRef.current = false;
     }, { once: true });
     window.history.back();
-  }, [matchSnapshot.lifecycle]);
+  }, [isOnline, matchSnapshot.lifecycle]);
 
   useEffect(
     () => () => soundManager.stopAll(),
@@ -250,6 +260,11 @@ function Board() {
 
   const startNewGame = () => {
     soundManager.stopAll();
+    if (isOnline) {
+      session.dispose();
+      navigate("/multiplayer", { replace: true });
+      return;
+    }
     gameManager.restartGame();
     const newSession = gameManager.getSession();
 
@@ -260,6 +275,11 @@ function Board() {
 
   const returnToMainMenu = () => {
     soundManager.stopAll();
+    if (isOnline) {
+      session.dispose();
+      navigate("/multiplayer", { replace: true });
+      return;
+    }
     gameManager.newGame();
     navigate("/");
   };
@@ -281,16 +301,21 @@ function Board() {
     if (!result.accepted) return;
     soundManager.stopAll();
     session.dispose();
+    if (isOnline) {
+      allowHistoryExitRef.current = true;
+      navigate("/multiplayer", { replace: true });
+      return;
+    }
     if (historyGuardInstalledRef.current && window.history.state?.rouletteChessMatchGuard) {
       allowHistoryExitRef.current = true;
       window.addEventListener("popstate", () => {
         historyGuardInstalledRef.current = false;
-        navigate("/play", { replace: true });
+        navigate(isOnline ? "/multiplayer" : "/play", { replace: true });
       }, { once: true });
       window.history.back();
       return;
     }
-    navigate("/play", { replace: true });
+    navigate(isOnline ? "/multiplayer" : "/play", { replace: true });
   };
 
   const squares = [];
@@ -395,7 +420,8 @@ function Board() {
 
   return (
     <div
-      className="game-shell"
+      className={`game-shell${isOnline ? " multiplayer-game-shell" : ""}`}
+      data-match-mode={session.configuration.mode}
       data-history-mounted={isMoveHistoryMounted}
       data-history-open={isMoveHistoryOpen}
     >
@@ -469,6 +495,14 @@ function Board() {
           </div>
         </div>
 
+        {onlinePresentation ? (
+          <div className="multiplayer-match-meta" aria-label={t("multiplayer.matchDetails")}>
+            <span>{onlinePresentation.mode === "ranked" ? t("multiplayer.ranked") : t("multiplayer.unranked")}</span>
+            <span>{onlinePresentation.white?.displayName} #{onlinePresentation.white?.publicDiscriminator}</span>
+            <span>{onlinePresentation.black?.displayName} #{onlinePresentation.black?.publicDiscriminator}</span>
+          </div>
+        ) : null}
+
         <div className="roll-section">
               <div
                 className="slot-machine-frame"
@@ -523,7 +557,7 @@ function Board() {
                 </span>
               </div>
 
-              <button
+              {!isOnline && <button
                 className="roll-button"
                 disabled={!matchSnapshot.roll.canStartManualRoll}
                 onClick={() => {
@@ -535,13 +569,14 @@ function Board() {
                 type="button"
               >
                 {t("common.actions.roll")}
-              </button>
+              </button>}
         </div>
       </div>
 
       <ChessClockPanel
         color={opponentColor}
         isPlayer={false}
+        roleLabel={isOnline ? (opponentColor === "white" ? onlinePresentation?.white?.displayName : onlinePresentation?.black?.displayName) : undefined}
         snapshot={matchSnapshot.clock}
       />
 
@@ -564,6 +599,7 @@ function Board() {
       <ChessClockPanel
         color={playerColor}
         isPlayer
+        roleLabel={isOnline ? t("game.you") : undefined}
         snapshot={matchSnapshot.clock}
       />
 
@@ -581,17 +617,34 @@ function Board() {
 
       {matchSnapshot.winner && (
         <GameResultModal
-          endReason={matchSnapshot.resultReason ?? "king-captured"}
+          endReason={matchSnapshot.terminationReason ?? matchSnapshot.resultReason ?? "king-captured"}
           onMainMenu={returnToMainMenu}
           onPlayAgain={startNewGame}
           pieceSet={session.configuration.pieceSet}
-          xpProgression={gameManager.getMatchXpProgression()!}
+          xpProgression={isOnline ? null : gameManager.getMatchXpProgression()!}
           winner={matchSnapshot.winner}
+          showPlayAgain={!isOnline}
         />
+      )}
+      {isOnline && matchSnapshot.lifecycle === "completed" && !matchSnapshot.winner && (
+        <div className="match-exit-overlay">
+          <div aria-modal="true" className="match-exit-dialog" role="dialog">
+            <p className="match-exit-eyebrow">RouletteChess</p>
+            <h2>{t("multiplayer.technicalAbort")}</h2>
+            <p>{t("multiplayer.technicalAbortDescription")}</p>
+            <div className="match-exit-actions">
+              <button className="match-exit-return" onClick={returnToMainMenu} type="button">
+                {t("multiplayer.backToMultiplayer")}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       {matchSnapshot.exitConfirmationOpen && !matchSnapshot.winner && (
         <MatchExitDialog
-          mode="singleplayer-bot"
+          mode={isOnline
+            ? onlinePresentation?.mode === "ranked" ? "multiplayer-ranked" : "multiplayer-unranked"
+            : "singleplayer-bot"}
           onLeave={() => void leaveMatch()}
           onReturn={() => void returnToGame()}
         />

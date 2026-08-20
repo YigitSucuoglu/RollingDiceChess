@@ -16,6 +16,7 @@ import {
   type MultiplayerStartResult,
   type OpenMultiplayerLobby,
 } from "../../application/multiplayer/MultiplayerLobbyPort";
+import { SupabaseMultiplayerMatchAdapter } from "./SupabaseMultiplayerMatchAdapter";
 
 type JsonObject = Record<string, unknown>;
 
@@ -143,6 +144,7 @@ export class SupabaseMultiplayerLobbyAdapter implements MultiplayerLobbyPort {
     if (data === null) return null;
     const row = object(data);
     if (row.kind === "match") return { kind: "match", matchId: string(row.matchId) };
+    if (row.kind === "legacy-match") return { kind: "legacy-match", matchId: string(row.matchId) };
     if (row.kind !== "lobby") throw new MultiplayerLobbyError("unknown");
     return lobbyContext(row);
   }
@@ -186,16 +188,16 @@ export class SupabaseMultiplayerLobbyAdapter implements MultiplayerLobbyPort {
     if (error) throw mapError(error);
   }
 
+  public async recoverLegacyMatch(matchId: string): Promise<void> {
+    await new SupabaseMultiplayerMatchAdapter(this.client).recoverLegacy(matchId);
+  }
+
   public async startMatch(lobbyId: string): Promise<MultiplayerStartResult> {
     const { data: matchId, error } = await this.client.rpc("request_multiplayer_match_start", { requested_lobby_id: lobbyId });
     if (error) throw mapError(error);
     const id = string(matchId);
-    const { data, error: snapshotError } = await this.client.rpc("get_multiplayer_match_snapshot", { requested_match_id: id });
-    if (snapshotError) throw mapError(snapshotError);
-    const snapshot = object(data);
-    const status = snapshot.status === "active" ? "active" : "initializing";
-    const ownSide = snapshot.youSide === "white" || snapshot.youSide === "black" ? snapshot.youSide : null;
-    return { matchId: id, status, ownSide, revision: number(snapshot.revision) };
+    const snapshot = await new SupabaseMultiplayerMatchAdapter(this.client).request({ action: "start", matchId: id });
+    return { matchId: id, status: snapshot.status === "active" ? "active" : "initializing", ownSide: snapshot.ownSide, revision: snapshot.revision };
   }
 
   public subscribe(listener: (event: MultiplayerInvalidation) => void): () => void {

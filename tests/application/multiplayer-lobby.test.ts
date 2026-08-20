@@ -77,7 +77,7 @@ describe("MULTIPLAYER-01B lobby application boundary", () => {
   it("returns one safe future-game transition result", async () => {
     const adapter = new E2EMultiplayerLobbyAdapter();
     const result = await adapter.startMatch("11111111-1111-4111-8111-111111111111");
-    expect(result).toEqual({ matchId: "33333333-3333-4333-8333-333333333333", status: "initializing", ownSide: null, revision: 0 });
+    expect(result).toEqual({ matchId: "33333333-3333-4333-8333-333333333333", status: "active", ownSide: "white", revision: 1 });
   });
 
   it("cleans subscriptions", () => {

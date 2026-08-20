@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 interface ChessClockPanelProps {
   color: PieceColor;
   isPlayer: boolean;
+  roleLabel?: string;
   snapshot: ChessClockSnapshot;
 }
 
@@ -24,6 +25,7 @@ function getAccessibleTime(remainingMs: number): { minutes: number; seconds: num
 function ChessClockPanel({
   color,
   isPlayer,
+  roleLabel: roleLabelOverride,
   snapshot,
 }: ChessClockPanelProps) {
   const { t } = useTranslation();
@@ -34,7 +36,7 @@ function ChessClockPanel({
   const isActive = snapshot.isRunning && snapshot.activeColor === color;
   const isLowTime = remainingMs <= LOW_TIME_THRESHOLD_MS;
   const colorLabel = t(`common.colors.${color}`).toUpperCase();
-  const roleLabel = t(isPlayer ? "game.you" : "setup.bot").toUpperCase();
+  const roleLabel = (roleLabelOverride ?? t(isPlayer ? "game.you" : "setup.bot")).toUpperCase();
   const accessibleTime = getAccessibleTime(remainingMs);
 
   return (

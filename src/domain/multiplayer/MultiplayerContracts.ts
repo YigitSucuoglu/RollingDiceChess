@@ -11,7 +11,7 @@ export type LobbyVisibility = "public" | "private";
 export type LobbyStatus = "waiting" | "ready" | "starting" | "closed";
 export type SidePreference = "white" | "black" | "random";
 export type MultiplayerMatchStatus = "initializing" | "active" | "terminal" | "technical-abort";
-export type MultiplayerTerminationReason = "king-captured" | "timeout" | "forfeit" | "technical-abort";
+export type MultiplayerTerminationReason = "king-captured" | "timeout" | "forfeit" | "disconnect-forfeit" | "technical-abort";
 
 export interface MultiplayerParticipantPublicSummary {
   readonly displayName: string;

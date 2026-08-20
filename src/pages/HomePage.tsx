@@ -28,20 +28,28 @@ function HomePage() {
           <p className="home-summary">{t("home.summary")}</p>
 
           <nav aria-label={t("common.navigation.mainMenu")} className="home-actions">
-            <button
-              className="home-action home-action-primary"
-              onClick={() => navigate("/play")}
+            <div className="home-primary-actions">
+              <button className="home-action home-action-game-mode" onClick={() => navigate("/play")} type="button">
+                {t("home.singleplayer")}
+              </button>
+              <button className="home-action home-action-game-mode" onClick={() => navigate("/multiplayer")} type="button">
+                {t("home.multiplayer")}
+              </button>
+            </div>
+            <div className="home-secondary-actions">
+              <button
+              className="home-action home-action-secondary"
+              onClick={() => navigate("/profile")}
               type="button"
             >
-              <span>{t("common.actions.play")}</span>
-              <span aria-hidden="true" className="home-action-arrow">→</span>
+              {t("home.profile")}
             </button>
             <button
               className="home-action home-action-secondary"
-              onClick={() => navigate("/multiplayer")}
+              onClick={() => navigate("/leaderboard")}
               type="button"
             >
-              {t("home.multiplayer")}
+              {t("home.leaderboard")}
             </button>
             <button
               className="home-action home-action-secondary"
@@ -51,31 +59,13 @@ function HomePage() {
               {t("home.settings")}
             </button>
             <button
-              className="home-tertiary-link"
-              onClick={() => navigate("/profile")}
-              type="button"
-            >
-              <svg
-                aria-hidden="true"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="12" cy="8" r="3.25" />
-                <path d="M5.75 19c.6-3.45 2.68-5.25 6.25-5.25s5.65 1.8 6.25 5.25" />
-              </svg>
-              {t("home.profile")}
-            </button>
-            <button
-              className="home-tertiary-link"
+              className="home-action home-action-secondary"
               onClick={() => navigate("/how-to-play")}
               type="button"
             >
-              <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
-                <path d="M4.5 5.5A2.5 2.5 0 0 1 7 3h4a2 2 0 0 1 2 2v16a2 2 0 0 0-2-2H7a2.5 2.5 0 0 0-2.5 2.5v-16Z" />
-                <path d="M19.5 5.5A2.5 2.5 0 0 0 17 3h-4v18a2 2 0 0 1 2-2h2a2.5 2.5 0 0 1 2.5 2.5v-16Z" />
-              </svg>
               {t("home.howToPlay")}
             </button>
+            </div>
           </nav>
         </section>
 

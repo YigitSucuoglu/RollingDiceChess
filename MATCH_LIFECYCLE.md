@@ -52,3 +52,11 @@ as confirmed abandon. Refresh, tab close, process termination, and mobile OS evi
 cannot be made reliable with client-only `beforeunload` handling, so no misleading custom
 prompt or synchronous persistence hack is installed. Future online play must solve these
 cases with server-owned presence, reconnect windows, and terminal match state.
+
+## Online lifecycle implementation
+
+Active multiplayer Leave is an authenticated forfeit intent. Ranked forfeits use the normal
+RATING-01 formula; Unranked forfeits never change rating. Heartbeats extend server-owned
+30-second deadlines without pausing the active clock. One expired participant becomes
+`disconnect-forfeit`; dual expiry becomes `technical-abort` with no winner or rating effect.
+The first locked terminal transition wins and match-ID settlement remains idempotent.

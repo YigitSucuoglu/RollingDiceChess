@@ -87,7 +87,7 @@ export interface MatchTurnHistory {
 
 export type MatchRollPhase = "ready" | "spinning" | "resolved";
 export type MatchLifecycle = "active" | "completed" | "abandoned";
-export type MatchTerminationReason = GameResultReason | "abandoned";
+export type MatchTerminationReason = GameResultReason | "abandoned" | "forfeit" | "disconnect-forfeit" | "technical-abort";
 
 export interface MatchRollSnapshot {
   readonly phase: MatchRollPhase;

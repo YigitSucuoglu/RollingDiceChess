@@ -20,6 +20,8 @@ v1.0.0
 ## Completed
 
 ### Quality
+- MULTIPLAYER-01C-HF1 — Recover legacy multiplayer state and refine Home navigation hierarchy
+- MULTIPLAYER-01C — Integrate real two-player authoritative gameplay and multiplayer Game UI
 - MULTIPLAYER-01B — Implement public/private multiplayer lobby experience
 - MULTIPLAYER-01A — Establish authoritative multiplayer match/session foundation
 - RATING-01 — Design and implement authoritative multiplayer rating model
@@ -119,6 +121,8 @@ v1.0.0
 ## Current Sprint
 
 Completed:
+- MULTIPLAYER-01C-HF1 — Recover legacy multiplayer state and refine Home navigation hierarchy
+- MULTIPLAYER-01C — Integrate real two-player authoritative gameplay and multiplayer Game UI
 - MULTIPLAYER-01B — Implement public/private multiplayer lobby experience
 - MULTIPLAYER-01A — Establish authoritative multiplayer match/session foundation
 - RATING-01 — Design and implement authoritative multiplayer rating model
@@ -171,7 +175,7 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. MULTIPLAYER-01C — Integrate real two-player authoritative gameplay and multiplayer Game UI
+1. MULTIPLAYER-01D — Qualify production multiplayer latency, reconnect, and two-device behavior
 
 Roadmap:
 - DATA-01A — Apply Supabase player schema and validate RLS/security
@@ -254,6 +258,7 @@ Performance Backlog:
 - RATING-01 locks the ranked formula at a 1000 starting rating, ±15 for equal opponents, a 200-point effective-difference cap, and nominal movement from 5 to 25. Bot, unranked, technical-abort, XP, and streak paths have zero rating effect. Trusted settlement is private/service-only, atomically locks both rating rows, uses an append-only match-id ledger for replay safety, and preserves browser denial for direct rating/history mutation; the migration, schema verification, and two-client publishable-key security harness passed.
 
 - MULTIPLAYER-01B adds the real public/private Supabase lobby experience with cloud-profile gating, ranked/unranked and side/time controls, six-digit private codes, public browse cards, canonical waiting/ready restoration, host Kick/Start, pre-match Leave/Close, EN/TR responsive UI, and privacy-safe Realtime invalidation/refetch. Normal E2E remains fully isolated from live Supabase; schema verification and the expanded three-client remote security harness passed. The actual authoritative two-player board and multiplayer machine sizing remain MULTIPLAYER-01C scope.
+- MULTIPLAYER-01C runs the shared TypeScript RouletteChess rules in a Vercel trusted function, verifies Supabase bearer identity and resolves PlayerId server-side, accepts only revisioned from/to intents, and persists automatic rolls, rights, clocks, reconnect deadlines, terminal state, and exactly-once ranked settlement through service-only RPCs. OnlineMatchSession reuses the Game UI with no Roll button, a larger multiplayer machine, participant metadata, canonical reconciliation, mode-aware forfeit, technical-abort handling, and active-match restoration. Three additive migrations and all reported schema/privilege assertions were applied successfully; deterministic Chromium remains isolated from live Supabase. Real two-browser production gameplay is NOT TESTED and is the explicit MULTIPLAYER-01D qualification gate.
 
 - MULTIPLAYER-01A establishes versioned lobby and authoritative-match contracts, a deterministic trusted-runtime prototype, and a private Supabase authority schema. Public/private lobby visibility, six-digit private codes, membership concurrency, host-only idempotent Start, participant-only snapshots, browser write denial, and trusted activation boundaries passed schema and three-client remote security verification. Supabase Postgres/Auth/Realtime are sufficient for the initial architecture when rule execution remains in a trusted TypeScript runtime; lobby UI, network gameplay, presence transport, and rating settlement integration remain deferred.
 

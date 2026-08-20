@@ -125,3 +125,13 @@ full policy and browser lifecycle limitations are recorded in `MATCH_LIFECYCLE.m
 ## Architecture guard
 
 `npm run test:architecture` scans domain, application, and engine sources for React/presentation/style imports and direct DOM/storage usage. Targeted Board rules reject direct selection/move mutation, DiceEngine and BotFactory access, canonical roll/bot state or timers, compatibility Game access, clock polling/start intents, and skip progression/timers.
+
+## Production online MatchSession
+
+MULTIPLAYER-01C adds `OnlineMatchSession` without constructing mutable authoritative `Game`
+state in the browser. Minimal intents go through `SupabaseMultiplayerMatchAdapter` to the
+Vercel `/api/multiplayer` function. The function validates the bearer token, resolves
+canonical PlayerId internally, reuses the TypeScript engine, and persists only service-only
+revision-CAS transitions. `SUPABASE_SECRET_KEY` remains outside the Vite import graph.
+Realtime events are participant-scoped hints; refetch, polling, focus, and refresh recover
+canonical state when hints are missed.

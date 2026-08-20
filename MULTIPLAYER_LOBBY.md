@@ -62,3 +62,11 @@ Normal Chromium E2E uses a deterministic application-port adapter and the global
 guard, producing zero Supabase requests and zero anonymous users. Live schema/RLS/RPC checks
 remain explicit through `npm run test:multiplayer:remote`. Two real browser contexts are
 still required for final human acceptance of Realtime timing and clipboard behavior.
+
+## ACTIVE game handoff
+
+Host Start now calls the trusted Vercel authority and routes to `/game/:matchId`. Opponents
+observe the membership transition and reconcile the same route. Reopening Multiplayer or
+refreshing restores the durable active match rather than the former preparation placeholder.
+Pre-ACTIVE Leave remains penalty-free; after ACTIVE the same control becomes authoritative
+forfeit.

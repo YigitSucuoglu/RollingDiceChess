@@ -20,7 +20,7 @@ test("mandatory account username onboarding blocks routes and survives refresh",
   await page.goto("/");
   await input.fill("RouletteKing");
   await input.press("Enter");
-  await expect(page.getByRole("button", { name: "Play", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Singleplayer", exact: true })).toBeVisible();
   await page.goto("/profile");
   await expect(page.getByRole("heading", { name: "RouletteKing", exact: true })).toBeVisible();
   await expect(page.getByText("#19F1P")).toBeVisible();

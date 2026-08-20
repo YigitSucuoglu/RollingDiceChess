@@ -34,8 +34,13 @@ export class E2EMultiplayerLobbyAdapter implements MultiplayerLobbyPort {
   private readonly listeners = new Set<(event: MultiplayerInvalidation) => void>();
   public constructor() {
     try {
-      if (window.localStorage.getItem("roulettechess.e2e-multiplayer-fixture.v1") === "ready-host") {
+      const fixture = window.localStorage.getItem("roulettechess.e2e-multiplayer-fixture.v1");
+      if (fixture === "ready-host") {
         this.current = { kind: "lobby", role: "host", lobby: snapshot({ status: "ready", opponent }) };
+      } else if (fixture === "active") {
+        this.current = { kind: "match", matchId: "33333333-3333-4333-8333-333333333333" };
+      } else if (fixture === "legacy-active") {
+        this.current = { kind: "legacy-match", matchId: "44444444-4444-4444-8444-444444444444" };
       }
     } catch { /* Fixture remains in its empty default state. */ }
   }
@@ -82,8 +87,17 @@ export class E2EMultiplayerLobbyAdapter implements MultiplayerLobbyPort {
     return this.current;
   }
   public async leaveLobby(): Promise<void> { this.current = null; }
+  public async recoverLegacyMatch(matchId: string): Promise<void> {
+    if (this.current?.kind !== "legacy-match" || this.current.matchId !== matchId) {
+      throw new MultiplayerLobbyError("forbidden");
+    }
+    this.current = null;
+    try { window.localStorage.removeItem("roulettechess.e2e-multiplayer-fixture.v1"); } catch { /* no-op */ }
+  }
   public async startMatch(): Promise<MultiplayerStartResult> {
-    return { matchId: "33333333-3333-4333-8333-333333333333", status: "initializing", ownSide: null, revision: 0 };
+    const matchId = "33333333-3333-4333-8333-333333333333";
+    this.current = { kind: "match", matchId };
+    return { matchId, status: "active", ownSide: "white", revision: 1 };
   }
   public subscribe(listener: (event: MultiplayerInvalidation) => void): () => void {
     this.listeners.add(listener); return () => this.listeners.delete(listener);
