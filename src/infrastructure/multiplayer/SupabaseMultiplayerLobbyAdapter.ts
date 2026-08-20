@@ -139,8 +139,7 @@ export class SupabaseMultiplayerLobbyAdapter implements MultiplayerLobbyPort {
   }
 
   public async getCurrentContext(): Promise<CurrentMultiplayerContext | null> {
-    const { data, error } = await this.client.rpc("get_current_multiplayer_context");
-    if (error) throw mapError(error);
+    const data = await new SupabaseMultiplayerMatchAdapter(this.client).reconcileCurrent();
     if (data === null) return null;
     const row = object(data);
     if (row.kind === "match") return { kind: "match", matchId: string(row.matchId) };

@@ -95,7 +95,7 @@ async function resolveCallerPlayerId(client: SupabaseClient, accessToken: string
   return owner.player_id;
 }
 
-async function rpcRow(client: SupabaseClient, name: string, args: JsonObject): Promise<TrustedMatchRow> {
+async function rpcObject(client: SupabaseClient, name: string, args: JsonObject): Promise<JsonObject> {
   const { data, error } = await client.rpc(name, args);
   if (error) {
     if (error.code === "40001") throw new RequestFailure(409, "stale-revision");
@@ -103,7 +103,11 @@ async function rpcRow(client: SupabaseClient, name: string, args: JsonObject): P
     if (error.code === "P0002") throw new RequestFailure(404, "match-unavailable");
     throw new RequestFailure(409, "match-transition-rejected");
   }
-  return object(data) as TrustedMatchRow;
+  return object(data);
+}
+
+async function rpcRow(client: SupabaseClient, name: string, args: JsonObject): Promise<TrustedMatchRow> {
+  return rpcObject(client, name, args) as Promise<TrustedMatchRow>;
 }
 
 function publicSnapshot(row: TrustedMatchRow, callerPlayerId: string): JsonObject {
@@ -151,6 +155,25 @@ async function performAction(client: SupabaseClient, caller: string, body: JsonO
     throw new RequestFailure(400, "player-id-not-accepted");
   }
   const action = requiredString(body.action);
+  if (action === "reconcile") {
+    const result = await rpcObject(client, "trusted_reconcile_multiplayer_state", {
+      requested_caller_player_id: caller,
+    });
+    if (result.kind === "starting" && result.role === "host") {
+      const matchId = requiredString(result.matchId);
+      const state = createAuthoritativeInitialState(randomSource);
+      await rpcRow(client, "trusted_activate_multiplayer_match", {
+        requested_match_id: matchId,
+        requested_caller_player_id: caller,
+        requested_host_is_white: randomSource() < 0.5,
+        trusted_initial_state: state,
+        trusted_initial_roll: state.currentRoll,
+      });
+      return { kind: "match", matchId };
+    }
+    if (result.kind === "starting") return { kind: "match", matchId: result.matchId };
+    return result;
+  }
   const matchId = requiredString(body.matchId);
   if (action === "start") {
     const state = createAuthoritativeInitialState(randomSource);

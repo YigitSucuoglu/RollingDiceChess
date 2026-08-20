@@ -61,9 +61,15 @@ test("valid active membership restores the real Game without lobby actions", asy
 
 test("legacy active membership recovers without sign out and stays released after refresh", async ({ page }) => {
   await useCloudGuestFixture(page);
-  await page.addInitScript(() => window.localStorage.setItem("roulettechess.e2e-multiplayer-fixture.v1", "legacy-active"));
+  await page.goto("/");
+  await page.evaluate(() => window.localStorage.setItem("roulettechess.e2e-multiplayer-fixture.v1", "legacy-active"));
   await page.goto("/multiplayer");
   await expect(page.getByText(/incompatible development match was safely closed/iu)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Open Lobbies" })).toBeVisible();
+  await page.getByRole("button", { name: /Create Lobby/ }).click();
+  await page.getByRole("button", { name: "Create Lobby", exact: true }).last().click();
+  await expect(page.getByRole("heading", { name: "Public Lobby" })).toBeVisible();
+  await page.getByRole("button", { name: "Close Lobby" }).click();
   await expect(page.getByRole("heading", { name: "Open Lobbies" })).toBeVisible();
   await page.reload();
   await expect(page.getByRole("heading", { name: "Open Lobbies" })).toBeVisible();

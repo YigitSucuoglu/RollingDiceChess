@@ -98,6 +98,26 @@ if (!trustedMultiplayerApi.includes("trusted_recover_legacy_multiplayer_match")
     || !trustedMultiplayerApi.includes("resolveCallerPlayerId")) {
   violations.push("api/multiplayer.ts: legacy recovery must stay behind verified trusted identity");
 }
+if (!trustedMultiplayerApi.includes("trusted_reconcile_multiplayer_state")
+    || !trustedMultiplayerApi.includes('action === "reconcile"')) {
+  violations.push("api/multiplayer.ts: canonical stale-state reconciliation must remain in trusted runtime");
+}
+const staleMembershipMigration = fs.readFileSync(
+  "supabase/migrations/202608200005_multiplayer_01c_hf2_stale_membership_recovery.sql",
+  "utf8",
+);
+for (const invariant of [
+  "auth.role() <> 'service_role'",
+  "requested_caller_player_id not in (match_row.player_a_id, match_row.player_b_id)",
+  "match_row.updated_at >= now() - interval '5 minutes'",
+  "match_row.canonical_state is not null",
+  "release_terminal_match_membership",
+  "release_closed_lobby_membership",
+]) {
+  if (!staleMembershipMigration.includes(invariant)) {
+    violations.push(`stale membership migration: missing recovery guard ${invariant}`);
+  }
+}
 const legacyRecoveryMigration = fs.readFileSync(
   "supabase/migrations/202608200004_multiplayer_01c_hf1_legacy_recovery.sql",
   "utf8",

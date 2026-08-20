@@ -5,6 +5,7 @@ import type {
   MultiplayerMatchPort,
   MultiplayerServerSnapshot,
 } from "../../application/multiplayer/MultiplayerMatchPort";
+import type { CurrentMultiplayerContext } from "../../application/multiplayer/MultiplayerLobbyPort";
 
 export class MultiplayerMatchTransportError extends Error {
   public readonly code: string;
@@ -29,7 +30,18 @@ export class SupabaseMultiplayerMatchAdapter implements MultiplayerMatchPort {
     await this.send({ action: "recover-legacy", matchId });
   }
 
-  private async send<T>(intent: MultiplayerMatchIntent | { readonly action: "recover-legacy"; readonly matchId: string }): Promise<T> {
+  public async reconcileCurrent(): Promise<CurrentMultiplayerContext | null> {
+    const result = await this.send<CurrentMultiplayerContext
+      | { readonly kind: "none" }
+      | { readonly kind: "recovered" }>({
+      action: "reconcile",
+    });
+    return result.kind === "none" || result.kind === "recovered" ? null : result;
+  }
+
+  private async send<T>(intent: MultiplayerMatchIntent
+    | { readonly action: "recover-legacy"; readonly matchId: string }
+    | { readonly action: "reconcile" }): Promise<T> {
     const { data } = await this.client.auth.getSession();
     const token = data.session?.access_token;
     if (!token) throw new MultiplayerMatchTransportError("authentication-required");
