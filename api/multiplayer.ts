@@ -1,4 +1,4 @@
-import { randomInt } from "node:crypto";
+import { createHash, randomInt, randomUUID } from "node:crypto";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
@@ -83,21 +83,50 @@ function bearer(request: NodeRequest): string {
   return value.slice(7);
 }
 
-async function resolveCallerPlayerId(client: SupabaseClient, accessToken: string): Promise<string> {
+function reconcileLog(correlationId: string, stage: string, metadata: JsonObject = {}): void {
+  console.info(JSON.stringify({ event: "multiplayer-reconcile-diagnostic", correlationId, stage, ...metadata }));
+}
+
+function callerFingerprint(playerId: string): string {
+  return createHash("sha256").update(playerId).digest("hex").slice(0, 10);
+}
+
+function databaseFailureReason(error: { code?: string; message?: string }): string {
+  if (error.code === "42703" || error.message?.includes("created_at")) return "undefined-column";
+  if (error.code === "42883") return "undefined-function";
+  if (error.code === "42501") return "permission-denied";
+  if (error.code === "23514") return "check-constraint";
+  if (error.code === "23503") return "foreign-key-constraint";
+  return `database-error-${error.code ?? "unknown"}`;
+}
+
+async function resolveCallerPlayerId(
+  client: SupabaseClient,
+  accessToken: string,
+  diagnostic?: (stage: string, metadata?: JsonObject) => void,
+): Promise<string> {
   const { data, error } = await client.auth.getUser(accessToken);
   if (error || !data.user?.id) throw new RequestFailure(401, "authentication-required");
+  diagnostic?.("auth-verified");
   const { data: owner, error: ownerError } = await client
     .from("player_auth_owners")
     .select("player_id")
     .eq("auth_user_id", data.user.id)
     .maybeSingle();
   if (ownerError || !owner || typeof owner.player_id !== "string") throw new RequestFailure(403, "player-profile-required");
+  diagnostic?.("canonical-player-resolved", { callerFingerprint: callerFingerprint(owner.player_id) });
   return owner.player_id;
 }
 
-async function rpcObject(client: SupabaseClient, name: string, args: JsonObject): Promise<JsonObject> {
+async function rpcObject(
+  client: SupabaseClient,
+  name: string,
+  args: JsonObject,
+  onError?: (reason: string) => void,
+): Promise<JsonObject> {
   const { data, error } = await client.rpc(name, args);
   if (error) {
+    onError?.(databaseFailureReason(error));
     if (error.code === "40001") throw new RequestFailure(409, "stale-revision");
     if (error.code === "42501") throw new RequestFailure(403, "not-authorized");
     if (error.code === "P0002") throw new RequestFailure(404, "match-unavailable");
@@ -150,14 +179,37 @@ async function readMatch(client: SupabaseClient, matchId: string, caller: string
   });
 }
 
-async function performAction(client: SupabaseClient, caller: string, body: JsonObject): Promise<JsonObject> {
+async function performAction(
+  client: SupabaseClient,
+  caller: string,
+  body: JsonObject,
+  correlationId: string,
+): Promise<JsonObject> {
   if (Object.hasOwn(body, "playerId") || Object.hasOwn(body, "player_id")) {
     throw new RequestFailure(400, "player-id-not-accepted");
   }
   const action = requiredString(body.action);
   if (action === "reconcile") {
+    const diagnostic = await rpcObject(client, "trusted_diagnose_multiplayer_reconciliation", {
+      requested_caller_player_id: caller,
+    }, (reason) => reconcileLog(correlationId, "diagnostic-rpc-failed", { reason }));
+    reconcileLog(correlationId, "state-classified", diagnostic);
+    reconcileLog(correlationId, "recovery-rpc-invoked", {
+      expectedRecovery: diagnostic.classification === "stale-starting"
+        || diagnostic.classification === "terminal"
+        || diagnostic.classification === "orphaned"
+        || diagnostic.classification === "inconsistent",
+    });
     const result = await rpcObject(client, "trusted_reconcile_multiplayer_state", {
       requested_caller_player_id: caller,
+    }, (reason) => reconcileLog(correlationId, "recovery-rpc-failed", {
+      reason,
+      cleanupCommitted: false,
+    }));
+    reconcileLog(correlationId, "recovery-rpc-returned", {
+      normalizedKind: result.kind,
+      cleanupCommitted: result.kind === "recovered" || result.kind === "none",
+      finalCanonicalState: result.kind,
     });
     if (result.kind === "starting" && result.role === "host") {
       const matchId = requiredString(result.matchId);
@@ -235,12 +287,20 @@ export default async function handler(request: NodeRequest, response: NodeRespon
     response.status(405).json({ error: "method-not-allowed" });
     return;
   }
+  const correlationId = randomUUID().replaceAll("-", "").slice(0, 12);
+  let action = "unknown";
   try {
+    const body = object(request.body);
+    action = typeof body.action === "string" ? body.action : "unknown";
+    if (action === "reconcile") reconcileLog(correlationId, "endpoint-received");
     const client = serverClient();
-    const caller = await resolveCallerPlayerId(client, bearer(request));
-    response.status(200).json(await performAction(client, caller, object(request.body)));
+    const caller = await resolveCallerPlayerId(client, bearer(request), action === "reconcile"
+      ? (stage, metadata) => reconcileLog(correlationId, stage, metadata)
+      : undefined);
+    response.status(200).json(await performAction(client, caller, body, correlationId));
   } catch (error) {
     const failure = error instanceof RequestFailure ? error : new RequestFailure(500, "multiplayer-server-error");
+    if (action === "reconcile") reconcileLog(correlationId, "request-failed", { failureCode: failure.code });
     response.status(failure.status).json({ error: failure.code });
   }
 }
