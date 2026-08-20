@@ -3,7 +3,14 @@ import { isBenignBrowserCancellation, isHttpFailure } from "./network-failure-cl
 
 interface QaFailureState {
   asserted: boolean;
+  flushDeferredFailures(): void;
   failures: string[];
+}
+
+interface DeferredFirefoxImageAbort {
+  readonly request: Request;
+  readonly url: string;
+  readonly errorText?: string;
 }
 
 const E2E_AUTH_FIXTURE_STORAGE_KEY = "roulettechess.e2e-auth-fixture.v1";
@@ -38,8 +45,24 @@ export async function useAccountMigrationFixture(
 export async function installErrorGuards(page: Page, browserName: string): Promise<QaFailureState> {
   const failures: string[] = [];
   const pendingImages = new Set<Request>();
+  const recentlyAbortedImages = new Map<Request, number>();
   const navigationSupersededImages = new WeakSet<Request>();
-  const state: QaFailureState = { asserted: false, failures };
+  const deferredFirefoxImageAborts: DeferredFirefoxImageAbort[] = [];
+  const state: QaFailureState = {
+    asserted: false,
+    failures,
+    flushDeferredFailures: () => {
+      for (const candidate of deferredFirefoxImageAborts) {
+        if (!isBenignBrowserCancellation({
+          browserName: "firefox",
+          errorText: candidate.errorText,
+          resourceType: candidate.request.resourceType(),
+          supersededByNavigation: navigationSupersededImages.has(candidate.request),
+        })) failures.push(`requestfailed: ${candidate.url} (${candidate.errorText})`);
+      }
+      deferredFirefoxImageAborts.length = 0;
+    },
+  };
   page.on("console", (message) => {
     if (message.type() === "error") failures.push(`console.error: ${message.text()}`);
   });
@@ -50,6 +73,11 @@ export async function installErrorGuards(page: Page, browserName: string): Promi
     }
     if (request.resourceType() === "document") {
       for (const pendingImage of pendingImages) navigationSupersededImages.add(pendingImage);
+      const navigationStartedAt = Date.now();
+      for (const [abortedImage, abortedAt] of recentlyAbortedImages) {
+        if (navigationStartedAt - abortedAt <= 500) navigationSupersededImages.add(abortedImage);
+      }
+      recentlyAbortedImages.clear();
     } else if (request.resourceType() === "image") {
       pendingImages.add(request);
     }
@@ -63,6 +91,12 @@ export async function installErrorGuards(page: Page, browserName: string): Promi
   page.on("requestfailed", (request) => {
     pendingImages.delete(request);
     const errorText = request.failure()?.errorText;
+    if (browserName === "firefox" && request.resourceType() === "image"
+        && errorText === "NS_BINDING_ABORTED") {
+      recentlyAbortedImages.set(request, Date.now());
+      deferredFirefoxImageAborts.push({ request, url: request.url(), errorText });
+      return;
+    }
     if (isBenignBrowserCancellation({
       browserName,
       errorText,
@@ -88,6 +122,7 @@ export const test = base.extend<{ assertNoErrors: () => void }>({
     const state = await installErrorGuards(page, browserName);
     await provide(page);
     if (!state.asserted) {
+      state.flushDeferredFailures();
       expect(state.failures, state.failures.join("\n")).toEqual([]);
     }
   },
@@ -95,6 +130,7 @@ export const test = base.extend<{ assertNoErrors: () => void }>({
     await provide(() => {
       const state = (page as Page & { __qaFailureState: QaFailureState }).__qaFailureState;
       state.asserted = true;
+      state.flushDeferredFailures();
       expect(state.failures, state.failures.join("\n")).toEqual([]);
     });
   },

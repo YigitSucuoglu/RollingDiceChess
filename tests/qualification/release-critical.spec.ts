@@ -19,7 +19,7 @@ test("release-critical game journey works across the qualification matrix", asyn
 
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Roulette");
-  await activate(page.getByRole("button", { name: /^play$|^oyna$/i }), useTouch);
+  await activate(page.getByRole("button", { name: /^singleplayer$|^tek oyunculu$/i }), useTouch);
   await expect(page).toHaveURL(/\/play$/);
   const startGame = page.getByRole("button", { name: /start game|oyunu başlat/i });
   await startGame.scrollIntoViewIfNeeded();

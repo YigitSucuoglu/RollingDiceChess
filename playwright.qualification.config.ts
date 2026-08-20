@@ -34,7 +34,7 @@ export default defineConfig({
     { name: "iphone-webkit-emulated", use: { ...devices["iPhone 13"] } },
   ],
   webServer: {
-    command: "npm run preview -- --host 127.0.0.1",
+    command: "npm run serve:e2e",
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
   },
