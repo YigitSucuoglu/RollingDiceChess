@@ -17,6 +17,7 @@
     "test:i18n": "node scripts/i18n-tests.cjs",
     "test:sound": "node scripts/sound-tests.cjs",
     "test:architecture": "node scripts/architecture-tests.cjs",
+    "test:server-function": "node scripts/server-function-load-test.mjs",
     "test:data:remote": "node --use-system-ca scripts/data-01a-remote-security.mjs",
     "test:rating:remote": "node --use-system-ca scripts/rating-01-remote-security.mjs",
     "test:multiplayer:remote": "node --use-system-ca scripts/multiplayer-01a-remote-security.mjs",
@@ -34,7 +35,7 @@
     "perf": "npm run perf:bundle && npm run perf:engine && npm run perf:lighthouse && npm run perf:browser",
     "assets:home": "node scripts/optimize-home-assets.mjs",
     "assets:game": "node scripts/optimize-game-assets.mjs",
-    "test": "npm run test:i18n && npm run test:profile && npm run test:sound && npm run test:architecture && npm run test:unit",
+    "test": "npm run test:i18n && npm run test:profile && npm run test:sound && npm run test:architecture && npm run test:server-function && npm run test:unit",
     "validate": "npm run typecheck && npm run lint && npm run test && vite build && npm run test:release-smoke",
     "validate:ci": "npm run validate",
     "preview": "vite preview"

@@ -1,6 +1,6 @@
-import type { PieceType } from "../types/Chess";
-import TurnRights from "./TurnRights";
-import type { RandomSource } from "../domain/contracts/PlatformPorts";
+import type { PieceType } from "../types/Chess.js";
+import TurnRights from "./TurnRights.js";
+import type { RandomSource } from "../domain/contracts/PlatformPorts.js";
 
 const PIECE_TYPES: readonly PieceType[] = [
   "pawn",

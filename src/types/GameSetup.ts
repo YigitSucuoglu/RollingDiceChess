@@ -1,6 +1,6 @@
-import type { PieceColor } from "./Chess";
-import type { BoardTheme } from "./BoardTheme";
-import type { PieceSet } from "./PieceSet";
+import type { PieceColor } from "./Chess.js";
+import type { BoardTheme } from "./BoardTheme.js";
+import type { PieceSet } from "./PieceSet.js";
 
 export type BotDifficulty = "easy" | "medium" | "hard";
 

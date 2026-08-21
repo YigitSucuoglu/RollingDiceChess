@@ -7,8 +7,8 @@ import {
   applyAuthoritativeMove,
   createAuthoritativeInitialState,
   type AuthoritativeStoredState,
-} from "../src/application/multiplayer/AuthoritativeMatchEngine";
-import type { Position } from "../src/types/Chess";
+} from "../src/application/multiplayer/AuthoritativeMatchEngine.js";
+import type { Position } from "../src/types/Chess.js";
 
 type JsonObject = Record<string, unknown>;
 

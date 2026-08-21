@@ -1,5 +1,5 @@
-import type { Move, Piece } from "../types/Chess";
-import ChessBoard from "./ChessBoard";
+import type { Move, Piece } from "../types/Chess.js";
+import ChessBoard from "./ChessBoard.js";
 
 export default class MoveGenerator {
   public static generateMoves(

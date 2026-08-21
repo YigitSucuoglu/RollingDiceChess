@@ -1,5 +1,5 @@
-import type { Piece } from "../types/Chess";
-import type { IdGenerator } from "../domain/contracts/PlatformPorts";
+import type { Piece } from "../types/Chess.js";
+import type { IdGenerator } from "../domain/contracts/PlatformPorts.js";
 
 export default class ChessBoard {
 

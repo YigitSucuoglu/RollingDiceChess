@@ -1,6 +1,6 @@
-import type { Move } from "../types/Chess";
-import MoveGenerator from "./MoveGenerator";
-import { applySimulatedMove, type SimulationState } from "./Simulation";
+import type { Move } from "../types/Chess.js";
+import MoveGenerator from "./MoveGenerator.js";
+import { applySimulatedMove, type SimulationState } from "./Simulation.js";
 
 export interface TurnResolution {
   maxConsumableRights: number;

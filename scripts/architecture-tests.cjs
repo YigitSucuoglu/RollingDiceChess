@@ -83,6 +83,18 @@ if (/rating|multiplayerRating/i.test(playerPort.replace(/\/\/.*rating.*$/gim, ""
 }
 
 const trustedMultiplayerApi = fs.readFileSync("api/multiplayer.ts", "utf8");
+const trustedRuntimeImports = [...trustedMultiplayerApi.matchAll(/from\s+["'](\.\.?\/[^"']+)["']/g)]
+  .map((match) => match[1]);
+for (const importPath of trustedRuntimeImports) {
+  if (!importPath.endsWith(".js")) {
+    violations.push(`api/multiplayer.ts: Node ESM relative import lacks .js extension: ${importPath}`);
+  }
+}
+const serverTsconfig = JSON.parse(fs.readFileSync("tsconfig.server.json", "utf8"));
+if (serverTsconfig.compilerOptions?.module !== "NodeNext"
+    || serverTsconfig.compilerOptions?.moduleResolution !== "NodeNext") {
+  violations.push("tsconfig.server.json: trusted runtime must use NodeNext ESM resolution");
+}
 if (/VITE_SUPABASE_|SUPABASE_SERVICE_ROLE_KEY/.test(trustedMultiplayerApi)) {
   violations.push("api/multiplayer.ts: trusted runtime uses a browser or legacy service-role variable");
 }

@@ -1,11 +1,11 @@
-import ChessBoard from "../../engine/ChessBoard";
-import DiceEngine from "../../engine/DiceEngine";
-import NotationGenerator from "../../engine/NotationGenerator";
-import { applySimulatedMove } from "../../engine/Simulation";
-import TurnResolver from "../../engine/TurnResolver";
-import TurnRights from "../../engine/TurnRights";
-import type { MatchHistoryEntry, MatchPieceSnapshot, MatchTurnHistory } from "../../domain/contracts/MatchContracts";
-import type { Move, PieceColor, PieceType, Position } from "../../types/Chess";
+import ChessBoard from "../../engine/ChessBoard.js";
+import DiceEngine from "../../engine/DiceEngine.js";
+import NotationGenerator from "../../engine/NotationGenerator.js";
+import { applySimulatedMove } from "../../engine/Simulation.js";
+import TurnResolver from "../../engine/TurnResolver.js";
+import TurnRights from "../../engine/TurnRights.js";
+import type { MatchHistoryEntry, MatchPieceSnapshot, MatchTurnHistory } from "../../domain/contracts/MatchContracts.js";
+import type { Move, PieceColor, PieceType, Position } from "../../types/Chess.js";
 
 export const AUTHORITATIVE_STATE_VERSION = 1;
 

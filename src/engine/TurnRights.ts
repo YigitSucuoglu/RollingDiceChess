@@ -1,4 +1,4 @@
-import type { PieceType } from "../types/Chess";
+import type { PieceType } from "../types/Chess.js";
 
 export default class TurnRights {
 

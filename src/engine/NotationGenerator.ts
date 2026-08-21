@@ -1,4 +1,4 @@
-import type { Move, PieceType } from "../types/Chess";
+import type { Move, PieceType } from "../types/Chess.js";
 
 const PIECE_SYMBOLS: Readonly<Record<Exclude<PieceType, "pawn">, string>> = {
   king: "K",

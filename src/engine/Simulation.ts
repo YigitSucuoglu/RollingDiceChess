@@ -1,7 +1,6 @@
-import type { Move, Piece, PieceColor } from "../types/Chess";
-import type ChessBoard from "./ChessBoard";
-import type Game from "./Game";
-import type TurnRights from "./TurnRights";
+import type { Move, Piece, PieceColor } from "../types/Chess.js";
+import type ChessBoard from "./ChessBoard.js";
+import type TurnRights from "./TurnRights.js";
 
 export interface SimulationState {
   board: ChessBoard;
@@ -11,7 +10,15 @@ export interface SimulationState {
   winner: PieceColor | null;
 }
 
-export function createSimulationState(game: Game): SimulationState {
+interface SimulationSource {
+  board: ChessBoard;
+  turnRights: TurnRights;
+  currentTurn: PieceColor;
+  lastMove: Move | null;
+  winner: PieceColor | null;
+}
+
+export function createSimulationState(game: SimulationSource): SimulationState {
   return cloneSimulationState({
     board: game.board,
     rights: game.turnRights,

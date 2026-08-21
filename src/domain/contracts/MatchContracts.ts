@@ -5,10 +5,10 @@ import type {
   PieceColor,
   PieceType,
   Position,
-} from "../../types/Chess";
-import type { BoardTheme } from "../../types/BoardTheme";
-import type { BotDifficulty } from "../../types/GameSetup";
-import type { PieceSet } from "../../types/PieceSet";
+} from "../../types/Chess.js";
+import type { BoardTheme } from "../../types/BoardTheme.js";
+import type { BotDifficulty } from "../../types/GameSetup.js";
+import type { PieceSet } from "../../types/PieceSet.js";
 
 export const MATCH_CONFIGURATION_SCHEMA_VERSION = 1;
 export const MATCH_SNAPSHOT_SCHEMA_VERSION = 1;
