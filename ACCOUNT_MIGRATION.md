@@ -19,6 +19,8 @@ Each PlayerId owns one immutable public discriminator. No-conflict linking and K
 
 The DATA-01B local/cloud conflict must be resolved before account migration starts. Local-only fallback Guests cannot migrate until a cloud Guest identity is established. Linking requires connectivity; offline gameplay and pending progression remain available. Progression-producing profile updates are suspended from OAuth handoff until canonical adoption completes, preventing an ambiguous or retired PlayerId from receiving new local operations.
 
+Local storage never authorizes this transfer. A PlayerId mismatch during ordinary authenticated initialization cannot bootstrap one profile into another, even when the target cloud profile is empty. Only the migration intent/handoff and its server-validated resolution can authorize a Guest-to-Google PlayerId transition.
+
 ## Retry and security
 
 Migration intents are expiry-aware, ownership-bound, and additionally bound to the permanent account on first inspection. Same-decision replay returns the same survivor; contradictory replay and another account's token are rejected. Browser roles cannot update ownership, intents, profiles, or ratings directly.

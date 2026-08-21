@@ -71,3 +71,13 @@ PROFILE-IDENTITY-01A adds a public discriminator without changing authentication
 DATA-01A and the DATA-01B progression-operation migration are **APPLIED**. DATA-01B adds configured cloud Guest creation and a cloud-canonical/cache synchronization coordinator; catalog and two-client remote security verification passed. DATA-01C uses Supabase Manual Linking through a dedicated migration adapter on the same composed client; details are in `ACCOUNT_MIGRATION.md`.
 
 PROFILE-IDENTITY-01B-HF1 reruns complete auth/migration reconciliation on Retry instead of replaying cached profile initialization. Server ownership stays authoritative, unresolved conflicts route directly to explicit choice, resolved survivors use canonical adoption, and Sign Out removes only account-scoped browser continuation state. Pending progression remains bound to its original canonical PlayerId.
+
+## PlayerId progression isolation
+
+PlayerId is the progression isolation boundary. Browser `localStorage` is a cache and recovery input, never migration authority. An empty canonical cloud profile does not authorize it to adopt progression belonging to another PlayerId.
+
+For authenticated accounts, normal initialization accepts a local bootstrap only when the local source PlayerId equals the server-owned canonical PlayerId. A mismatch makes the canonical cloud profile authoritative: it replaces the local profile cache, while pending operations remain quarantined under their original PlayerId. The database independently rejects an authenticated cross-PlayerId `bootstrap_local_profile` call.
+
+Anonymous cloud Guests retain the deliberate legacy local-to-cloud bootstrap path. Guest-to-Google progression transfer remains exclusively authorized by the server-validated migration intent/handoff and conflict-resolution flow; names, discriminators, browser continuity, and an empty cloud profile are never authorization evidence.
+
+PROFILE-IDENTITY-01B-HF2 is **COMPLETE**. Its database defense migration is applied and all four catalog/privilege assertions returned `true`. With old browser storage intentionally retained, the recreated Google account received a new canonical PlayerId/discriminator and remained at XP/games/statistics zero. Remote verification confirmed no bootstrap, migration intent, progression operation, or multiplayer residue.

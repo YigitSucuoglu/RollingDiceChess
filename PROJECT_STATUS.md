@@ -20,6 +20,8 @@ v1.0.0
 ## Completed
 
 ### Quality
+- DEV-DATA-CLEANUP-01 — Inventory and safely reset disposable development identity, progression, rating, migration, and multiplayer data
+- PROFILE-IDENTITY-01B-HF2 — Prevent unauthorized cross-PlayerId local bootstrap
 - MULTIPLAYER-01C-HF1 — Recover legacy multiplayer state and refine Home navigation hierarchy
 - MULTIPLAYER-01C — Integrate real two-player authoritative gameplay and multiplayer Game UI
 - MULTIPLAYER-01B — Implement public/private multiplayer lobby experience
@@ -175,7 +177,7 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. MULTIPLAYER-01D — Qualify production multiplayer latency, reconnect, and two-device behavior
+1. MULTIPLAYER-01D — Qualify production multiplayer latency, reconnect, and two-device behavior.
 
 Roadmap:
 - DATA-01A — Apply Supabase player schema and validate RLS/security

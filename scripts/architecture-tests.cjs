@@ -63,6 +63,9 @@ const allSourceFiles = fs.readdirSync("src", { recursive: true })
   .map((file) => path.join("src", file));
 for (const file of allSourceFiles) {
   const source = fs.readFileSync(file, "utf8");
+  if (/scripts\/admin|supabase\/admin/.test(source)) {
+    violations.push(`${file}: browser/application source imports destructive admin tooling`);
+  }
   if (/@supabase\/supabase-js/.test(source)
       && !file.startsWith(path.join("src", "infrastructure"))) {
     violations.push(`${file}: Supabase SDK outside infrastructure`);

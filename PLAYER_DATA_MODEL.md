@@ -33,6 +33,10 @@ Anonymous Sign-Ins are enabled and remote RLS was validated with two disposable 
 
 Local `PlayerProfile.playerId` is a source-record identifier, not cloud PlayerId. Display name, XP and statistics are bootstrap inputs. `processedMatchIds` stays local cache/idempotency data. Language, sound, themes and setup preferences remain settings, outside identity.
 
+PlayerId is also the mandatory progression-isolation boundary. Local storage alone cannot authorize progression transfer between PlayerIds. Authenticated bootstrap may recover only the same canonical PlayerId; a fresh/empty account profile wins over stale data belonging to another PlayerId. Cross-PlayerId Guest-to-account transfer requires the existing authenticated, server-validated migration contract. Anonymous Guest initialization remains a separate permitted bootstrap case.
+
+The PROFILE-IDENTITY-01B-HF2 additive bootstrap-isolation migration is **APPLIED** and its four schema/privilege assertions passed. Stale-browser runtime and remote acceptance also passed: the fresh canonical account remained at XP/games/statistics zero with no cross-PlayerId bootstrap record.
+
 ## Trust and migration boundaries
 
 Singleplayer bot-game XP/statistics are client-originated casual progression. Bot games never change multiplayer rating. Future RATING-01 owns an authoritative ranked-match update path.

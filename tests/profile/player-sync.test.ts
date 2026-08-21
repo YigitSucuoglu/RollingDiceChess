@@ -64,6 +64,115 @@ describe("PlayerSyncCoordinator", () => {
     expect(repository.getProfile().playerId).toBe(canonical.profile.playerId);
   });
 
+  it("adopts a fresh authenticated canonical profile without bootstrapping stale local progression", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const stale = meaningful(repository.getProfile());
+    stale.playerId = "deleted-player-a";
+    stale.totalXp = 208;
+    stale.statistics.gamesPlayed = 3;
+    repository.saveProfile(stale);
+    localStorage.setItem(PLAYER_SYNC_STORAGE_KEY, JSON.stringify({
+      schemaVersion: 1,
+      cloudPlayerId: "deleted-player-a",
+      bootstrapSourceProfileId: "deleted-player-a",
+      pending: [],
+      conflict: false,
+    }));
+    const fresh = createDefaultPlayerProfile();
+    fresh.playerId = "new-player-b";
+    fresh.displayName = "Yigit";
+    fresh.publicDiscriminator = "9Z7VG";
+    fresh.usernameOnboardingRequired = true;
+    const canonical = { ...cloud(fresh), playerId: fresh.playerId };
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => structuredClone(canonical)),
+      bootstrap: vi.fn(), applyOperation: vi.fn(), renameCurrentPlayer: vi.fn(),
+    };
+
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+    await sync.handleAuthentication(accountSession());
+
+    expect(remote.bootstrap).not.toHaveBeenCalled();
+    expect(sync.getCanonicalProfileStatus()).toBe("ready");
+    expect(repository.getProfile()).toMatchObject({
+      playerId: "new-player-b",
+      publicDiscriminator: "9Z7VG",
+      totalXp: 0,
+      statistics: { gamesPlayed: 0 },
+    });
+    expect(JSON.parse(localStorage.getItem(PLAYER_SYNC_STORAGE_KEY)!)).toMatchObject({
+      cloudPlayerId: "new-player-b",
+      bootstrapSourceProfileId: "new-player-b",
+      pending: [],
+    });
+
+    const refreshedRepository = new LocalStoragePlayerProfileRepository(localStorage);
+    const refreshed = new PlayerSyncCoordinator(refreshedRepository, remote, localStorage);
+    await refreshed.handleAuthentication(accountSession());
+    expect(remote.bootstrap).not.toHaveBeenCalled();
+    expect(refreshedRepository.getProfile()).toMatchObject({
+      playerId: "new-player-b",
+      totalXp: 0,
+      statistics: { gamesPlayed: 0 },
+    });
+  });
+
+  it("preserves same-PlayerId authenticated recovery bootstrap", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const local = meaningful(repository.getProfile());
+    local.playerId = "account-player";
+    repository.saveProfile(local);
+    const empty = createDefaultPlayerProfile();
+    empty.playerId = local.playerId;
+    const recovered = structuredClone(local);
+    const canonical = { ...cloud(recovered), playerId: recovered.playerId };
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn().mockResolvedValueOnce({ ...cloud(empty), playerId: empty.playerId })
+        .mockResolvedValue(canonical),
+      bootstrap: vi.fn(async () => canonical),
+      applyOperation: vi.fn(), renameCurrentPlayer: vi.fn(),
+    };
+
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+    await sync.handleAuthentication(accountSession());
+
+    expect(remote.bootstrap).toHaveBeenCalledOnce();
+    expect(repository.getProfile()).toMatchObject({ playerId: "account-player", totalXp: 100 });
+  });
+
+  it("quarantines old-player pending operations while adopting a new authenticated player", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const old = meaningful(repository.getProfile());
+    old.playerId = "player-a";
+    repository.saveProfile(old);
+    const pending = { operationId: "operation-a", payload: { xpDelta: 25 } };
+    localStorage.setItem(PLAYER_SYNC_STORAGE_KEY, JSON.stringify({
+      schemaVersion: 1, cloudPlayerId: "player-a", pending: [pending], conflict: false,
+    }));
+    const fresh = createDefaultPlayerProfile();
+    fresh.playerId = "player-b";
+    const canonical = { ...cloud(fresh), playerId: fresh.playerId };
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => canonical), bootstrap: vi.fn(),
+      applyOperation: vi.fn(), renameCurrentPlayer: vi.fn(),
+    };
+
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+    await sync.handleAuthentication(accountSession());
+
+    expect(remote.applyOperation).not.toHaveBeenCalled();
+    expect(remote.bootstrap).not.toHaveBeenCalled();
+    expect(repository.getProfile()).toMatchObject({ playerId: "player-b", totalXp: 0 });
+    expect(JSON.parse(localStorage.getItem(PLAYER_SYNC_STORAGE_KEY)!)).toMatchObject({
+      cloudPlayerId: "player-b",
+      pending: [],
+      deferredPending: [{ playerId: "player-a", operations: [pending] }],
+    });
+  });
+
   it("preserves both meaningful profiles and reports an unresolved conflict", async () => {
     const localStorage = storage();
     const repository = new LocalStoragePlayerProfileRepository(localStorage);

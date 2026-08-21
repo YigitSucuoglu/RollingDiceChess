@@ -118,4 +118,23 @@ describe("cloud player identity model", () => {
     expect(sql).toContain("for update");
     expect(sql).not.toMatch(/update public\.player_(?:progression|ratings)/i);
   });
+
+  it("enforces cross-PlayerId bootstrap isolation in the database boundary", () => {
+    const migration = readFileSync(
+      "supabase/migrations/202608210003_profile_identity_01b_hf2_bootstrap_isolation.sql",
+      "utf8",
+    );
+    const verification = readFileSync(
+      "supabase/tests/profile_identity_01b_hf2_bootstrap_isolation_verification.sql",
+      "utf8",
+    );
+    expect(migration.trimStart()).toMatch(/^--[\s\S]*?begin;/);
+    expect(migration.trimEnd()).toMatch(/commit;$/);
+    expect(migration).toContain("input_source_profile_id <> target::text");
+    expect(migration).toContain("auth.jwt() ->> 'is_anonymous'");
+    expect(migration).toContain("cross-player bootstrap requires explicit migration authorization");
+    expect(migration).toContain("using errcode = '42501'");
+    expect(migration).toContain("revoke all on function public.bootstrap_local_profile(jsonb)");
+    expect(verification).toContain("browser_direct_progression_update_denied");
+  });
 });

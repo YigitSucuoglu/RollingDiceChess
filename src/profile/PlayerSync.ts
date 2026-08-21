@@ -292,13 +292,18 @@ export class PlayerSyncCoordinator {
         return;
       }
       let canonical = cloud;
-      if (!knownCloud && !isMeaningfulCloudProfile(cloud) && isMeaningfulLocalProfile(local)) {
+      const bootstrapOwnsCanonicalIdentity = !this.accountAuthenticated
+        || local.playerId === cloud.playerId;
+      if (!knownCloud && !isMeaningfulCloudProfile(cloud) && isMeaningfulLocalProfile(local)
+          && bootstrapOwnsCanonicalIdentity) {
         canonical = await this.remote.bootstrap(local);
       }
       this.writeState({
         ...state,
         cloudPlayerId: canonical.playerId,
-        bootstrapSourceProfileId: state.bootstrapSourceProfileId ?? local.playerId,
+        bootstrapSourceProfileId: this.accountAuthenticated
+          ? canonical.playerId
+          : state.bootstrapSourceProfileId ?? local.playerId,
         conflict: false,
       });
       if (this.readState().pending.length > 0) await this.flushPending();
