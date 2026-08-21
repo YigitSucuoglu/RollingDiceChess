@@ -125,6 +125,18 @@ const trustedPlayerResolutionMigration = fs.readFileSync(
   "supabase/migrations/202608210001_multiplayer_01c_hf2_trusted_player_resolution.sql",
   "utf8",
 );
+const triggerEnumCastMigration = fs.readFileSync(
+  "supabase/migrations/202608210002_multiplayer_01c_hf2_trigger_enum_cast_fix.sql",
+  "utf8",
+);
+for (const invariant of [
+  "new.status::text in ('terminal', 'technical-abort')",
+  "new.status::text = 'closed'",
+]) {
+  if (!triggerEnumCastMigration.includes(invariant)) {
+    violations.push(`multiplayer cleanup trigger migration: missing enum-safe comparison ${invariant}`);
+  }
+}
 for (const invariant of [
   "auth.role() <> 'service_role'",
   "public.player_auth_owners",
