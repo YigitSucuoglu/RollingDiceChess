@@ -100,8 +100,11 @@ if (/VITE_SUPABASE_|SUPABASE_SERVICE_ROLE_KEY/.test(trustedMultiplayerApi)) {
 }
 if (!/process\.env\.SUPABASE_SECRET_KEY/.test(trustedMultiplayerApi)
     || !/client\.auth\.getUser\(accessToken\)/.test(trustedMultiplayerApi)
-    || !/player_auth_owners/.test(trustedMultiplayerApi)) {
+    || !/trusted_resolve_multiplayer_player/.test(trustedMultiplayerApi)) {
   violations.push("api/multiplayer.ts: missing server secret, verified token, or canonical PlayerId boundary");
+}
+if (/\.from\(["']player_auth_owners["']\)/.test(trustedMultiplayerApi)) {
+  violations.push("api/multiplayer.ts: trusted runtime bypasses the narrow player resolver RPC");
 }
 if (/console\.(?:log|error|warn)|response[^\n]+(?:secret|accessToken)/i.test(trustedMultiplayerApi)) {
   violations.push("api/multiplayer.ts: credential-bearing logging or response risk");
@@ -118,6 +121,21 @@ const staleMembershipMigration = fs.readFileSync(
   "supabase/migrations/202608200005_multiplayer_01c_hf2_stale_membership_recovery.sql",
   "utf8",
 );
+const trustedPlayerResolutionMigration = fs.readFileSync(
+  "supabase/migrations/202608210001_multiplayer_01c_hf2_trusted_player_resolution.sql",
+  "utf8",
+);
+for (const invariant of [
+  "auth.role() <> 'service_role'",
+  "public.player_auth_owners",
+  "player.lifecycle = 'active'",
+  "from public, anon, authenticated",
+  "to service_role",
+]) {
+  if (!trustedPlayerResolutionMigration.includes(invariant)) {
+    violations.push(`trusted player resolver migration: missing security guard ${invariant}`);
+  }
+}
 for (const invariant of [
   "auth.role() <> 'service_role'",
   "requested_caller_player_id not in (match_row.player_a_id, match_row.player_b_id)",

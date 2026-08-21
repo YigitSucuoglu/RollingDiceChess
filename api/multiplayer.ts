@@ -121,11 +121,10 @@ async function resolveCallerPlayerId(
     authFingerprint: callerFingerprint(data.user.id),
     projectFingerprint: configuredProjectFingerprint(),
   });
-  const { data: owner, error: ownerError } = await client
-    .from("player_auth_owners")
-    .select("player_id")
-    .eq("auth_user_id", data.user.id)
-    .maybeSingle();
+  const { data: resolvedPlayerId, error: ownerError } = await client.rpc(
+    "trusted_resolve_multiplayer_player",
+    { requested_auth_user_id: data.user.id },
+  );
   if (ownerError) {
     diagnostic?.("canonical-owner-lookup-failed", {
       outcome: "database-error",
@@ -133,16 +132,12 @@ async function resolveCallerPlayerId(
     });
     throw new RequestFailure(403, "player-profile-required");
   }
-  if (!owner) {
+  if (typeof resolvedPlayerId !== "string") {
     diagnostic?.("canonical-owner-lookup-failed", { outcome: "missing" });
     throw new RequestFailure(403, "player-profile-required");
   }
-  if (typeof owner.player_id !== "string") {
-    diagnostic?.("canonical-owner-lookup-failed", { outcome: "invalid-row-shape" });
-    throw new RequestFailure(403, "player-profile-required");
-  }
-  diagnostic?.("canonical-player-resolved", { callerFingerprint: callerFingerprint(owner.player_id) });
-  return owner.player_id;
+  diagnostic?.("canonical-player-resolved", { callerFingerprint: callerFingerprint(resolvedPlayerId) });
+  return resolvedPlayerId;
 }
 
 async function rpcObject(
