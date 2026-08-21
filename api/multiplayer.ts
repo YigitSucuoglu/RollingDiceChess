@@ -91,6 +91,16 @@ function callerFingerprint(playerId: string): string {
   return createHash("sha256").update(playerId).digest("hex").slice(0, 10);
 }
 
+function configuredProjectFingerprint(): string {
+  const configuredUrl = process.env.SUPABASE_URL?.trim();
+  if (!configuredUrl) return "missing";
+  try {
+    return callerFingerprint(new URL(configuredUrl).hostname);
+  } catch {
+    return "invalid";
+  }
+}
+
 function databaseFailureReason(error: { code?: string; message?: string }): string {
   if (error.code === "42703" || error.message?.includes("created_at")) return "undefined-column";
   if (error.code === "42883") return "undefined-function";
@@ -107,13 +117,30 @@ async function resolveCallerPlayerId(
 ): Promise<string> {
   const { data, error } = await client.auth.getUser(accessToken);
   if (error || !data.user?.id) throw new RequestFailure(401, "authentication-required");
-  diagnostic?.("auth-verified");
+  diagnostic?.("auth-verified", {
+    authFingerprint: callerFingerprint(data.user.id),
+    projectFingerprint: configuredProjectFingerprint(),
+  });
   const { data: owner, error: ownerError } = await client
     .from("player_auth_owners")
     .select("player_id")
     .eq("auth_user_id", data.user.id)
     .maybeSingle();
-  if (ownerError || !owner || typeof owner.player_id !== "string") throw new RequestFailure(403, "player-profile-required");
+  if (ownerError) {
+    diagnostic?.("canonical-owner-lookup-failed", {
+      outcome: "database-error",
+      reason: databaseFailureReason(ownerError),
+    });
+    throw new RequestFailure(403, "player-profile-required");
+  }
+  if (!owner) {
+    diagnostic?.("canonical-owner-lookup-failed", { outcome: "missing" });
+    throw new RequestFailure(403, "player-profile-required");
+  }
+  if (typeof owner.player_id !== "string") {
+    diagnostic?.("canonical-owner-lookup-failed", { outcome: "invalid-row-shape" });
+    throw new RequestFailure(403, "player-profile-required");
+  }
   diagnostic?.("canonical-player-resolved", { callerFingerprint: callerFingerprint(owner.player_id) });
   return owner.player_id;
 }
