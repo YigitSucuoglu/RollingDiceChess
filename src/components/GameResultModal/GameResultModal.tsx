@@ -8,6 +8,8 @@ import type { MatchXpProgressionResult } from "../../profile/ProfileProgression"
 import ResultXpProgress from "./ResultXpProgress";
 import "./GameResultModal.css";
 import { useTranslation } from "react-i18next";
+import type { MultiplayerRatingSettlement } from "../../application/multiplayer/MultiplayerMatchPort";
+import RatingResultProgress from "./RatingResultProgress";
 
 interface GameResultModalProps {
   endReason: MatchTerminationReason;
@@ -17,6 +19,7 @@ interface GameResultModalProps {
   xpProgression: MatchXpProgressionResult | null;
   winner: PieceColor;
   showPlayAgain?: boolean;
+  ratingSettlement?: MultiplayerRatingSettlement | null;
 }
 
 type ResultPieceStyle = CSSProperties & {
@@ -33,6 +36,7 @@ function GameResultModal({
   xpProgression,
   winner,
   showPlayAgain = true,
+  ratingSettlement = null,
 }: GameResultModalProps) {
   const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -118,6 +122,7 @@ function GameResultModal({
         <p id="game-result-reason">{endReasonLabel}</p>
 
         {xpProgression ? <ResultXpProgress progression={xpProgression} /> : null}
+        {ratingSettlement ? <RatingResultProgress settlement={ratingSettlement} /> : null}
 
         <div className="game-result-actions">
           {showPlayAgain ? <button

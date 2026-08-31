@@ -194,6 +194,53 @@
     opacity:1;
 }
 
+.game-result-rating{
+    width:100%;
+    margin:0 0 22px;
+    padding:13px 15px;
+    border:1px solid rgba(202,160,86,.28);
+    border-radius:10px;
+    background:rgba(11,10,9,.56);
+}
+
+.game-result-rating>p{
+    margin:0 0 8px;
+    color:#a99d8a;
+    font-size:10px;
+    letter-spacing:.16em;
+}
+
+.game-result-rating-transition{
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap:12px;
+    font-variant-numeric:tabular-nums;
+}
+
+.game-result-rating-transition span{
+    color:#a99d8a;
+    font-size:18px;
+}
+
+.game-result-rating-transition strong{
+    min-width:4ch;
+    color:#f2ca72;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:28px;
+    font-weight:700;
+}
+
+.game-result-rating output{
+    display:block;
+    margin-top:5px;
+    font-size:14px;
+    font-weight:800;
+}
+
+.game-result-rating.is-positive output{ color:#8fd0a0; }
+.game-result-rating.is-negative output{ color:#e49a83; }
+
 .game-result-actions{
     width:100%;
 

@@ -17,6 +17,13 @@
     transition:border-color 160ms ease,box-shadow 160ms ease,background 160ms ease;
 }
 
+.chess-clock-identity{
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
 .chess-clock-player{
     overflow:hidden;
 
@@ -25,6 +32,19 @@
     letter-spacing:.12em;
     text-overflow:ellipsis;
     white-space:nowrap;
+}
+
+.chess-clock-rating{
+    color:#a99a7e;
+    font-size:10px;
+    font-variant-numeric:tabular-nums;
+    font-weight:700;
+    letter-spacing:.08em;
+}
+
+.chess-clock-rating>span{
+    color:#c99a43;
+    font-size:7px;
 }
 
 .chess-clock-time{
@@ -79,6 +99,10 @@
     .chess-clock-player{
         font-size:10px;
         letter-spacing:.09em;
+    }
+
+    .chess-clock-rating{
+        font-size:9px;
     }
 
     .chess-clock-time{

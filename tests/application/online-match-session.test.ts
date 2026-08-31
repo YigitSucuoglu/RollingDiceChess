@@ -35,6 +35,7 @@ function snapshot(revision = 1): MultiplayerServerSnapshot {
     connections: { whiteReconnectDeadline: null, blackReconnectDeadline: null },
     winner: null,
     terminationReason: null,
+    ratingSettlement: null,
   };
 }
 

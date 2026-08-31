@@ -264,6 +264,40 @@
   color: #e3c889;
 }
 
+.profile-rating {
+  align-items: center;
+  color: var(--profile-brass);
+  display: inline-flex;
+  gap: .65rem;
+  margin-top: 1rem;
+}
+
+.profile-rating > span {
+  font-size: .7rem;
+}
+
+.profile-rating div {
+  display: flex;
+  flex-direction: column;
+  gap: .12rem;
+}
+
+.profile-rating small {
+  color: #8f8678;
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.profile-rating strong {
+  color: var(--profile-gold);
+  font-family: Georgia,"Times New Roman",serif;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+}
+
 .profile-joined {
   color: #777064;
   font-size: 0.72rem;

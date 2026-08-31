@@ -201,3 +201,6 @@ origin, or to a localhost trusted runtime origin. It must be an origin without c
 a path. It is deliberately not prefixed with `VITE_` and is never added to the browser import
 graph. No `SUPABASE_SECRET_KEY` is needed by or exposed through Vite. Because the default
 proxy reaches production authority, local real-multiplayer actions affect production data.
+## Rating presentation
+
+Player ratings shown during a match come from the trusted `white` and `black` participant summaries and remain visible in both ranked and unranked modes. Ranked terminal feedback is sourced from the append-only private settlement ledger through the service-only match snapshot; the API returns only the current caller's `ratingBefore`, `ratingDelta`, and `ratingAfter`. The browser never calculates or settles rating. Profile rating is refreshed from the canonical cloud player snapshot rather than local XP or statistics.

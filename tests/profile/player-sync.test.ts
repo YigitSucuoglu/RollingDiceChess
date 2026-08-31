@@ -45,6 +45,20 @@ function accountSession() {
 }
 
 describe("PlayerSyncCoordinator", () => {
+  it("exposes only the latest canonical server-backed multiplayer rating", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const canonical = { ...cloud(), multiplayerRating: 1376 };
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => canonical),
+      bootstrap: vi.fn(), applyOperation: vi.fn(), renameCurrentPlayer: vi.fn(),
+    };
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+    expect(sync.getCanonicalMultiplayerRating()).toBeNull();
+    await sync.handleAuthentication(cloudGuest());
+    expect(sync.getCanonicalMultiplayerRating()).toBe(1376);
+  });
+
   it("bootstraps a meaningful legacy profile once when cloud is empty", async () => {
     const localStorage = storage();
     const repository = new LocalStoragePlayerProfileRepository(localStorage);

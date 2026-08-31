@@ -111,6 +111,7 @@ export class PlayerSyncCoordinator {
   private migrationSuspended = false;
   private canonicalProfileStatus: CanonicalProfileStatus = "not-applicable";
   private accountAuthenticated = false;
+  private canonicalMultiplayerRating: number | null = null;
 
   public constructor(local: PlayerProfileRepository, remote: CloudPlayerSyncPort, storage?: SyncStorage) {
     this.local = local;
@@ -132,6 +133,10 @@ export class PlayerSyncCoordinator {
 
   public getCanonicalProfileStatus(): CanonicalProfileStatus {
     return this.canonicalProfileStatus;
+  }
+
+  public getCanonicalMultiplayerRating(): number | null {
+    return this.canonicalMultiplayerRating;
   }
 
   public suspendForAccountMigration(): void {
@@ -168,6 +173,7 @@ export class PlayerSyncCoordinator {
     this.accountAuthenticated = false;
     this.migrationSuspended = false;
     this.canonicalProfileStatus = "not-applicable";
+    this.canonicalMultiplayerRating = null;
     this.initializing = undefined;
     this.flushing = undefined;
   }
@@ -203,6 +209,16 @@ export class PlayerSyncCoordinator {
     const activeFlush = this.flushing;
     if (activeFlush) await activeFlush;
     await this.flushPending();
+    const state = this.readState();
+    if (!state.cloudPlayerId || state.conflict || state.pending.length > 0) return;
+    const canonical = await this.remote.loadCurrent();
+    if (canonical.playerId !== state.cloudPlayerId) {
+      this.canonicalProfileStatus = "unavailable";
+      return;
+    }
+    this.local.saveProfile(canonical.profile);
+    this.canonicalMultiplayerRating = canonical.multiplayerRating;
+    this.canonicalProfileStatus = "ready";
   }
 
   public async flushPending(): Promise<void> {
@@ -239,6 +255,7 @@ export class PlayerSyncCoordinator {
       conflict: false,
     });
     this.local.saveProfile(canonical.profile);
+    this.canonicalMultiplayerRating = canonical.multiplayerRating;
     this.connected = true;
     this.migrationSuspended = false;
     this.canonicalProfileStatus = "ready";
@@ -258,6 +275,7 @@ export class PlayerSyncCoordinator {
       throw new Error("Identity changed during username update.");
     }
     this.local.saveProfile(canonical.profile);
+    this.canonicalMultiplayerRating = canonical.multiplayerRating;
     return canonical;
   }
 
@@ -306,6 +324,7 @@ export class PlayerSyncCoordinator {
           : state.bootstrapSourceProfileId ?? local.playerId,
         conflict: false,
       });
+      this.canonicalMultiplayerRating = canonical.multiplayerRating;
       if (this.readState().pending.length > 0) await this.flushPending();
       else this.local.saveProfile(canonical.profile);
       this.canonicalProfileStatus = "ready";
@@ -328,7 +347,10 @@ export class PlayerSyncCoordinator {
         return;
       }
     }
-    if (canonical) this.local.saveProfile(canonical.profile);
+    if (canonical) {
+      this.local.saveProfile(canonical.profile);
+      this.canonicalMultiplayerRating = canonical.multiplayerRating;
+    }
   }
 
   private readState(): PlayerSyncState {

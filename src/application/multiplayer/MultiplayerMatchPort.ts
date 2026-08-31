@@ -27,6 +27,13 @@ export interface MultiplayerServerSnapshot {
   };
   readonly winner: PieceColor | null;
   readonly terminationReason: MultiplayerTerminationReason | null;
+  readonly ratingSettlement: MultiplayerRatingSettlement | null;
+}
+
+export interface MultiplayerRatingSettlement {
+  readonly ratingBefore: number;
+  readonly ratingDelta: number;
+  readonly ratingAfter: number;
 }
 
 export type MultiplayerMatchIntent =

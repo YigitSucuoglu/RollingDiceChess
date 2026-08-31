@@ -35,6 +35,10 @@ interface TrustedMatchRow extends JsonObject {
   canonicalState: AuthoritativeStoredState | null;
   currentRoll: readonly string[] | null;
   currentTurn: string | null;
+  ratingSettlement: {
+    readonly playerA: { readonly before: number; readonly delta: number; readonly after: number };
+    readonly playerB: { readonly before: number; readonly delta: number; readonly after: number };
+  } | null;
 }
 
 class RequestFailure extends Error {
@@ -166,6 +170,9 @@ function publicSnapshot(row: TrustedMatchRow, callerPlayerId: string): JsonObjec
     : callerPlayerId === row.blackPlayerId ? "black" : null;
   if (!ownSide && row.status !== "initializing") throw new RequestFailure(403, "not-authorized");
   const state = row.canonicalState;
+  const callerSettlement = callerPlayerId === row.playerAId
+    ? row.ratingSettlement?.playerA
+    : callerPlayerId === row.playerBId ? row.ratingSettlement?.playerB : null;
   return {
     schemaVersion: 1,
     matchId: row.matchId,
@@ -190,6 +197,11 @@ function publicSnapshot(row: TrustedMatchRow, callerPlayerId: string): JsonObjec
     winner: row.winnerPlayerId === row.whitePlayerId ? "white"
       : row.winnerPlayerId === row.blackPlayerId ? "black" : null,
     terminationReason: row.terminationReason,
+    ratingSettlement: callerSettlement ? {
+      ratingBefore: callerSettlement.before,
+      ratingDelta: callerSettlement.delta,
+      ratingAfter: callerSettlement.after,
+    } : null,
   };
 }
 

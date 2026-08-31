@@ -109,13 +109,13 @@
   },
   "result": {
     "forfeit": "Match won by forfeit",
-    "gameOver": "Game over", "wins": "{{color}} wins", "kingCaptured": "King captured", "timeout": "{{color}} ran out of time", "experienceEarned": "Experience earned", "progressToward": "XP progress toward Level {{level}}", "nextLevel": "Next level", "levelUp": "Level up"
+    "gameOver": "Game over", "wins": "{{color}} wins", "kingCaptured": "King captured", "timeout": "{{color}} ran out of time", "experienceEarned": "Experience earned", "progressToward": "XP progress toward Level {{level}}", "nextLevel": "Next level", "levelUp": "Level up", "rating": "Rating", "ratingChangeAria": "Rating changed from {{ratingBefore}} to {{ratingAfter}}, {{ratingDelta}} points"
   },
   "errors": {
     "fatal": { "title": "Something went wrong", "message": "RouletteChess encountered an unexpected error.", "tryAgain": "Try Again", "backHome": "Back to Home" }
   },
   "profile": {
-    "browserTitle": "Profile | RouletteChess", "eyebrow": "Offline player hub", "title": "Profile", "player": "Player", "joined": "Joined {{date}}", "levelProgress": "Level progress", "progressLabel": "Level {{level}} experience progress",
+    "browserTitle": "Profile | RouletteChess", "eyebrow": "Offline player hub", "title": "Profile", "player": "Player", "joined": "Joined {{date}}", "levelProgress": "Level progress", "progressLabel": "Level {{level}} experience progress", "multiplayerRating": "Multiplayer rating", "multiplayerRatingValue": "Multiplayer rating {{rating}}",
     "careerOverview": "Career overview", "generalStatistics": "General Statistics", "rouletteSignature": "Your roulette signature", "rouletteStatistics": "RouletteChess Statistics",
     "stats": { "gamesPlayed": "Games Played", "wins": "Wins", "losses": "Losses", "winRate": "Win Rate", "currentWinStreak": "Current Win Streak", "bestWinStreak": "Best Win Streak", "totalPlayTime": "Total Play Time", "kingsCaptured": "Kings Captured", "rouletteRolls": "Roulette Rolls", "mostRolledPiece": "Most Rolled Piece", "mostPlayedPiece": "Most Played Piece", "mostSuccessfulPiece": "Most Successful Piece", "threeRightsUsed": "Three Rights Used", "triplePawnRolls": "Triple Pawn Rolls", "tripleKnightRolls": "Triple Knight Rolls", "tripleQueenRolls": "Triple Queen Rolls" },
     "futureMilestones": "Future milestones", "achievements": "Achievements", "achievementNames": { "firstVictory": "First Victory", "hundredGames": "100 Games", "captureHundredKings": "Capture 100 Kings", "tripleQueenRoll": "Triple Queen Roll" },
@@ -130,7 +130,7 @@
     "languageChanged": "Language changed to English."
   },
   "multiplayer": {
-    "gameBrowserTitle": "Multiplayer Game | RouletteChess", "matchDetails": "Multiplayer match details", "technicalAbort": "Match interrupted", "technicalAbortDescription": "The match ended safely because the server could not determine a legitimate winner.", "backToMultiplayer": "Back to Multiplayer",
+    "gameBrowserTitle": "Multiplayer Game | RouletteChess", "matchDetails": "Multiplayer match details", "playerRating": "Player rating {{rating}}", "technicalAbort": "Match interrupted", "technicalAbortDescription": "The match ended safely because the server could not determine a legitimate winner.", "backToMultiplayer": "Back to Multiplayer",
     "browserTitle": "Multiplayer | RouletteChess", "title": "Multiplayer", "actions": "Multiplayer actions", "availableMatches": "Available matches",
     "createLobby": "Create Lobby", "joinPrivate": "Join Private Lobby", "openLobbies": "Open Lobbies", "noOpenLobbies": "No open lobbies right now.", "emptyHint": "Create one and wait for another player.",
     "public": "Public", "private": "Private", "visibility": "Visibility", "mode": "Mode", "ranked": "Ranked", "unranked": "Unranked", "timeControl": "Time Control", "side": "Side", "white": "White", "black": "Black", "random": "Random", "locked": "Locked",

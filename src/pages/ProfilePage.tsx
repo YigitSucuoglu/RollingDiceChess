@@ -39,6 +39,7 @@ function ProfilePage() {
   const { t, i18n } = useTranslation();
   const language: AppLanguage = i18n.resolvedLanguage === "tr" ? "tr" : "en";
   const { authentication, session } = useAuthentication();
+  const [, setProfileRevision] = useState(0);
   const profile = playerProfileService.getViewModel(language);
   const [authPending, setAuthPending] = useState(false);
   const [renaming, setRenaming] = useState(false);
@@ -85,6 +86,12 @@ function ProfilePage() {
   };
 
   useEffect(() => accountMigrationService.subscribe(setMigration), []);
+
+  useEffect(() => {
+    const unsubscribe = playerProfileService.subscribe(() => setProfileRevision((value) => value + 1));
+    void playerProfileService.reconnectCloudSync().catch(() => undefined);
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     const previousTitle = document.title;
@@ -239,6 +246,15 @@ function ProfilePage() {
               <span aria-hidden="true">◆</span>
               <strong>{t(`titles.${progression.titleId}`)}</strong>
             </div>
+            {profile.multiplayerRating !== null && (
+              <div className="profile-rating" aria-label={t("profile.multiplayerRatingValue", { rating: profile.multiplayerRating })}>
+                <span aria-hidden="true">◆</span>
+                <div>
+                  <small>{t("profile.multiplayerRating")}</small>
+                  <strong>{profile.multiplayerRating}</strong>
+                </div>
+              </div>
+            )}
             <p className="profile-joined">{t("profile.joined", { date: profile.joinedLabel })}</p>
           </div>
 

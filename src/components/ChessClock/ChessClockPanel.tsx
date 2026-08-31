@@ -8,6 +8,7 @@ interface ChessClockPanelProps {
   color: PieceColor;
   isPlayer: boolean;
   roleLabel?: string;
+  rating?: number;
   snapshot: ChessClockSnapshot;
 }
 
@@ -26,6 +27,7 @@ function ChessClockPanel({
   color,
   isPlayer,
   roleLabel: roleLabelOverride,
+  rating,
   snapshot,
 }: ChessClockPanelProps) {
   const { t } = useTranslation();
@@ -47,8 +49,15 @@ function ChessClockPanel({
       }`}
       role="timer"
     >
-      <span className="chess-clock-player">
+      <span className="chess-clock-identity">
+        <span className="chess-clock-player">
         {colorLabel} <span aria-hidden="true">·</span> {roleLabel}
+        </span>
+        {rating !== undefined && (
+          <span aria-label={t("multiplayer.playerRating", { rating })} className="chess-clock-rating">
+            <span aria-hidden="true">◆</span> {rating}
+          </span>
+        )}
       </span>
       <time className="chess-clock-time">{formatClockTime(remainingMs)}</time>
     </div>

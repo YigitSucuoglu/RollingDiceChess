@@ -585,6 +585,9 @@ function Board({ onlinePresentation, sessionOverride }: BoardProps) {
       <ChessClockPanel
         color={opponentColor}
         isPlayer={false}
+        rating={isOnline ? (opponentColor === "white"
+          ? onlinePresentation?.white?.multiplayerRating
+          : onlinePresentation?.black?.multiplayerRating) : undefined}
         roleLabel={isOnline ? (opponentColor === "white" ? onlinePresentation?.white?.displayName : onlinePresentation?.black?.displayName) : undefined}
         snapshot={matchSnapshot.clock}
       />
@@ -608,7 +611,12 @@ function Board({ onlinePresentation, sessionOverride }: BoardProps) {
       <ChessClockPanel
         color={playerColor}
         isPlayer
-        roleLabel={isOnline ? t("game.you") : undefined}
+        rating={isOnline ? (playerColor === "white"
+          ? onlinePresentation?.white?.multiplayerRating
+          : onlinePresentation?.black?.multiplayerRating) : undefined}
+        roleLabel={isOnline ? (playerColor === "white"
+          ? onlinePresentation?.white?.displayName
+          : onlinePresentation?.black?.displayName) : undefined}
         snapshot={matchSnapshot.clock}
       />
 
@@ -631,6 +639,9 @@ function Board({ onlinePresentation, sessionOverride }: BoardProps) {
           onPlayAgain={startNewGame}
           pieceSet={session.configuration.pieceSet}
           xpProgression={isOnline ? null : gameManager.getMatchXpProgression()!}
+          ratingSettlement={isOnline && onlinePresentation?.mode === "ranked"
+            ? onlinePresentation.ratingSettlement
+            : null}
           winner={matchSnapshot.winner}
           showPlayAgain={!isOnline}
         />

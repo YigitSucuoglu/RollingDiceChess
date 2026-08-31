@@ -2,9 +2,9 @@
 
 ## Current status
 
-MULTIPLAYER-01D local and deterministic qualification is complete. Real production
-qualification with two independent authenticated players remains **PENDING**. The task must
-not be marked Completed until the sessions below pass against the deployed production build.
+MULTIPLAYER-01D local, deterministic, and real production qualification is **COMPLETE**.
+Sessions A-E passed with independent authenticated players across a PC and a physical mobile
+device against the deployed production build on 2026-08-31.
 
 The deterministic suite uses application-owned fixtures and must not contact Supabase or
 create Auth users. Realtime timing, Vercel cold starts, physical-device behavior, and actual
@@ -17,8 +17,8 @@ changing `.env.local` or proxy configuration. Do not place a Supabase secret in 
 variable. The default proxy uses production authority and therefore changes production
 multiplayer state during real manual tests.
 
-The MULTIPLAYER-01D host-lease migration is additive but must be applied before validating
-ghost-lobby acceptance. After application, an existing abandoned waiting/ready lobby receives
+The additive MULTIPLAYER-01D host-lease migration was applied before validating ghost-lobby
+acceptance. After application, an existing abandoned waiting/ready lobby receives
 one three-minute transition lease. Without a live host heartbeat it must disappear from
 discovery naturally, release its memberships during opportunistic reconciliation, and allow
 the former host to create a new lobby without manual deletion. Record this production ghost
@@ -28,8 +28,7 @@ Production migration/catalog verification passed on 2026-08-31: all eight lease/
 assertions were true and no lease exceeded the hard TTL. The preserved abandoned public
 lobby disappeared from Open Lobbies naturally without manual close/delete. Final read-only
 verification returned zero open/expired/lease-bound anomalies and zero orphan/stale
-pre-match memberships. The ghost-lobby lifecycle acceptance is complete; Sessions A-E remain
-pending.
+pre-match memberships. The ghost-lobby lifecycle acceptance is complete.
 
 ## Automated baseline
 
@@ -52,12 +51,12 @@ lobby codes, emails, or raw provider/server payloads.
 
 | Operation | Client/device | Cold/warm | Approx. ms | Result/notes |
 | --- | --- | --- | ---: | --- |
-| Public lobby create |  |  |  |  |
-| Public lobby join |  |  |  |  |
-| Start Match |  |  |  |  |
-| Move intent -> response |  |  |  |  |
-| Move -> opponent visible |  |  |  |  |
-| Reconnect restore |  |  |  |  |
+| Public lobby create | Production PC/mobile | Warm | Accepted | Public discovery and join passed |
+| Public lobby join | Production PC/mobile | Warm | Accepted | Independent account saw and joined the host lobby |
+| Start Match | Production PC/mobile | Warm | Accepted | Both clients entered one canonical match |
+| Move intent -> response | Production PC/mobile | Warm | ~250-400 | Accepted after Vercel authority alignment to `fra1` |
+| Move -> opponent visible | Production PC/mobile | Warm | Accepted | Realtime notification and canonical reconciliation converged correctly |
+| Reconnect restore | Production PC/mobile | Warm | Accepted | Disconnect/reconnect and canonical clock restoration passed |
 
 ## Session A - Lobby
 
@@ -124,9 +123,23 @@ event, or stale snapshot. Do not manually delete rows to make acceptance pass.
 
 ## Completion record
 
-Record deployment/date, clients, approximate latencies, Sessions A-E results, demonstrated
-defects, and retest evidence. Only then may PROJECT_STATUS mark MULTIPLAYER-01D Completed and
-select the next roadmap task.
+Production acceptance completed on 2026-08-31 with a PC and physical mobile browser using
+independent authenticated accounts. Sessions A-E passed: lobby lifecycle and discovery,
+authoritative cross-device gameplay, clocks, reconnect/disconnect behavior, ranked settlement,
+canonical Profile and board ratings, responsive rating UI, and ranked Game Over rating
+animation. The preserved ghost lobby expired naturally under the verified host lease policy,
+with no manual deletion.
+
+Aligning the Vercel trusted authority with Supabase through the `fra1` production region
+reduced the previously severe latency. Warm caller move responses were accepted at roughly
+250-400 ms; opponent Realtime observation followed by canonical reconciliation was also
+accepted in real two-client use. No deeper authority-path optimization was required for
+MULTIPLAYER-01D.
+
+Potential post-v1 optimizations remain backlog-only: evaluating `getClaims`, consolidating
+safe RPC round trips, revision-aware Realtime deduplication, and separating presence from
+canonical reconciliation. These must not weaken authenticated PlayerId resolution, revision
+protection, clocks, RNG, settlement idempotency, or server authority.
 # Multiplayer latency diagnostics
 
 The browser console emits privacy-safe `multiplayer-latency` records for T0, T1, T4-T8. The trusted function logs T2/T3 with a short random correlation ID and returns an `authority` duration through `Server-Timing`. These records contain no token, PlayerId, lobby code, or profile data. Local measurements include the Vite proxy hop; production uses the shorter same-origin path.

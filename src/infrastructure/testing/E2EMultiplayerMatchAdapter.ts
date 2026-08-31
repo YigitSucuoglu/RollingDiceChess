@@ -11,6 +11,18 @@ export class E2EMultiplayerMatchAdapter implements MultiplayerMatchPort {
   private status: MultiplayerServerSnapshot["status"] = "active";
   private winner: MultiplayerServerSnapshot["winner"] = null;
   private terminationReason: MultiplayerServerSnapshot["terminationReason"] = null;
+  private mode: MultiplayerServerSnapshot["mode"] = "ranked";
+
+  public constructor() {
+    this.mode = window.localStorage.getItem("roulettechess.e2e-multiplayer-mode") === "unranked"
+      ? "unranked" : "ranked";
+    if (window.localStorage.getItem("roulettechess.e2e-multiplayer-match-state") === "terminal") {
+      this.status = "terminal";
+      this.winner = "black";
+      this.terminationReason = "king-captured";
+      this.revision = 2;
+    }
+  }
 
   public async request(intent: MultiplayerMatchIntent): Promise<MultiplayerServerSnapshot> {
     if (intent.matchId !== MATCH_ID) throw new Error("match-unavailable");
@@ -38,7 +50,7 @@ export class E2EMultiplayerMatchAdapter implements MultiplayerMatchPort {
       matchId: MATCH_ID,
       revision: this.revision,
       status: this.status,
-      mode: "ranked",
+      mode: this.mode,
       ownSide,
       white,
       black,
@@ -53,6 +65,9 @@ export class E2EMultiplayerMatchAdapter implements MultiplayerMatchPort {
       connections: { whiteReconnectDeadline: null, blackReconnectDeadline: null },
       winner: this.winner,
       terminationReason: this.terminationReason,
+      ratingSettlement: this.status === "terminal" && this.mode === "ranked" ? (ownSide === "white"
+        ? { ratingBefore: 1248, ratingDelta: -25, ratingAfter: 1223 }
+        : { ratingBefore: 1032, ratingDelta: 25, ratingAfter: 1057 }) : null,
     };
   }
 }

@@ -33,6 +33,7 @@ export interface PlayerProfileViewModel {
   readonly displayName: string;
   readonly publicDiscriminator: string | null;
   readonly usernameOnboardingRequired: boolean;
+  readonly multiplayerRating: number | null;
   readonly monogram: string;
   readonly joinedLabel: string;
   readonly progression: {
@@ -174,6 +175,7 @@ export class PlayerProfileService {
 
   public async reconnectCloudSync(): Promise<void> {
     await this.sync?.reconnect();
+    this.notify();
   }
 
   public isCloudProfileEstablished(): boolean {
@@ -239,6 +241,7 @@ export class PlayerProfileService {
       displayName: profile.displayName,
       publicDiscriminator: profile.publicDiscriminator,
       usernameOnboardingRequired: profile.usernameOnboardingRequired,
+      multiplayerRating: this.sync?.getCanonicalMultiplayerRating() ?? null,
       monogram: monogram || "P",
       joinedLabel: new Intl.DateTimeFormat(locale, {
         month: "long",

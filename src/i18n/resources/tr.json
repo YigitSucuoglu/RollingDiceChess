@@ -109,13 +109,13 @@
   },
   "result": {
     "forfeit": "Maç hükmen kazanıldı",
-    "gameOver": "Oyun bitti", "wins": "{{color}} kazandı", "kingCaptured": "Şah yakalandı", "timeout": "{{color}}ın süresi doldu", "experienceEarned": "Kazanılan deneyim", "progressToward": "Seviye {{level}} için XP ilerlemesi", "nextLevel": "Sonraki seviye", "levelUp": "Seviye atlandı"
+    "gameOver": "Oyun bitti", "wins": "{{color}} kazandı", "kingCaptured": "Şah yakalandı", "timeout": "{{color}}ın süresi doldu", "experienceEarned": "Kazanılan deneyim", "progressToward": "Seviye {{level}} için XP ilerlemesi", "nextLevel": "Sonraki seviye", "levelUp": "Seviye atlandı", "rating": "Puan", "ratingChangeAria": "Puan {{ratingBefore}} değerinden {{ratingAfter}} değerine değişti, {{ratingDelta}} puan"
   },
   "errors": {
     "fatal": { "title": "Bir \u015feyler ters gitti", "message": "RouletteChess beklenmeyen bir hatayla kar\u015f\u0131la\u015ft\u0131.", "tryAgain": "Tekrar Dene", "backHome": "Ana Sayfaya D\u00f6n" }
   },
   "profile": {
-    "browserTitle": "Profil | RouletteChess", "eyebrow": "Çevrimdışı oyuncu merkezi", "title": "Profil", "player": "Oyuncu", "joined": "Katılım: {{date}}", "levelProgress": "Seviye ilerlemesi", "progressLabel": "Seviye {{level}} deneyim ilerlemesi",
+    "browserTitle": "Profil | RouletteChess", "eyebrow": "Çevrimdışı oyuncu merkezi", "title": "Profil", "player": "Oyuncu", "joined": "Katılım: {{date}}", "levelProgress": "Seviye ilerlemesi", "progressLabel": "Seviye {{level}} deneyim ilerlemesi", "multiplayerRating": "Çok oyunculu puanı", "multiplayerRatingValue": "Çok oyunculu puanı {{rating}}",
     "careerOverview": "Kariyer özeti", "generalStatistics": "Genel İstatistikler", "rouletteSignature": "Rulet imzan", "rouletteStatistics": "RouletteChess İstatistikleri",
     "stats": { "gamesPlayed": "Oynanan Maç", "wins": "Galibiyet", "losses": "Mağlubiyet", "winRate": "Galibiyet Oranı", "currentWinStreak": "Mevcut Galibiyet Serisi", "bestWinStreak": "En İyi Galibiyet Serisi", "totalPlayTime": "Toplam Oyun Süresi", "kingsCaptured": "Yakalanan Şahlar", "rouletteRolls": "Rulet Çevirmeleri", "mostRolledPiece": "En Çok Gelen Taş", "mostPlayedPiece": "En Çok Oynanan Taş", "mostSuccessfulPiece": "En Başarılı Taş", "threeRightsUsed": "Üç Hakkın Kullanımı", "triplePawnRolls": "Üçlü Piyon", "tripleKnightRolls": "Üçlü At", "tripleQueenRolls": "Üçlü Vezir" },
     "futureMilestones": "Gelecek hedefler", "achievements": "Başarımlar", "achievementNames": { "firstVictory": "İlk Zafer", "hundredGames": "100 Maç", "captureHundredKings": "100 Şah Yakala", "tripleQueenRoll": "Üçlü Vezir" },
@@ -130,7 +130,7 @@
     "languageChanged": "Dil Türkçe olarak değiştirildi."
   },
   "multiplayer": {
-    "gameBrowserTitle": "Çok Oyunculu Oyun | RouletteChess", "matchDetails": "Çok oyunculu maç ayrıntıları", "technicalAbort": "Maç kesintiye uğradı", "technicalAbortDescription": "Sunucu meşru bir kazanan belirleyemediği için maç güvenli biçimde sonlandırıldı.", "backToMultiplayer": "Çok Oyunculuya Dön",
+    "gameBrowserTitle": "Çok Oyunculu Oyun | RouletteChess", "matchDetails": "Çok oyunculu maç ayrıntıları", "playerRating": "Oyuncu puanı {{rating}}", "technicalAbort": "Maç kesintiye uğradı", "technicalAbortDescription": "Sunucu meşru bir kazanan belirleyemediği için maç güvenli biçimde sonlandırıldı.", "backToMultiplayer": "Çok Oyunculuya Dön",
     "browserTitle": "Çok Oyunculu | RouletteChess", "title": "Çok Oyunculu", "actions": "Çok oyunculu işlemleri", "availableMatches": "Uygun maçlar",
     "createLobby": "Lobi Oluştur", "joinPrivate": "Özel Lobiye Katıl", "openLobbies": "Açık Lobiler", "noOpenLobbies": "Şu anda açık lobi yok.", "emptyHint": "Bir lobi oluştur ve başka bir oyuncuyu bekle.",
     "public": "Herkese Açık", "private": "Özel", "visibility": "Görünürlük", "mode": "Mod", "ranked": "Dereceli", "unranked": "Derecesiz", "timeControl": "Süre Kontrolü", "side": "Taraf", "white": "Beyaz", "black": "Siyah", "random": "Rastgele", "locked": "Kilitli",

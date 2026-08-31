@@ -143,6 +143,54 @@ test("desktop multiplayer gameplay shell is centered without changing its intrin
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
+test("multiplayer clocks keep authoritative ratings paired with the oriented players", async ({ page }) => {
+  await useCloudGuestFixture(page);
+  await page.addInitScript(() => window.localStorage.setItem("roulettechess.e2e-multiplayer-side", "black"));
+  await page.goto("/game/33333333-3333-4333-8333-333333333333");
+  const clocks = page.locator(".chess-clock");
+  await expect(clocks.first()).toContainText("YIGIT");
+  await expect(clocks.first()).toContainText("1248");
+  await expect(clocks.last()).toContainText("GUEST4921");
+  await expect(clocks.last()).toContainText("1032");
+});
+
+test("unranked gameplay shows player ratings but no terminal rating change", async ({ page }) => {
+  await useCloudGuestFixture(page);
+  await page.addInitScript(() => {
+    window.localStorage.setItem("roulettechess.e2e-multiplayer-mode", "unranked");
+    window.localStorage.setItem("roulettechess.e2e-multiplayer-match-state", "terminal");
+  });
+  await page.goto("/game/33333333-3333-4333-8333-333333333333");
+  await expect(page.getByLabel("Player rating 1248")).toBeVisible();
+  await expect(page.getByLabel("Player rating 1032")).toBeVisible();
+  await expect(page.locator(".game-result-rating")).toHaveCount(0);
+});
+
+test("ranked terminal snapshot renders authoritative rating feedback", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await useCloudGuestFixture(page);
+  await page.addInitScript(() => window.localStorage.setItem("roulettechess.e2e-multiplayer-match-state", "terminal"));
+  await page.goto("/game/33333333-3333-4333-8333-333333333333");
+  const feedback = page.locator(".game-result-rating");
+  await expect(feedback).toBeVisible();
+  await expect(feedback).toContainText("1248");
+  await expect(feedback).toContainText("1223");
+  await expect(feedback).toContainText("-25");
+});
+
+test("ranked rating animation reaches the authoritative winning value", async ({ page }) => {
+  await useCloudGuestFixture(page);
+  await page.addInitScript(() => {
+    window.localStorage.setItem("roulettechess.e2e-multiplayer-side", "black");
+    window.localStorage.setItem("roulettechess.e2e-multiplayer-match-state", "terminal");
+  });
+  await page.goto("/game/33333333-3333-4333-8333-333333333333");
+  const feedback = page.locator(".game-result-rating");
+  await expect(feedback).toContainText("1032");
+  await expect(feedback).toContainText("+25");
+  await expect(feedback.locator("strong")).toHaveText("1057", { timeout: 2_000 });
+});
+
 test("six-digit private join validates input and stays usable on mobile", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await useCloudGuestFixture(page);

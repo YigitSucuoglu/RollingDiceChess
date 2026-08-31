@@ -24,6 +24,7 @@ export interface OnlineMatchPresentation {
   readonly mode: MultiplayerServerSnapshot["mode"];
   readonly white: MultiplayerServerSnapshot["white"];
   readonly black: MultiplayerServerSnapshot["black"];
+  readonly ratingSettlement: MultiplayerServerSnapshot["ratingSettlement"];
 }
 
 interface OnlineMatchSessionDependencies {
@@ -35,7 +36,12 @@ interface OnlineMatchSessionDependencies {
 export default class OnlineMatchSession implements MatchSession {
   public readonly configuration: OnlineMatchConfiguration;
   public get presentation(): OnlineMatchPresentation {
-    return { mode: this.server.mode, white: this.server.white, black: this.server.black };
+    return {
+      mode: this.server.mode,
+      white: this.server.white,
+      black: this.server.black,
+      ratingSettlement: this.server.ratingSettlement,
+    };
   }
 
   private server: MultiplayerServerSnapshot;
