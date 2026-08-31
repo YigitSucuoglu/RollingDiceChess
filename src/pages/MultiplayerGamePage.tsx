@@ -7,6 +7,7 @@ import { getMultiplayerMatchPort } from "../bootstrap/MultiplayerMatch";
 import gameManager from "../bootstrap/GameManager";
 import Board from "../components/Board/Board";
 import { systemScheduler, systemTimeSource } from "../infrastructure/local/LocalPlatformAdapters";
+import "./GamePage.css";
 
 export default function MultiplayerGamePage() {
   const { matchId } = useParams();

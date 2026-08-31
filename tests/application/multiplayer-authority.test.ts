@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { MultiplayerAuthorityPrototype } from "../../src/application/multiplayer/MultiplayerAuthorityPrototype";
+import {
+  LOBBY_HOST_LEASE_MS,
+  MultiplayerAuthorityPrototype,
+} from "../../src/application/multiplayer/MultiplayerAuthorityPrototype";
 import { toPlayerId } from "../../src/application/players/PlayerContracts";
 import { RECONNECT_GRACE_MS, type CreateLobbyIntent, type TrustedMultiplayerParticipant } from "../../src/domain/multiplayer/MultiplayerContracts";
 
@@ -102,9 +105,43 @@ describe("authoritative multiplayer lobby foundation", () => {
   it("expires abandoned waiting lobbies", () => {
     const { authority, advance } = fixture();
     authority.createLobby(participant(1), PUBLIC_RANKED);
-    advance(30 * 60_000);
+    advance(LOBBY_HOST_LEASE_MS);
     expect(authority.listPublicLobbies()).toHaveLength(0);
     expect(() => authority.createLobby(participant(1), PUBLIC_RANKED)).not.toThrow();
+  });
+
+  it("expires abandoned private waiting lobbies and rejects their code", () => {
+    const { authority, advance } = fixture([0.004921]);
+    authority.createLobby(participant(1), { ...PUBLIC_RANKED, visibility: "private" });
+    advance(LOBBY_HOST_LEASE_MS);
+    expect(() => authority.joinPrivateLobby(participant(2), "004921")).toThrow(/available/i);
+    expect(() => authority.createLobby(participant(1), PUBLIC_RANKED)).not.toThrow();
+  });
+
+  it("releases both pre-match memberships when a ready lobby host lease expires", () => {
+    const { authority, advance } = fixture();
+    const lobby = authority.createLobby(participant(1), PUBLIC_RANKED);
+    authority.joinPublicLobby(participant(2), lobby.lobbyId);
+    advance(LOBBY_HOST_LEASE_MS);
+    expect(() => authority.createLobby(participant(1), PUBLIC_RANKED)).not.toThrow();
+    expect(() => authority.createLobby(participant(2), PUBLIC_RANKED)).not.toThrow();
+  });
+
+  it("lets the host renew within grace but never extends the absolute 30-minute TTL", () => {
+    const { authority, advance } = fixture();
+    const host = participant(1);
+    const lobby = authority.createLobby(host, PUBLIC_RANKED);
+    advance(2 * 60_000);
+    expect(authority.heartbeatLobby(host.playerId, lobby.lobbyId).status).toBe("waiting");
+    advance(2 * 60_000);
+    expect(authority.listPublicLobbies()).toHaveLength(1);
+
+    for (let elapsedMinutes = 4; elapsedMinutes < 30; elapsedMinutes += 2) {
+      authority.heartbeatLobby(host.playerId, lobby.lobbyId);
+      advance(2 * 60_000);
+    }
+    expect(authority.listPublicLobbies()).toHaveLength(0);
+    expect(() => authority.heartbeatLobby(host.playerId, lobby.lobbyId)).toThrow(/available/i);
   });
 });
 

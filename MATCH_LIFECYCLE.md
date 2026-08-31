@@ -60,3 +60,5 @@ RATING-01 formula; Unranked forfeits never change rating. Heartbeats extend serv
 30-second deadlines without pausing the active clock. One expired participant becomes
 `disconnect-forfeit`; dual expiry becomes `technical-abort` with no winner or rating effect.
 The first locked terminal transition wins and match-ID settlement remains idempotent.
+Real two-client production reconnect and adjudication acceptance is tracked in
+`MULTIPLAYER_QUALIFICATION.md`; deterministic coverage alone does not close MULTIPLAYER-01D.

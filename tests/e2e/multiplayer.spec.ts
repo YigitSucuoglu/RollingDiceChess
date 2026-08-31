@@ -126,6 +126,23 @@ test("multiplayer Game and Home remain overflow-safe at 390x844", async ({ page 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
+test("desktop multiplayer gameplay shell is centered without changing its intrinsic width", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await useCloudGuestFixture(page);
+  await page.goto("/game/33333333-3333-4333-8333-333333333333");
+  const layout = await page.locator(".multiplayer-game-shell").evaluate((shell) => {
+    const box = shell.getBoundingClientRect();
+    return {
+      centerDelta: Math.abs((box.left + box.right) / 2 - window.innerWidth / 2),
+      shellWidth: box.width,
+      viewportWidth: window.innerWidth,
+    };
+  });
+  expect(layout.centerDelta).toBeLessThanOrEqual(1);
+  expect(layout.shellWidth).toBeLessThan(layout.viewportWidth);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
 test("six-digit private join validates input and stays usable on mobile", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await useCloudGuestFixture(page);
@@ -137,4 +154,50 @@ test("six-digit private join validates input and stays usable on mobile", async 
   await expect(page.getByText("Guest4921 #7K2M9")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await expect(page.getByRole("button", { name: "Leave Lobby", exact: true })).toBeInViewport();
+});
+
+test("mobile Multiplayer owns vertical scrolling and keeps Create Lobby reachable", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await useCloudGuestFixture(page);
+  await page.goto("/multiplayer");
+  await page.getByRole("button", { name: /Create Lobby/ }).click();
+  const createAction = page.getByRole("button", { name: "Create Lobby", exact: true }).last();
+  const scrollOwnership = await page.locator(".multiplayer-page").evaluate((container) => {
+    container.scrollTop = container.scrollHeight;
+    return {
+      clientHeight: container.clientHeight,
+      rootScrollTop: document.documentElement.scrollTop,
+      scrollHeight: container.scrollHeight,
+      scrollTop: container.scrollTop,
+    };
+  });
+  expect(scrollOwnership.scrollHeight).toBeGreaterThan(scrollOwnership.clientHeight);
+  expect(scrollOwnership.scrollTop).toBeGreaterThan(0);
+  expect(scrollOwnership.rootScrollTop).toBe(0);
+  await createAction.scrollIntoViewIfNeeded();
+
+  const metrics = await page.locator(".multiplayer-page").evaluate((container, action) => {
+    const actionBox = (action as HTMLElement).getBoundingClientRect();
+    const containerBox = container.getBoundingClientRect();
+    return {
+      actionBottom: actionBox.bottom,
+      actionTop: actionBox.top,
+      clientHeight: container.clientHeight,
+      containerBottom: containerBox.bottom,
+      containerTop: containerBox.top,
+      rootScrollTop: document.documentElement.scrollTop,
+      scrollHeight: container.scrollHeight,
+      scrollTop: container.scrollTop,
+      viewportWidth: window.innerWidth,
+      rootScrollWidth: document.documentElement.scrollWidth,
+    };
+  }, await createAction.elementHandle());
+
+  expect(metrics.actionTop).toBeGreaterThanOrEqual(metrics.containerTop - 1);
+  expect(metrics.actionBottom).toBeLessThanOrEqual(metrics.containerBottom + 1);
+  expect(metrics.rootScrollTop).toBe(0);
+  expect(metrics.rootScrollWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
+  await createAction.click();
+  await expect(page.getByRole("heading", { name: "Public Lobby" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Close Lobby" })).toBeInViewport();
 });

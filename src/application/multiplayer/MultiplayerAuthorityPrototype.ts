@@ -18,6 +18,7 @@ import TurnRights from "../../engine/TurnRights";
 import type { PieceColor } from "../../types/Chess";
 
 const LOBBY_TTL_MS = 30 * 60_000;
+export const LOBBY_HOST_LEASE_MS = 3 * 60_000;
 const PRIVATE_CODE_ATTEMPT_LIMIT = 20;
 
 interface StoredLobby {
@@ -25,6 +26,7 @@ interface StoredLobby {
   host: TrustedMultiplayerParticipant;
   opponent: TrustedMultiplayerParticipant | null;
   matchId: string | null;
+  hostLeaseExpiresAtMs: number;
 }
 
 interface StoredMatch {
@@ -65,6 +67,7 @@ export class MultiplayerAuthorityPrototype {
   }
 
   public createLobby(host: TrustedMultiplayerParticipant, intent: CreateLobbyIntent): MultiplayerLobbySnapshot {
+    this.expireLobbies();
     this.assertPlayerAvailable(host.playerId);
     this.validateIntent(intent);
     const lobbyId = this.ids.nextId();
@@ -82,7 +85,13 @@ export class MultiplayerAuthorityPrototype {
       privateCode,
       expiresAtMs: this.time.now() + LOBBY_TTL_MS,
     };
-    this.lobbies.set(lobbyId, { snapshot, host, opponent: null, matchId: null });
+    this.lobbies.set(lobbyId, {
+      snapshot,
+      host,
+      opponent: null,
+      matchId: null,
+      hostLeaseExpiresAtMs: Math.min(snapshot.expiresAtMs, this.time.now() + LOBBY_HOST_LEASE_MS),
+    });
     this.activeMembership.set(host.playerId, lobbyId);
     return this.copyLobby(snapshot);
   }
@@ -99,6 +108,7 @@ export class MultiplayerAuthorityPrototype {
   }
 
   public joinPrivateLobby(player: TrustedMultiplayerParticipant, code: string): MultiplayerLobbySnapshot {
+    this.expireLobbies();
     if (!PRIVATE_LOBBY_CODE_PATTERN.test(code)) {
       throw new MultiplayerAuthorityError("lobby-unavailable", "Lobby is no longer available.");
     }
@@ -106,6 +116,22 @@ export class MultiplayerAuthorityPrototype {
       candidate.snapshot.visibility === "private" && candidate.snapshot.privateCode === code);
     if (!lobby) throw new MultiplayerAuthorityError("lobby-unavailable", "Lobby is no longer available.");
     return this.join(player, lobby);
+  }
+
+  public heartbeatLobby(hostId: PlayerId, lobbyId: string): MultiplayerLobbySnapshot {
+    this.expireLobbies();
+    const lobby = this.requireLobby(lobbyId);
+    if (hostId !== lobby.host.playerId) {
+      throw new MultiplayerAuthorityError("not-host", "Only the host may refresh a lobby lease.");
+    }
+    if (lobby.snapshot.status !== "waiting" && lobby.snapshot.status !== "ready") {
+      throw new MultiplayerAuthorityError("lobby-unavailable", "Lobby is no longer available.");
+    }
+    lobby.hostLeaseExpiresAtMs = Math.min(
+      lobby.snapshot.expiresAtMs,
+      this.time.now() + LOBBY_HOST_LEASE_MS,
+    );
+    return this.copyLobby(lobby.snapshot);
   }
 
   public leaveLobby(caller: PlayerId, lobbyId: string): MultiplayerLobbySnapshot {
@@ -332,7 +358,8 @@ export class MultiplayerAuthorityPrototype {
   private expireLobbies(): void {
     const now = this.time.now();
     for (const lobby of this.lobbies.values()) {
-      if ((lobby.snapshot.status === "waiting" || lobby.snapshot.status === "ready") && lobby.snapshot.expiresAtMs <= now) {
+      if ((lobby.snapshot.status === "waiting" || lobby.snapshot.status === "ready")
+          && (lobby.snapshot.expiresAtMs <= now || lobby.hostLeaseExpiresAtMs <= now)) {
         this.activeMembership.delete(lobby.host.playerId);
         if (lobby.opponent) this.activeMembership.delete(lobby.opponent.playerId);
         lobby.snapshot = { ...lobby.snapshot, status: "closed" };

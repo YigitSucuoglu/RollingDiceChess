@@ -310,16 +310,36 @@ export default async function handler(request: NodeRequest, response: NodeRespon
     return;
   }
   const correlationId = randomUUID().replaceAll("-", "").slice(0, 12);
+  const requestStartedAt = performance.now();
   let action = "unknown";
   try {
     const body = object(request.body);
     action = typeof body.action === "string" ? body.action : "unknown";
     if (action === "reconcile") reconcileLog(correlationId, "endpoint-received");
+    if (action === "move") {
+      console.info(JSON.stringify({
+        event: "multiplayer-latency",
+        correlationId,
+        stage: "T2-trusted-function-received",
+      }));
+    }
     const client = serverClient();
     const caller = await resolveCallerPlayerId(client, bearer(request), action === "reconcile"
       ? (stage, metadata) => reconcileLog(correlationId, stage, metadata)
       : undefined);
-    response.status(200).json(await performAction(client, caller, body, correlationId));
+    const result = await performAction(client, caller, body, correlationId);
+    const authorityDurationMs = performance.now() - requestStartedAt;
+    response.setHeader("Server-Timing", `authority;dur=${authorityDurationMs.toFixed(1)}`);
+    response.setHeader("X-RouletteChess-Request-Id", correlationId);
+    if (action === "move") {
+      console.info(JSON.stringify({
+        event: "multiplayer-latency",
+        correlationId,
+        stage: "T3-authoritative-move-completed",
+        authorityDurationMs,
+      }));
+    }
+    response.status(200).json(result);
   } catch (error) {
     const failure = error instanceof RequestFailure ? error : new RequestFailure(500, "multiplayer-server-error");
     if (action === "reconcile") reconcileLog(correlationId, "request-failed", { failureCode: failure.code });

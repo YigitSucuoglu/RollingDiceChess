@@ -3,11 +3,13 @@
   --mp-line: rgba(224, 184, 103, 0.22);
   background: radial-gradient(circle at 50% -10%, rgba(165, 111, 38, 0.2), transparent 32rem), #0b0b0b;
   color: #f3ebdd;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100%;
+  min-height: 0;
+  overscroll-behavior-y: contain;
   overflow-x: hidden;
   overflow-y: auto;
   padding: clamp(1rem, 3vw, 2.5rem);
+  -webkit-overflow-scrolling: touch;
 }
 .multiplayer-page * { box-sizing: border-box; }
 .multiplayer-shell { margin: 0 auto; max-width: 72rem; width: 100%; }

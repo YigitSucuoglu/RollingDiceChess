@@ -49,19 +49,24 @@ aggressive polling. Route cleanup removes the listener/channel and recovery hand
 Canonical membership restoration prevents a second tab or refresh from creating a second
 lobby.
 
-## Future multiplayer Game requirement
+## Multiplayer Game handoff
 
-MULTIPLAYER-01C must render the authoritative two-player Game state. Multiplayer has no Roll
+MULTIPLAYER-01C renders the authoritative two-player Game state. Multiplayer has no Roll
 button: the server generates the roulette result automatically. The freed button area must
 make the machine/reels and symbols proportionally larger on desktop and mobile without
 shrinking or crowding the board and clocks.
+
+The lobby page owns vertical scrolling inside the fixed application root. Its content uses
+the available dynamic height, so Create, Join, waiting, and ready controls remain reachable
+on mobile without document-level or horizontal scrolling.
 
 ## Verification split
 
 Normal Chromium E2E uses a deterministic application-port adapter and the global request
 guard, producing zero Supabase requests and zero anonymous users. Live schema/RLS/RPC checks
 remain explicit through `npm run test:multiplayer:remote`. Two real browser contexts are
-still required for final human acceptance of Realtime timing and clipboard behavior.
+still required for final human acceptance of Realtime timing and cross-client behavior; see
+`MULTIPLAYER_QUALIFICATION.md`.
 
 ## ACTIVE game handoff
 

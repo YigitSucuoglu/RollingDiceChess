@@ -78,6 +78,14 @@ async function run() {
     assert(Boolean(closedCode.error), "closed private code remained usable");
 
     const publicLobby = await rpc(hostClient, "create_multiplayer_lobby", lobbyInput, "public lobby create");
+    const hostHeartbeat = await rpc(hostClient, "heartbeat_multiplayer_lobby", {
+      requested_lobby_id: publicLobby.lobbyId,
+    }, "host lobby heartbeat");
+    assert(hostHeartbeat.lobbyId === publicLobby.lobbyId, "host heartbeat changed lobby identity");
+    const forgedHeartbeat = await opponentClient.rpc("heartbeat_multiplayer_lobby", {
+      requested_lobby_id: publicLobby.lobbyId,
+    });
+    assert(Boolean(forgedHeartbeat.error), "non-host refreshed the host lease");
     listing = await rpc(thirdClient, "list_open_multiplayer_lobbies", {}, "public listing");
     assert(listing.some((entry) => entry.lobby_id === publicLobby.lobbyId), "waiting public lobby is hidden");
     assert(listing.every((entry) => !("private_code" in entry)), "public listing leaked private code");
@@ -106,7 +114,9 @@ async function run() {
 
     const activate = await hostClient.rpc("activate_multiplayer_match", { requested_match_id: matchId, trusted_initial_state: {} });
     assert(Boolean(activate.error), "browser invoked trusted match activation");
-    const forgedLobby = await hostClient.from("multiplayer_lobbies").update({ status: "closed" }).eq("lobby_id", publicLobby.lobbyId);
+    const forgedLobby = await hostClient.from("multiplayer_lobbies")
+      .update({ status: "closed", host_lease_expires_at: new Date(Date.now() + 86_400_000).toISOString() })
+      .eq("lobby_id", publicLobby.lobbyId);
     const forgedMatch = await hostClient.from("multiplayer_matches").update({ status: "active", revision: 999 }).eq("match_id", matchId);
     assert(Boolean(forgedLobby.error) && Boolean(forgedMatch.error), "browser directly mutated authority tables");
     const forgedEvent = await hostClient.from("multiplayer_lobby_events").insert({ scope: "public-list", event_kind: "created" });
@@ -123,6 +133,7 @@ async function run() {
     console.log("Trusted activation from browser....... PASS (denied)");
     console.log("Direct authority-table mutation....... PASS (denied)");
     console.log("Canonical lobby restoration........... PASS");
+    console.log("Caller-bound bounded host heartbeat... PASS");
     console.log("Realtime event privacy/mutation....... PASS");
     console.log("\nDisposable Auth users (manual Dashboard cleanup required):");
     console.log(`Host: ${host.authUserId}`);

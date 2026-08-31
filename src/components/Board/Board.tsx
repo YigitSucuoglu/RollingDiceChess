@@ -21,6 +21,10 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import MatchExitDialog from "../MatchExitDialog/MatchExitDialog";
 import type { OnlineMatchPresentation } from "../../application/matches/OnlineMatchSession";
+import {
+  markCanonicalBoardRendered,
+  markMoveConfirmation,
+} from "../../infrastructure/multiplayer/MultiplayerLatencyDiagnostics";
 
 const HISTORY_TRANSITION_MS = 260;
 
@@ -68,6 +72,10 @@ function Board({ onlinePresentation, sessionOverride }: BoardProps) {
     soundManager.isEnabled()
   );
   const historyCloseTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (isOnline) markCanonicalBoardRendered();
+  }, [isOnline, matchSnapshot.board]);
   const historyOpenRef = useRef(false);
   const historyOpenFrameRef = useRef<number | null>(null);
   const rollSoundRef = useRef({ session, spinning: 0, resolved: 0 });
@@ -376,6 +384,7 @@ function Board({ onlinePresentation, sessionOverride }: BoardProps) {
                   position: { row, col },
                 };
 
+            if (isOnline && move) markMoveConfirmation();
             playerActionInFlightRef.current = true;
             void session.requestAction(action)
               .then((result) => setMatchSnapshot(result.snapshot))

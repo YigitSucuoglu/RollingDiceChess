@@ -87,6 +87,12 @@ export class E2EMultiplayerLobbyAdapter implements MultiplayerLobbyPort {
     return this.current;
   }
   public async leaveLobby(): Promise<void> { this.current = null; }
+  public async heartbeatLobby(): Promise<Extract<CurrentMultiplayerContext, { kind: "lobby" }>> {
+    if (this.current?.kind !== "lobby" || this.current.role !== "host") {
+      throw new MultiplayerLobbyError("forbidden");
+    }
+    return this.current;
+  }
   public async recoverLegacyMatch(matchId: string): Promise<void> {
     if (this.current?.kind !== "legacy-match" || this.current.matchId !== matchId) {
       throw new MultiplayerLobbyError("forbidden");

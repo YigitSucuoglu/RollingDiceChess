@@ -14,6 +14,8 @@ const TIME_CONTROLS = [
   { id: "rapid-10-0", label: "10+0", initialMs: 600_000, incrementMs: 0 },
 ] as const;
 
+const LOBBY_HEARTBEAT_INTERVAL_MS = 60_000;
+
 type Operation = "create" | "join" | "kick" | "leave" | "start" | null;
 
 function identity(player: MultiplayerLobbySnapshot["host"]): string {
@@ -64,6 +66,9 @@ export default function MultiplayerPage() {
   const contextRef = useRef<CurrentMultiplayerContext | null>(null);
 
   useEffect(() => { contextRef.current = context; }, [context]);
+  const hostedLobbyId = context?.kind === "lobby" && context.role === "host"
+    ? context.lobby.lobbyId
+    : null;
 
   const reconcile = useCallback(async () => {
     if (!onlineIdentity) { setLoading(false); return; }
@@ -124,6 +129,25 @@ export default function MultiplayerPage() {
       window.removeEventListener("focus", recover);
     };
   }, [reconcile, t]);
+
+  useEffect(() => {
+    if (!hostedLobbyId) return;
+    let active = true;
+    const heartbeat = async () => {
+      try {
+        const refreshed = await multiplayerLobby.heartbeatLobby(hostedLobbyId);
+        if (active && mounted.current) setContext(refreshed);
+      } catch {
+        if (active && mounted.current) void reconcile();
+      }
+    };
+    void heartbeat();
+    const interval = window.setInterval(() => void heartbeat(), LOBBY_HEARTBEAT_INTERVAL_MS);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, [hostedLobbyId, reconcile]);
 
   const run = useCallback(async <T,>(name: Exclude<Operation, null>, task: () => Promise<T>, apply: (result: T) => void) => {
     if (operation) return;

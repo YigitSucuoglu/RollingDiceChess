@@ -202,6 +202,11 @@
     gap:10px;
 }
 
+.game-result-actions:has(> :only-child){
+    grid-template-columns:minmax(0,220px);
+    justify-content:center;
+}
+
 .game-result-button{
     min-height:46px;
     padding:10px 16px;

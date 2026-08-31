@@ -187,6 +187,14 @@ export class SupabaseMultiplayerLobbyAdapter implements MultiplayerLobbyPort {
     if (error) throw mapError(error);
   }
 
+  public async heartbeatLobby(lobbyId: string): Promise<Extract<CurrentMultiplayerContext, { kind: "lobby" }>> {
+    const { data, error } = await this.client.rpc("heartbeat_multiplayer_lobby", {
+      requested_lobby_id: lobbyId,
+    });
+    if (error) throw mapError(error);
+    return { kind: "lobby", role: "host", lobby: lobby(data) };
+  }
+
   public async recoverLegacyMatch(matchId: string): Promise<void> {
     await new SupabaseMultiplayerMatchAdapter(this.client).recoverLegacy(matchId);
   }

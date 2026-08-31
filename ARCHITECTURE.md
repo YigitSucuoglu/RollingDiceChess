@@ -135,3 +135,9 @@ canonical PlayerId internally, reuses the TypeScript engine, and persists only s
 revision-CAS transitions. `SUPABASE_SECRET_KEY` remains outside the Vite import graph.
 Realtime events are participant-scoped hints; refetch, polling, focus, and refresh recover
 canonical state when hints are missed.
+
+MULTIPLAYER-01D preserves these boundaries. Its deterministic mobile regression makes the
+Multiplayer route own vertical scrolling inside the fixed root and proves lower lobby actions
+remain tappable in Android Chromium and iPhone WebKit emulation. Real production latency,
+reconnect, and two-device acceptance remain explicitly pending in
+`MULTIPLAYER_QUALIFICATION.md`.

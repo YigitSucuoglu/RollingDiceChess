@@ -12,6 +12,10 @@
     background:#202020;
 }
 
+.game-page>.multiplayer-game-shell{
+    margin-inline:auto;
+}
+
 @media (max-width:900px){
     .game-page{
         align-items:flex-start;

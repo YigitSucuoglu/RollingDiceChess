@@ -172,3 +172,32 @@ Participant-scoped Realtime rows announce activation, revision and termination o
 browser always refetches canonical state and retains polling recovery. Multiplayer uses the
 shared Board presentation with automatic roll visualization, no Roll button, and a larger
 machine modifier; Singleplayer remains unchanged.
+
+MULTIPLAYER-01D keeps that authority model unchanged and adds deterministic mobile scroll
+ownership coverage. Real Realtime latency, reconnect, cross-device convergence, rating, and
+complete production lifecycle acceptance are tracked in `MULTIPLAYER_QUALIFICATION.md`.
+
+Pre-match lobby presence uses a server-time host lease that is deliberately separate from
+active-match reconnect. The host refreshes once per 60 seconds while its waiting/ready room
+is mounted; each refresh grants at most three minutes and is capped by the unchanged absolute
+30-minute lobby TTL. Discovery and locked join predicates require both bounds. Expiry closes
+the lobby idempotently, releases every pre-match membership through the existing closed-state
+trigger, emits no rating settlement, and never touches active-match reconnect deadlines.
+Heartbeat updates only lease timestamps, so the status/opponent Realtime event trigger does
+not generate per-heartbeat churn. Existing open lobbies receive one bounded transition grace
+when migration `202608310001_multiplayer_01d_lobby_host_lease.sql` is applied.
+
+## Local development authority
+
+`npm run dev` starts Vite with Node's system CA store and keeps browser requests same-origin
+at `/api/multiplayer`. Vite proxies only
+that route to the deployed trusted Vercel authority (production by default), preserving the
+Supabase bearer token while avoiding browser CORS changes. The proxy runs in the development
+server only; production continues to use its same-origin function and normal deterministic
+E2E continues to use the isolated adapter/preview server.
+
+Developers may set the server-only `MULTIPLAYER_API_PROXY_TARGET` to another HTTPS Vercel
+origin, or to a localhost trusted runtime origin. It must be an origin without credentials or
+a path. It is deliberately not prefixed with `VITE_` and is never added to the browser import
+graph. No `SUPABASE_SECRET_KEY` is needed by or exposed through Vite. Because the default
+proxy reaches production authority, local real-multiplayer actions affect production data.

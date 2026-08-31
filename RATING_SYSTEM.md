@@ -110,3 +110,6 @@ The Vercel trusted runtime is the only caller that connects terminal match state
 disconnect-forfeit settle from canonical participant IDs. Unranked and technical-abort
 paths never invoke settlement. The append-only match-ID ledger makes retries and concurrent
 terminal attempts exactly-once.
+
+Real two-client Ranked settlement, refresh, and replay acceptance remains pending in
+MULTIPLAYER-01D and is recorded through `MULTIPLAYER_QUALIFICATION.md`.

@@ -61,6 +61,7 @@ export interface MultiplayerLobbyPort {
   joinPrivateLobby(code: string): Promise<Extract<CurrentMultiplayerContext, { kind: "lobby" }>>;
   kickOpponent(lobbyId: string): Promise<Extract<CurrentMultiplayerContext, { kind: "lobby" }>>;
   leaveLobby(lobbyId: string): Promise<void>;
+  heartbeatLobby(lobbyId: string): Promise<Extract<CurrentMultiplayerContext, { kind: "lobby" }>>;
   recoverLegacyMatch(matchId: string): Promise<void>;
   startMatch(lobbyId: string): Promise<MultiplayerStartResult>;
   subscribe(listener: (event: MultiplayerInvalidation) => void): () => void;

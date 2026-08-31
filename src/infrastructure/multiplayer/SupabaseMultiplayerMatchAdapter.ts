@@ -6,6 +6,11 @@ import type {
   MultiplayerServerSnapshot,
 } from "../../application/multiplayer/MultiplayerMatchPort";
 import type { CurrentMultiplayerContext } from "../../application/multiplayer/MultiplayerLobbyPort";
+import {
+  markRealtimeObserved,
+  markRequestStarted,
+  markResponseReceived,
+} from "./MultiplayerLatencyDiagnostics";
 
 export class MultiplayerMatchTransportError extends Error {
   public readonly code: string;
@@ -45,6 +50,7 @@ export class SupabaseMultiplayerMatchAdapter implements MultiplayerMatchPort {
     const { data } = await this.client.auth.getSession();
     const token = data.session?.access_token;
     if (!token) throw new MultiplayerMatchTransportError("authentication-required");
+    const requestStartedAt = markRequestStarted(intent.action);
     let response: Response;
     try {
       response = await fetch("/api/multiplayer", {
@@ -64,6 +70,12 @@ export class SupabaseMultiplayerMatchAdapter implements MultiplayerMatchPort {
         && typeof payload.error === "string" ? payload.error : "unknown";
       throw new MultiplayerMatchTransportError(code);
     }
+    markResponseReceived(
+      intent.action,
+      requestStartedAt,
+      response.headers.get("Server-Timing"),
+      response.headers.get("X-RouletteChess-Request-Id"),
+    );
     return payload as T;
   }
 
@@ -75,7 +87,10 @@ export class SupabaseMultiplayerMatchAdapter implements MultiplayerMatchPort {
         schema: "public",
         table: "multiplayer_match_events",
         filter: `match_id=eq.${matchId}`,
-      }, listener)
+      }, () => {
+        markRealtimeObserved();
+        listener();
+      })
       .subscribe();
     return () => { void this.client.removeChannel(channel); };
   }

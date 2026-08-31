@@ -55,6 +55,8 @@ export default class OnlineMatchSession implements MatchSession {
   private rollTimer: unknown | null = null;
   private skipTimer: unknown | null = null;
   private requestInFlight = false;
+  private reconcileInFlight = false;
+  private reconcilePending = false;
   private snapshotReceivedAtMs: number;
   private readonly unsubscribeRealtime: () => void;
   private readonly dependencies: OnlineMatchSessionDependencies;
@@ -79,7 +81,7 @@ export default class OnlineMatchSession implements MatchSession {
       pieceSet: appearance.pieceSet,
       boardTheme: appearance.boardTheme,
     };
-    this.unsubscribeRealtime = this.port.subscribe(initial.matchId, () => void this.reconcile());
+    this.unsubscribeRealtime = this.port.subscribe(initial.matchId, () => this.requestReconcile());
     this.beginRollReveal();
     this.schedulePoll();
     this.scheduleClockRefresh();
@@ -92,7 +94,7 @@ export default class OnlineMatchSession implements MatchSession {
     const active = this.server.status === "active" && !this.disposed;
     const canAct = active && ownTurn && this.connection === "connected"
       && this.rollPhase === "resolved" && this.skipPhase === "none"
-      && !this.exitConfirmationOpen && legalMoves.length > 0;
+      && !this.exitConfirmationOpen && !this.requestInFlight && legalMoves.length > 0;
     const clock = this.currentClock();
     return {
       schemaVersion: 1,
@@ -187,29 +189,51 @@ export default class OnlineMatchSession implements MatchSession {
   }
 
   private async performRemote(intent: Parameters<MultiplayerMatchPort["request"]>[0]): Promise<MatchActionResult> {
+    if (this.requestInFlight) return this.reject("invalid-action");
     this.requestInFlight = true;
+    this.publish();
     try {
       this.applyServerSnapshot(await this.port.request(intent));
       this.exitConfirmationOpen = false;
       return { accepted: true, snapshot: this.getSnapshot() };
     } catch {
       this.connection = "reconnecting";
-      await this.reconcile();
+      this.reconcilePending = true;
       return this.reject("invalid-action");
     } finally {
       this.requestInFlight = false;
+      this.publish();
+      this.flushPendingReconcile();
     }
   }
 
   private async reconcile(): Promise<void> {
-    if (this.disposed || this.requestInFlight) return;
+    if (this.disposed || this.requestInFlight || this.reconcileInFlight) {
+      this.reconcilePending = true;
+      return;
+    }
+    this.reconcileInFlight = true;
     try {
       this.applyServerSnapshot(await this.port.request({ action: "heartbeat", matchId: this.server.matchId }));
       this.connection = "connected";
     } catch {
       this.connection = this.dependencies.isNetworkOnline() ? "reconnecting" : "disconnected";
       this.publish();
+    } finally {
+      this.reconcileInFlight = false;
+      this.flushPendingReconcile();
     }
+  }
+
+  private requestReconcile(): void {
+    this.reconcilePending = true;
+    this.flushPendingReconcile();
+  }
+
+  private flushPendingReconcile(): void {
+    if (this.disposed || !this.reconcilePending || this.requestInFlight || this.reconcileInFlight) return;
+    this.reconcilePending = false;
+    void this.reconcile();
   }
 
   private applyServerSnapshot(next: MultiplayerServerSnapshot): void {

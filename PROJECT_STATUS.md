@@ -122,6 +122,9 @@ v1.0.0
 
 ## Current Sprint
 
+In Progress:
+- MULTIPLAYER-01D — Mobile scrolling and the full pre-match host-lease lifecycle passed deterministic and production verification. Multiplayer Game centering, single-action Game Over alignment, direct caller-response rendering, immediate/coalesced Realtime reconciliation, and privacy-safe T0–T8 latency diagnostics are implemented locally. Real two-client latency/reconnect/rating/cross-device Sessions A-E remain pending.
+
 Completed:
 - MULTIPLAYER-01C-HF1 — Recover legacy multiplayer state and refine Home navigation hierarchy
 - MULTIPLAYER-01C — Integrate real two-player authoritative gameplay and multiplayer Game UI
@@ -177,7 +180,7 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. MULTIPLAYER-01D — Qualify production multiplayer latency, reconnect, and two-device behavior.
+1. Complete MULTIPLAYER-01D real two-client production acceptance using `MULTIPLAYER_QUALIFICATION.md`.
 
 Roadmap:
 - DATA-01A — Apply Supabase player schema and validate RLS/security
@@ -261,6 +264,7 @@ Performance Backlog:
 
 - MULTIPLAYER-01B adds the real public/private Supabase lobby experience with cloud-profile gating, ranked/unranked and side/time controls, six-digit private codes, public browse cards, canonical waiting/ready restoration, host Kick/Start, pre-match Leave/Close, EN/TR responsive UI, and privacy-safe Realtime invalidation/refetch. Normal E2E remains fully isolated from live Supabase; schema verification and the expanded three-client remote security harness passed. The actual authoritative two-player board and multiplayer machine sizing remain MULTIPLAYER-01C scope.
 - MULTIPLAYER-01C runs the shared TypeScript RouletteChess rules in a Vercel trusted function, verifies Supabase bearer identity and resolves PlayerId server-side, accepts only revisioned from/to intents, and persists automatic rolls, rights, clocks, reconnect deadlines, terminal state, and exactly-once ranked settlement through service-only RPCs. OnlineMatchSession reuses the Game UI with no Roll button, a larger multiplayer machine, participant metadata, canonical reconciliation, mode-aware forfeit, technical-abort handling, and active-match restoration. Three additive migrations and all reported schema/privilege assertions were applied successfully; deterministic Chromium remains isolated from live Supabase. Real two-browser production gameplay is NOT TESTED and is the explicit MULTIPLAYER-01D qualification gate.
+- MULTIPLAYER-01D fixes mobile lobby scroll ownership, pre-match ghost expiry, multiplayer Game centering, single-action Game Over alignment, and client synchronization without changing server authority, gameplay, clocks, or Singleplayer layout. The caller applies the successful canonical response directly; Realtime invalidations now trigger immediate deduplicated canonical fetches and cannot be lost during an action. Privacy-safe T0–T8 diagnostics are ready for measurement. Real two-client production Sessions A-E, measured latency, reconnect, rating, and physical cross-device acceptance remain PENDING, so the task is not Completed.
 
 - MULTIPLAYER-01A establishes versioned lobby and authoritative-match contracts, a deterministic trusted-runtime prototype, and a private Supabase authority schema. Public/private lobby visibility, six-digit private codes, membership concurrency, host-only idempotent Start, participant-only snapshots, browser write denial, and trusted activation boundaries passed schema and three-client remote security verification. Supabase Postgres/Auth/Realtime are sufficient for the initial architecture when rule execution remains in a trusted TypeScript runtime; lobby UI, network gameplay, presence transport, and rating settlement integration remain deferred.
 
@@ -275,5 +279,6 @@ Performance Backlog:
 
 ## Future UI Polish
 
+- Add a localized “Check Moves” / “Hamleleri İncele” Game Over action after a dedicated multiplayer match-history review experience exists.
 - Replace temporary blend-mode background removal with true transparent slot frame assets.
 - Split lever into layered assets to achieve proper mechanical occlusion and depth.

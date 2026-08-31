@@ -1,6 +1,6 @@
 import type { Locator } from "@playwright/test";
 
-import { expect, test } from "../e2e/fixtures";
+import { expect, test, useCloudGuestFixture } from "../e2e/fixtures";
 
 async function activate(locator: Locator, useTouch: boolean): Promise<void> {
   if (useTouch) await locator.tap();
@@ -76,5 +76,28 @@ test("public routes, refresh, storage fallback and language remain healthy", asy
   await expect(page).toHaveTitle(/Ayarlar/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth))
     .toBeLessThanOrEqual((page.viewportSize()?.width ?? 0) + 1);
+  assertNoErrors();
+});
+
+test("mobile Multiplayer scroll owner keeps the lower create action tappable", async ({ page, assertNoErrors }, testInfo) => {
+  test.skip(!/android|iphone/.test(testInfo.project.name), "Mobile qualification only");
+  await useCloudGuestFixture(page);
+  await page.goto("/multiplayer");
+  await page.getByRole("button", { name: /Create Lobby/ }).tap();
+  const createAction = page.getByRole("button", { name: "Create Lobby", exact: true }).last();
+  const scrollOwnership = await page.locator(".multiplayer-page").evaluate((container) => {
+    container.scrollTop = container.scrollHeight;
+    return {
+      canScroll: container.scrollHeight > container.clientHeight,
+      ownsScroll: container.scrollTop > 0,
+      rootStayedFixed: document.documentElement.scrollTop === 0,
+    };
+  });
+  expect(scrollOwnership).toEqual({ canScroll: true, ownsScroll: true, rootStayedFixed: true });
+  await createAction.scrollIntoViewIfNeeded();
+  await expect(createAction).toBeInViewport();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  await createAction.tap();
+  await expect(page.getByRole("heading", { name: /Public Lobby|Herkese Açık Lobi/i })).toBeVisible();
   assertNoErrors();
 });

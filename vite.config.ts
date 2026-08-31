@@ -1,8 +1,10 @@
 import { readFileSync } from 'node:fs'
 
 import { sentryVitePlugin } from '@sentry/vite-plugin'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+
+import { resolveMultiplayerDevProxyTarget } from './scripts/multiplayer-dev-proxy.js'
 
 const status = readFileSync(new URL('./PROJECT_STATUS.md', import.meta.url), 'utf8')
 const appVersion = status.match(/## Current Version\s+v([^\s]+)/)?.[1]
@@ -13,6 +15,10 @@ const commitSha = process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA
 const appRelease = `roulettechess@${appVersion}${commitSha ? `+${commitSha.slice(0, 12)}` : ''}`
 
 export default defineConfig(({ command, mode }) => {
+  const multiplayerProxyEnv = loadEnv(mode, process.cwd(), 'MULTIPLAYER_API_PROXY_')
+  const multiplayerApiProxyTarget = resolveMultiplayerDevProxyTarget(
+    multiplayerProxyEnv.MULTIPLAYER_API_PROXY_TARGET,
+  )
   const uploadCredentials = {
     authToken: process.env.SENTRY_AUTH_TOKEN,
     org: process.env.SENTRY_ORG,
@@ -52,5 +58,16 @@ export default defineConfig(({ command, mode }) => {
           })]
         : []),
     ],
+    server: command === 'serve'
+      ? {
+          proxy: {
+            '/api/multiplayer': {
+              target: multiplayerApiProxyTarget,
+              changeOrigin: true,
+              secure: true,
+            },
+          },
+        }
+      : undefined,
   }
 })
