@@ -28,7 +28,9 @@ function meaningful(profile: PlayerProfile): PlayerProfile {
 }
 
 function cloud(profile = createDefaultPlayerProfile()): CloudProfileSnapshot {
-  return { bootstrapApplied: false, playerId: "cloud-player", profile, multiplayerRating: 1000 };
+  return { bootstrapApplied: false, playerId: "cloud-player", profile, multiplayerRating: 1000,
+    multiplayerStatistics: { rating: 1000, rankedGames: 0, rankedWins: 0,
+      rankedLosses: 0, rankedWinRate: 0, unrankedGames: 0 } };
 }
 
 function cloudGuest() {
@@ -57,6 +59,7 @@ describe("PlayerSyncCoordinator", () => {
     expect(sync.getCanonicalMultiplayerRating()).toBeNull();
     await sync.handleAuthentication(cloudGuest());
     expect(sync.getCanonicalMultiplayerRating()).toBe(1376);
+    expect(sync.getCanonicalMultiplayerStatistics()).toEqual(canonical.multiplayerStatistics);
   });
 
   it("bootstraps a meaningful legacy profile once when cloud is empty", async () => {

@@ -19,6 +19,11 @@
     "singleplayer": "Tek Oyunculu", "settings": "Ayarlar", "profile": "Profil", "leaderboard": "Liderlik Tablosu", "howToPlay": "Nasıl Oynanır", "multiplayer": "Çok Oyunculu",
     "heroLabel": "Altın ve Obsidyen satranç taşları bulunan rulet makinesi", "caption": "Üç taş. Bir tur. Her hamle önemli."
   },
+  "leaderboard": {
+    "refresh": "Yenile", "top100": "Global dereceli ilk 100", "empty": "Henüz dereceli oyuncu yok.",
+    "topError": "Liderlik tablosu yüklenemedi. Tekrar deneyebilirsin.", "rankError": "Global sıralaman yüklenemedi.",
+    "unqualified": "Sıralamaya katılmak için en az 1 dereceli maç oyna.", "yourRank": "Global sıralaman: #{{rank}}", "yourRankLabel": "Sıralaman", "globalRankings": "Global Sıralama", "podium": "Dereceli ilk üç oyuncu", "you": "Sen"
+  },
   "auth": {
     "title": "Nasıl oynamak istediğini seç",
     "description": "Gelecekteki hesap özellikleri için giriş yap veya yerel profilinle devam et.",
@@ -116,7 +121,11 @@
   },
   "profile": {
     "browserTitle": "Profil | RouletteChess", "eyebrow": "Çevrimdışı oyuncu merkezi", "title": "Profil", "player": "Oyuncu", "joined": "Katılım: {{date}}", "levelProgress": "Seviye ilerlemesi", "progressLabel": "Seviye {{level}} deneyim ilerlemesi", "multiplayerRating": "Çok oyunculu puanı", "multiplayerRatingValue": "Çok oyunculu puanı {{rating}}",
-    "careerOverview": "Kariyer özeti", "generalStatistics": "Genel İstatistikler", "rouletteSignature": "Rulet imzan", "rouletteStatistics": "RouletteChess İstatistikleri",
+    "careerOverview": "Kariyer özeti", "generalStatistics": "İstatistikler", "rouletteSignature": "Rulet imzan", "rouletteStatistics": "RouletteChess İstatistikleri",
+    "statisticsViewLabel": "İstatistik görünümü", "statisticsViews": { "singleplayer": "Tek Oyunculu", "multiplayer": "Çok Oyunculu" },
+    "singleplayerScope": "Tek oyunculu istatistikler botlara karşı oynanan maçları gösterir.", "multiplayerScope": "Dereceli istatistikler yalnızca dereceli maçları içerir. Derecesiz maçlar yalnızca oynanan maç sayısına dahil edilir.",
+    "rankedStatistics": "Dereceli", "multiplayerActivity": "Aktivite", "multiplayerUnavailable": "Çok oyunculu istatistikler geçici olarak kullanılamıyor. Tek oyunculu istatistikler kullanılabilir.",
+    "multiplayerStats": { "rating": "Puan", "rankedGames": "Dereceli Maçlar", "rankedWins": "Dereceli Galibiyetler", "rankedLosses": "Dereceli Mağlubiyetler", "rankedWinRate": "Dereceli Galibiyet Oranı", "unrankedGames": "Derecesiz Maçlar" },
     "stats": { "gamesPlayed": "Oynanan Maç", "wins": "Galibiyet", "losses": "Mağlubiyet", "winRate": "Galibiyet Oranı", "currentWinStreak": "Mevcut Galibiyet Serisi", "bestWinStreak": "En İyi Galibiyet Serisi", "totalPlayTime": "Toplam Oyun Süresi", "kingsCaptured": "Yakalanan Şahlar", "rouletteRolls": "Rulet Çevirmeleri", "mostRolledPiece": "En Çok Gelen Taş", "mostPlayedPiece": "En Çok Oynanan Taş", "mostSuccessfulPiece": "En Başarılı Taş", "threeRightsUsed": "Üç Hakkın Kullanımı", "triplePawnRolls": "Üçlü Piyon", "tripleKnightRolls": "Üçlü At", "tripleQueenRolls": "Üçlü Vezir" },
     "futureMilestones": "Gelecek hedefler", "achievements": "Başarımlar", "achievementNames": { "firstVictory": "İlk Zafer", "hundredGames": "100 Maç", "captureHundredKings": "100 Şah Yakala", "tripleQueenRoll": "Üçlü Vezir" },
     "localDataNote": "Çevrimdışı profil verileri bu cihazda saklanır."

@@ -4,11 +4,21 @@ import type { PlayerProfileRepository } from "./PlayerProfileRepository";
 
 export const PLAYER_SYNC_STORAGE_KEY = "roulettechess.player-sync.v1";
 
+export interface MultiplayerStatisticsSnapshot {
+  readonly rating: number;
+  readonly rankedGames: number;
+  readonly rankedWins: number;
+  readonly rankedLosses: number;
+  readonly rankedWinRate: number;
+  readonly unrankedGames: number;
+}
+
 export interface CloudProfileSnapshot {
   readonly bootstrapApplied: boolean;
   readonly playerId: string;
   readonly profile: PlayerProfile;
   readonly multiplayerRating: number;
+  readonly multiplayerStatistics: MultiplayerStatisticsSnapshot;
 }
 
 export interface ProgressionOperation {
@@ -112,6 +122,7 @@ export class PlayerSyncCoordinator {
   private canonicalProfileStatus: CanonicalProfileStatus = "not-applicable";
   private accountAuthenticated = false;
   private canonicalMultiplayerRating: number | null = null;
+  private canonicalMultiplayerStatistics: MultiplayerStatisticsSnapshot | null = null;
 
   public constructor(local: PlayerProfileRepository, remote: CloudPlayerSyncPort, storage?: SyncStorage) {
     this.local = local;
@@ -137,6 +148,10 @@ export class PlayerSyncCoordinator {
 
   public getCanonicalMultiplayerRating(): number | null {
     return this.canonicalMultiplayerRating;
+  }
+
+  public getCanonicalMultiplayerStatistics(): MultiplayerStatisticsSnapshot | null {
+    return this.canonicalMultiplayerStatistics;
   }
 
   public suspendForAccountMigration(): void {
@@ -174,6 +189,7 @@ export class PlayerSyncCoordinator {
     this.migrationSuspended = false;
     this.canonicalProfileStatus = "not-applicable";
     this.canonicalMultiplayerRating = null;
+    this.canonicalMultiplayerStatistics = null;
     this.initializing = undefined;
     this.flushing = undefined;
   }
@@ -218,6 +234,7 @@ export class PlayerSyncCoordinator {
     }
     this.local.saveProfile(canonical.profile);
     this.canonicalMultiplayerRating = canonical.multiplayerRating;
+    this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
     this.canonicalProfileStatus = "ready";
   }
 
@@ -256,6 +273,7 @@ export class PlayerSyncCoordinator {
     });
     this.local.saveProfile(canonical.profile);
     this.canonicalMultiplayerRating = canonical.multiplayerRating;
+    this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
     this.connected = true;
     this.migrationSuspended = false;
     this.canonicalProfileStatus = "ready";
@@ -276,6 +294,7 @@ export class PlayerSyncCoordinator {
     }
     this.local.saveProfile(canonical.profile);
     this.canonicalMultiplayerRating = canonical.multiplayerRating;
+    this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
     return canonical;
   }
 
@@ -325,6 +344,7 @@ export class PlayerSyncCoordinator {
         conflict: false,
       });
       this.canonicalMultiplayerRating = canonical.multiplayerRating;
+      this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
       if (this.readState().pending.length > 0) await this.flushPending();
       else this.local.saveProfile(canonical.profile);
       this.canonicalProfileStatus = "ready";
@@ -350,6 +370,7 @@ export class PlayerSyncCoordinator {
     if (canonical) {
       this.local.saveProfile(canonical.profile);
       this.canonicalMultiplayerRating = canonical.multiplayerRating;
+      this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
     }
   }
 

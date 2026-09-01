@@ -13,7 +13,8 @@ interface CloudRow {
   pieceStatistics: Record<string, { captures: number; moves: number; rolls: number }>;
   playerId: string;
   progression: Record<string, number>;
-  rating: { multiplayerRating: number; ratedGames: number; ratingVersion: number };
+  rating: { multiplayerRating: number; ratedGames: number; rankedWins: number; rankedLosses: number;
+    rankedWinRate: number; unrankedGames: number; ratingVersion: number };
 }
 
 function pieceCounters(row: CloudRow, key: "captures" | "moves" | "rolls"): PieceCounters {
@@ -40,8 +41,13 @@ function normalize(row: CloudRow): CloudProfileSnapshot {
     usernameOnboardingRequired: row.usernameOnboardingRequired,
     createdAt: row.createdAt, totalXp: p.total_xp, statistics, processedMatchIds: [],
   };
+  const multiplayerStatistics = {
+    rating: row.rating.multiplayerRating, rankedGames: row.rating.ratedGames,
+    rankedWins: row.rating.rankedWins, rankedLosses: row.rating.rankedLosses,
+    rankedWinRate: row.rating.rankedWinRate, unrankedGames: row.rating.unrankedGames,
+  };
   return { bootstrapApplied: row.bootstrapApplied, playerId: row.playerId,
-    profile, multiplayerRating: row.rating.multiplayerRating };
+    profile, multiplayerRating: multiplayerStatistics.rating, multiplayerStatistics };
 }
 
 export class SupabaseCloudPlayerSync implements CloudPlayerSyncPort {

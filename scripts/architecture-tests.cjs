@@ -85,6 +85,37 @@ if (/rating|multiplayerRating/i.test(playerPort.replace(/\/\/.*rating.*$/gim, ""
   violations.push("src/application/players/PlayerProfilePort.ts: browser rating mutation surface");
 }
 
+const leaderboardContracts = fs.readFileSync(
+  "src/application/leaderboard/LeaderboardContracts.ts",
+  "utf8",
+);
+const leaderboardService = fs.readFileSync(
+  "src/application/leaderboard/LeaderboardService.ts",
+  "utf8",
+);
+const leaderboardPage = fs.readFileSync("src/pages/LeaderboardPage.tsx", "utf8");
+const leaderboardAdapter = fs.readFileSync(
+  "src/infrastructure/leaderboard/SupabaseLeaderboardAdapter.ts",
+  "utf8",
+);
+if (/\b(?:playerId|player_id|authUserId|auth_user_id)\b/.test(leaderboardContracts)) {
+  violations.push("leaderboard public contract: internal identity field");
+}
+if (/@supabase\/supabase-js|\.rpc\s*\(/.test(`${leaderboardService}\n${leaderboardPage}`)) {
+  violations.push("leaderboard application/UI bypasses its read adapter");
+}
+if (/\.from\s*\(|rating_settlements|player_auth_owners|player_ratings/.test(leaderboardAdapter)) {
+  violations.push("leaderboard adapter reads protected tables directly");
+}
+for (const rpcName of [
+  "get_ranked_leaderboard_top_100",
+  "get_current_player_ranked_rank",
+]) {
+  if (!leaderboardAdapter.includes(`client.rpc(\"${rpcName}\")`)) {
+    violations.push(`leaderboard adapter: missing approved read RPC ${rpcName}`);
+  }
+}
+
 const trustedMultiplayerApi = fs.readFileSync("api/multiplayer.ts", "utf8");
 const trustedRuntimeImports = [...trustedMultiplayerApi.matchAll(/from\s+["'](\.\.?\/[^"']+)["']/g)]
   .map((match) => match[1]);
@@ -177,6 +208,39 @@ for (const invariant of [
   if (!legacyRecoveryMigration.includes(invariant)) {
     violations.push(`legacy recovery migration: missing narrow guard ${invariant}`);
   }
+}
+
+const rankedLeaderboardMigration = fs.readFileSync(
+  "supabase/migrations/202608310003_leaderboard_01_ranked_projection.sql",
+  "utf8",
+);
+for (const invariant of [
+  "rating.rated_games <> coalesce(ledger.games, 0)",
+  "raise exception\n      'ranked projection backfill refused",
+  "ranked_win_rate numeric generated always",
+  "check (rated_games = ranked_wins + ranked_losses)",
+  "player_ratings_leaderboard_rank_idx",
+  "where rated_games >= 1",
+  "if existing.match_id is not null then",
+  "ranked_wins = rating.ranked_wins",
+  "ranked_losses = rating.ranked_losses",
+  "private.current_player_id()",
+  "get_ranked_leaderboard_top_100",
+  "get_current_player_ranked_rank",
+  "from public, anon, authenticated",
+  "to authenticated",
+]) {
+  if (!rankedLeaderboardMigration.toLowerCase().includes(invariant.toLowerCase())) {
+    violations.push(`ranked leaderboard projection: missing authority invariant ${invariant}`);
+  }
+}
+const leaderboardReturnSignature = rankedLeaderboardMigration
+  .slice(rankedLeaderboardMigration.indexOf(
+    "create or replace function public.get_ranked_leaderboard_top_100",
+  ))
+  .match(/returns table \(([\s\S]*?)\) language/i)?.[1] ?? "";
+if (/\b(?:player_id|auth_user_id)\b/i.test(leaderboardReturnSignature)) {
+  violations.push("ranked leaderboard projection: public Top 100 DTO leaks an internal identity field");
 }
 
 assert.deepEqual(violations, [], `Architecture boundary violations:\n${violations.join("\n")}`);

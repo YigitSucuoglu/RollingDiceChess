@@ -15,7 +15,7 @@ import {
 import type { PlayerProfileRepository } from "./PlayerProfileRepository";
 import type { AuthenticationSession } from "../application/auth/AuthenticationContracts";
 import { normalizeAccountDisplayName } from "../application/players/PlayerContracts";
-import { PlayerSyncCoordinator, type CanonicalProfileStatus, type CloudPlayerSyncPort } from "./PlayerSync";
+import { PlayerSyncCoordinator, type CanonicalProfileStatus, type CloudPlayerSyncPort, type MultiplayerStatisticsSnapshot } from "./PlayerSync";
 import {
   calculateLevelProgression,
   createMatchXpProgressionResult,
@@ -34,6 +34,7 @@ export interface PlayerProfileViewModel {
   readonly publicDiscriminator: string | null;
   readonly usernameOnboardingRequired: boolean;
   readonly multiplayerRating: number | null;
+  readonly multiplayerStatistics: MultiplayerStatisticsSnapshot | null;
   readonly monogram: string;
   readonly joinedLabel: string;
   readonly progression: {
@@ -242,6 +243,7 @@ export class PlayerProfileService {
       publicDiscriminator: profile.publicDiscriminator,
       usernameOnboardingRequired: profile.usernameOnboardingRequired,
       multiplayerRating: this.sync?.getCanonicalMultiplayerRating() ?? null,
+      multiplayerStatistics: this.sync?.getCanonicalMultiplayerStatistics() ?? null,
       monogram: monogram || "P",
       joinedLabel: new Intl.DateTimeFormat(locale, {
         month: "long",

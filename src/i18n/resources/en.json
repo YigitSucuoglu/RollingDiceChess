@@ -19,6 +19,11 @@
     "singleplayer": "Singleplayer", "settings": "Settings", "profile": "Profile", "leaderboard": "Leaderboard", "howToPlay": "How to Play", "multiplayer": "Multiplayer",
     "heroLabel": "Roulette machine with Gold and Obsidian chess pieces", "caption": "Three pieces. One turn. Every move matters."
   },
+  "leaderboard": {
+    "refresh": "Refresh", "top100": "Global ranked Top 100", "empty": "No ranked players yet.",
+    "topError": "The leaderboard could not be loaded. You can retry.", "rankError": "Your global rank could not be loaded.",
+    "unqualified": "Play at least 1 ranked match to join the leaderboard.", "yourRank": "Your global rank: #{{rank}}", "yourRankLabel": "Your Rank", "globalRankings": "Global Rankings", "podium": "Top three ranked players", "you": "You"
+  },
   "auth": {
     "title": "Choose how to play",
     "description": "Sign in for future account features, or continue with your local profile.",
@@ -116,7 +121,11 @@
   },
   "profile": {
     "browserTitle": "Profile | RouletteChess", "eyebrow": "Offline player hub", "title": "Profile", "player": "Player", "joined": "Joined {{date}}", "levelProgress": "Level progress", "progressLabel": "Level {{level}} experience progress", "multiplayerRating": "Multiplayer rating", "multiplayerRatingValue": "Multiplayer rating {{rating}}",
-    "careerOverview": "Career overview", "generalStatistics": "General Statistics", "rouletteSignature": "Your roulette signature", "rouletteStatistics": "RouletteChess Statistics",
+    "careerOverview": "Career overview", "generalStatistics": "Statistics", "rouletteSignature": "Your roulette signature", "rouletteStatistics": "RouletteChess Statistics",
+    "statisticsViewLabel": "Statistics view", "statisticsViews": { "singleplayer": "Singleplayer", "multiplayer": "Multiplayer" },
+    "singleplayerScope": "Singleplayer statistics reflect games played against bots.", "multiplayerScope": "Ranked statistics include ranked matches only. Unranked matches count only toward games played.",
+    "rankedStatistics": "Ranked", "multiplayerActivity": "Activity", "multiplayerUnavailable": "Multiplayer statistics are temporarily unavailable. Singleplayer statistics remain available.",
+    "multiplayerStats": { "rating": "Rating", "rankedGames": "Ranked Games", "rankedWins": "Ranked Wins", "rankedLosses": "Ranked Losses", "rankedWinRate": "Ranked Win Rate", "unrankedGames": "Unranked Games" },
     "stats": { "gamesPlayed": "Games Played", "wins": "Wins", "losses": "Losses", "winRate": "Win Rate", "currentWinStreak": "Current Win Streak", "bestWinStreak": "Best Win Streak", "totalPlayTime": "Total Play Time", "kingsCaptured": "Kings Captured", "rouletteRolls": "Roulette Rolls", "mostRolledPiece": "Most Rolled Piece", "mostPlayedPiece": "Most Played Piece", "mostSuccessfulPiece": "Most Successful Piece", "threeRightsUsed": "Three Rights Used", "triplePawnRolls": "Triple Pawn Rolls", "tripleKnightRolls": "Triple Knight Rolls", "tripleQueenRolls": "Triple Queen Rolls" },
     "futureMilestones": "Future milestones", "achievements": "Achievements", "achievementNames": { "firstVictory": "First Victory", "hundredGames": "100 Games", "captureHundredKings": "Capture 100 Kings", "tripleQueenRoll": "Triple Queen Roll" },
     "localDataNote": "Offline profile data stays on this device."

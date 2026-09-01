@@ -369,6 +369,105 @@
   text-transform: uppercase;
 }
 
+.profile-statistics-header {
+  align-items: end;
+  border-bottom: 1px solid rgba(207, 164, 87, 0.18);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+}
+
+.profile-statistics-header .profile-section-heading {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.profile-statistics-switch {
+  background: rgba(8, 8, 7, 0.72);
+  border: 1px solid rgba(207, 164, 87, 0.24);
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 0.2rem;
+}
+
+.profile-statistics-switch button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #918778;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.65rem;
+  font-weight: 800;
+  gap: 0.45rem;
+  justify-content: center;
+  letter-spacing: 0.11em;
+  min-height: 2.55rem;
+  padding: 0.55rem 0.8rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.profile-statistics-switch button[aria-pressed="true"] {
+  background: linear-gradient(135deg, rgba(211, 167, 80, 0.2), rgba(121, 76, 25, 0.12));
+  border-color: rgba(232, 193, 113, 0.46);
+  color: var(--profile-gold);
+}
+
+.profile-statistics-switch button:focus-visible {
+  outline: 3px solid #fff4cf;
+  outline-offset: 3px;
+  position: relative;
+  z-index: 1;
+}
+
+.profile-statistics-scope {
+  color: #8f8678;
+  font-size: 0.75rem;
+  line-height: 1.55;
+  margin-bottom: 1rem;
+}
+
+.profile-multiplayer-statistics {
+  max-width: 60rem;
+}
+
+.profile-multiplayer-group > h3 {
+  color: #c9b992;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.profile-multiplayer-ranked-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.profile-multiplayer-activity {
+  border-top: 1px solid rgba(207, 164, 87, 0.18);
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+}
+
+.profile-multiplayer-activity .profile-stat-card {
+  max-width: 12rem;
+}
+
+.profile-statistics-unavailable {
+  background: rgba(19, 18, 16, 0.68);
+  border: 1px solid rgba(207, 164, 87, 0.18);
+  color: #a69b8a;
+  line-height: 1.5;
+  padding: 1rem;
+}
+
 .profile-general-grid {
   display: grid;
   gap: 0.8rem;
@@ -519,6 +618,10 @@
   .profile-achievements-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .profile-multiplayer-ranked-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 560px) {
@@ -554,6 +657,31 @@
 
   .profile-general-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-statistics-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .profile-statistics-switch {
+    width: 100%;
+  }
+
+  .profile-statistics-switch button {
+    font-size: 0.59rem;
+    letter-spacing: 0.07em;
+    min-width: 0;
+    padding-inline: 0.45rem;
+    white-space: normal;
+  }
+
+  .profile-multiplayer-ranked-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-multiplayer-activity .profile-stat-card {
+    max-width: none;
   }
 
   .profile-stat-card {

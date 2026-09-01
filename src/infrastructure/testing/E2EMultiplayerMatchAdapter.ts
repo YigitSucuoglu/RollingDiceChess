@@ -16,10 +16,17 @@ export class E2EMultiplayerMatchAdapter implements MultiplayerMatchPort {
   public constructor() {
     this.mode = window.localStorage.getItem("roulettechess.e2e-multiplayer-mode") === "unranked"
       ? "unranked" : "ranked";
-    if (window.localStorage.getItem("roulettechess.e2e-multiplayer-match-state") === "terminal") {
+    const fixtureState = window.localStorage.getItem("roulettechess.e2e-multiplayer-match-state");
+    if (fixtureState?.startsWith("terminal") && fixtureState !== "terminal-after-load") {
       this.status = "terminal";
       this.winner = "black";
-      this.terminationReason = "king-captured";
+      this.terminationReason = fixtureState === "terminal-timeout" ? "timeout"
+        : fixtureState === "terminal-forfeit" ? "forfeit"
+          : fixtureState === "terminal-disconnect-forfeit" ? "disconnect-forfeit" : "king-captured";
+      this.revision = 2;
+    } else if (fixtureState === "technical-abort") {
+      this.status = "technical-abort";
+      this.terminationReason = "technical-abort";
       this.revision = 2;
     }
   }
@@ -40,7 +47,19 @@ export class E2EMultiplayerMatchAdapter implements MultiplayerMatchPort {
     return this.snapshot();
   }
 
-  public subscribe(): () => void { return () => undefined; }
+  public subscribe(_matchId: string, listener: () => void): () => void {
+    if (window.localStorage.getItem("roulettechess.e2e-multiplayer-match-state") !== "terminal-after-load") {
+      return () => undefined;
+    }
+    const timer = window.setTimeout(() => {
+      this.status = "terminal";
+      this.winner = "black";
+      this.terminationReason = "king-captured";
+      this.revision++;
+      listener();
+    }, 50);
+    return () => window.clearTimeout(timer);
+  }
 
   private snapshot(): MultiplayerServerSnapshot {
     const now = new Date();

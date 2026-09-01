@@ -1,8 +1,7 @@
 import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import playerProfileService, {
-} from "../profile/PlayerProfileService";
+import playerProfileService from "../profile/PlayerProfileService";
 import type { AppLanguage } from "../settings/AppSettings";
 import "../styles/ProfilePage.css";
 import { useAuthentication } from "../auth/authentication-context";
@@ -14,6 +13,8 @@ import { UsernameValidationError } from "../application/players/PlayerContracts"
 const ACHIEVEMENT_PLACEHOLDERS = [
   "firstVictory", "hundredGames", "captureHundredKings", "tripleQueenRoll",
 ] as const;
+
+type StatisticsView = "singleplayer" | "multiplayer";
 
 interface RouletteStatCardProps {
   label: string;
@@ -42,6 +43,7 @@ function ProfilePage() {
   const [, setProfileRevision] = useState(0);
   const profile = playerProfileService.getViewModel(language);
   const [authPending, setAuthPending] = useState(false);
+  const [statisticsView, setStatisticsView] = useState<StatisticsView>("singleplayer");
   const [renaming, setRenaming] = useState(false);
   const [renamePending, setRenamePending] = useState(false);
   const [renameValue, setRenameValue] = useState(profile.displayName);
@@ -104,6 +106,15 @@ function ProfilePage() {
   }, [t]);
 
   const { progression, rouletteStats } = profile;
+  const multiplayerStats = profile.multiplayerStatistics;
+  const locale = language === "tr" ? "tr-TR" : "en-US";
+  const formatInteger = (value: number) => new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 0,
+  }).format(value);
+  const formatCanonicalRate = (value: number) => new Intl.NumberFormat(locale, {
+    style: "percent",
+    maximumFractionDigits: 1,
+  }).format(value);
 
   return (
     <main className="profile-page">
@@ -288,21 +299,70 @@ function ProfilePage() {
           aria-labelledby="general-statistics-title"
           className="profile-section"
         >
-          <header className="profile-section-heading">
-            <p>{t("profile.careerOverview")}</p>
-            <h2 id="general-statistics-title">{t("profile.generalStatistics")}</h2>
-          </header>
-          <div className="profile-general-grid">
-            {profile.generalStats.map((stat) => (
-              <article className="profile-stat-card" key={stat.label}>
-                <strong>{stat.value}</strong>
-                <p>{t(`profile.stats.${stat.id}`)}</p>
-              </article>
-            ))}
+          <div className="profile-statistics-header">
+            <header className="profile-section-heading">
+              <p>{t("profile.careerOverview")}</p>
+              <h2 id="general-statistics-title">{t("profile.generalStatistics")}</h2>
+            </header>
+            <div aria-label={t("profile.statisticsViewLabel")} className="profile-statistics-switch">
+              {(["singleplayer", "multiplayer"] as const).map((view) => (
+                <button aria-pressed={statisticsView === view} key={view} onClick={() => setStatisticsView(view)} type="button">
+                  <span aria-hidden="true">{statisticsView === view ? "◆" : "◇"}</span>
+                  {t(`profile.statisticsViews.${view}`)}
+                </button>
+              ))}
+            </div>
           </div>
+          {statisticsView === "singleplayer" ? (
+            <div className="profile-statistics-view" data-statistics-view="singleplayer">
+              <p className="profile-statistics-scope">{t("profile.singleplayerScope")}</p>
+              <div className="profile-general-grid">
+                {profile.generalStats.map((stat) => (
+                  <article className="profile-stat-card" key={stat.label}>
+                    <strong>{stat.value}</strong>
+                    <p>{t(`profile.stats.${stat.id}`)}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="profile-statistics-view profile-multiplayer-statistics" data-statistics-view="multiplayer">
+              <p className="profile-statistics-scope">{t("profile.multiplayerScope")}</p>
+              {multiplayerStats ? (
+                <>
+                  <section aria-labelledby="ranked-statistics-title" className="profile-multiplayer-group">
+                    <h3 id="ranked-statistics-title">{t("profile.rankedStatistics")}</h3>
+                    <div className="profile-multiplayer-ranked-grid">
+                      {([
+                        ["rating", formatInteger(multiplayerStats.rating)],
+                        ["rankedGames", formatInteger(multiplayerStats.rankedGames)],
+                        ["rankedWins", formatInteger(multiplayerStats.rankedWins)],
+                        ["rankedLosses", formatInteger(multiplayerStats.rankedLosses)],
+                        ["rankedWinRate", formatCanonicalRate(multiplayerStats.rankedWinRate)],
+                      ] as const).map(([id, value]) => (
+                        <article className="profile-stat-card" key={id}>
+                          <strong>{value}</strong>
+                          <p>{t(`profile.multiplayerStats.${id}`)}</p>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                  <section aria-labelledby="multiplayer-activity-title" className="profile-multiplayer-group profile-multiplayer-activity">
+                    <h3 id="multiplayer-activity-title">{t("profile.multiplayerActivity")}</h3>
+                    <article className="profile-stat-card">
+                      <strong>{formatInteger(multiplayerStats.unrankedGames)}</strong>
+                      <p>{t("profile.multiplayerStats.unrankedGames")}</p>
+                    </article>
+                  </section>
+                </>
+              ) : (
+                <p className="profile-statistics-unavailable" role="status">{t("profile.multiplayerUnavailable")}</p>
+              )}
+            </div>
+          )}
         </section>
 
-        <section
+        {statisticsView === "singleplayer" && <section
           aria-labelledby="roulette-statistics-title"
           className="profile-section"
         >
@@ -342,7 +402,7 @@ function ProfilePage() {
               value={rouletteStats.tripleQueenRolls}
             />
           </div>
-        </section>
+        </section>}
 
         <section
           aria-labelledby="achievements-title"

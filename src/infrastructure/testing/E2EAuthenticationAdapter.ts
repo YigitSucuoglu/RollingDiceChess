@@ -63,6 +63,10 @@ export function createE2ECloudSnapshot(
   displayName = "Guest1234",
   totalXp = 50,
   usernameOnboardingRequired = false,
+  multiplayerStatistics: CloudProfileSnapshot["multiplayerStatistics"] = {
+    rating: 1000, rankedGames: 0, rankedWins: 0,
+    rankedLosses: 0, rankedWinRate: 0, unrankedGames: 0,
+  },
 ): CloudProfileSnapshot {
   const profile = createDefaultPlayerProfile(new Date("2026-01-01T00:00:00.000Z"));
   profile.playerId = playerId;
@@ -76,7 +80,8 @@ export function createE2ECloudSnapshot(
     bootstrapApplied: false,
     playerId,
     profile,
-    multiplayerRating: 1000,
+    multiplayerRating: multiplayerStatistics.rating,
+    multiplayerStatistics,
   };
 }
 
@@ -88,7 +93,10 @@ class E2ECloudPlayerSync implements CloudPlayerSyncPort {
     this.snapshot = fixture === "onboarding"
       ? createE2ECloudSnapshot(FIXTURE_PLAYER_ID, "Guest1234", 50, true)
       : fixture === "account" || fixture === "recovery-resolved-google"
-        ? createE2ECloudSnapshot(FIXTURE_GOOGLE_PLAYER_ID, "Yigit", 70)
+        ? createE2ECloudSnapshot(FIXTURE_GOOGLE_PLAYER_ID, "Yigit", 70, false, {
+          rating: 1125, rankedGames: 7, rankedWins: 4,
+          rankedLosses: 3, rankedWinRate: 0.571, unrankedGames: 5,
+        })
         : result === "google"
       ? createE2ECloudSnapshot(FIXTURE_GOOGLE_PLAYER_ID, "Player", 70)
       : createE2ECloudSnapshot(FIXTURE_PLAYER_ID, "Guest1234", 50, result === "guest");

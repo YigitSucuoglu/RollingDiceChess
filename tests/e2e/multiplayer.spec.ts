@@ -99,7 +99,7 @@ test("ranked multiplayer leave warns about rating and returns to Multiplayer", a
   await expect(page).toHaveURL(/\/multiplayer/u);
 });
 
-test("Home exposes equal game modes and the Leaderboard placeholder", async ({ page }) => {
+test("Home exposes equal game modes and the Leaderboard read model", async ({ page }) => {
   await page.goto("/");
   for (const name of ["Singleplayer", "Multiplayer", "Profile", "Leaderboard", "Settings", "How to Play"]) {
     await expect(page.getByRole("button", { name })).toBeVisible();
@@ -114,7 +114,8 @@ test("Home exposes equal game modes and the Leaderboard placeholder", async ({ p
   expect(metrics.secondary[0].top - metrics.primary[0].bottom).toBeGreaterThanOrEqual(20);
   await page.getByRole("button", { name: "Leaderboard" }).click();
   await expect(page.getByRole("heading", { name: "Leaderboard" })).toBeVisible();
-  await expect(page.getByText("Coming soon")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Global ranked Top 100" })).toContainText("Yigit");
+  await expect(page.locator(".leaderboard-row.is-current")).toContainText("#50");
 });
 
 test("multiplayer Game and Home remain overflow-safe at 390x844", async ({ page }) => {
@@ -141,6 +142,29 @@ test("desktop multiplayer gameplay shell is centered without changing its intrin
   expect(layout.centerDelta).toBeLessThanOrEqual(1);
   expect(layout.shellWidth).toBeLessThan(layout.viewportWidth);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test("desktop multiplayer keeps the complete gameplay stack inside a 1366x768 viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 }); await useCloudGuestFixture(page);
+  await page.goto("/game/33333333-3333-4333-8333-333333333333");
+  const metrics = await page.locator(".game-layout").evaluate((layout) => {
+    const boxes = [...layout.children].map((child) => (child as HTMLElement).getBoundingClientRect());
+    return { top: boxes[0].top, bottom: boxes.at(-1)?.bottom ?? 0, viewportHeight: window.innerHeight,
+      boardVisible: (layout.querySelector(".board") as HTMLElement).getBoundingClientRect().height > 0,
+      clockCount: layout.querySelectorAll(".chess-clock").length,
+      ratingCount: layout.querySelectorAll(".chess-clock-rating").length };
+  });
+  expect(metrics.top).toBeGreaterThanOrEqual(0); expect(metrics.bottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
+  expect(metrics.boardVisible).toBe(true); expect(metrics.clockCount).toBe(2); expect(metrics.ratingCount).toBe(2);
+});
+
+test("singleplayer gameplay stack remains inside the supported desktop viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 }); await page.goto("/play");
+  await page.getByRole("button", { name: /start game|oyunu başlat/i }).click();
+  await expect(page.locator(".board")).toBeVisible();
+  const bounds = await page.locator(".game-layout").boundingBox();
+  expect(bounds).not.toBeNull(); expect(bounds!.y).toBeGreaterThanOrEqual(0);
+  expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(769);
 });
 
 test("multiplayer clocks keep authoritative ratings paired with the oriented players", async ({ page }) => {
@@ -176,6 +200,31 @@ test("ranked terminal snapshot renders authoritative rating feedback", async ({ 
   await expect(feedback).toContainText("1248");
   await expect(feedback).toContainText("1223");
   await expect(feedback).toContainText("-25");
+});
+
+test("late authoritative ranked settlement reaches an already mounted Game Over modal", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" }); await useCloudGuestFixture(page);
+  await page.addInitScript(() => localStorage.setItem("roulettechess.e2e-multiplayer-match-state", "terminal-after-load"));
+  await page.goto("/game/33333333-3333-4333-8333-333333333333");
+  await expect(page.locator(".game-result-rating")).toContainText("1223");
+});
+
+for (const [fixture, reason] of [["terminal-timeout", /ran out of time/i], ["terminal-forfeit", /forfeit/i], ["terminal-disconnect-forfeit", /forfeit/i]] as const) {
+  test(`ranked ${fixture} renders authoritative feedback`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" }); await useCloudGuestFixture(page);
+    await page.addInitScript((state) => localStorage.setItem("roulettechess.e2e-multiplayer-match-state", state), fixture);
+    await page.goto("/game/33333333-3333-4333-8333-333333333333");
+    await expect(page.locator(".game-result-rating")).toContainText("1223");
+    await expect(page.locator("#game-result-reason")).toContainText(reason);
+  });
+}
+
+test("technical abort never renders rating feedback", async ({ page }) => {
+  await useCloudGuestFixture(page);
+  await page.addInitScript(() => localStorage.setItem("roulettechess.e2e-multiplayer-match-state", "technical-abort"));
+  await page.goto("/game/33333333-3333-4333-8333-333333333333");
+  await expect(page.getByText("Match interrupted")).toBeVisible();
+  await expect(page.locator(".game-result-rating")).toHaveCount(0);
 });
 
 test("ranked rating animation reaches the authoritative winning value", async ({ page }) => {

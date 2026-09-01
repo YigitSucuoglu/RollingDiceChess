@@ -11,6 +11,7 @@
     --slot-frame-height:clamp(112px,12dvh,136px);
     --roll-button-height:40px;
     --turn-panel-block-space:15px;
+    --multiplayer-meta-space:0px;
     --game-vertical-reserve:calc(
         var(--game-page-block-space)
         + var(--game-gaps-space)
@@ -19,6 +20,7 @@
         + var(--slot-frame-height)
         + var(--roll-button-height)
         + var(--turn-panel-block-space)
+        + var(--multiplayer-meta-space)
         + 4px
         + 5px
     );
@@ -298,6 +300,7 @@
 .multiplayer-game-shell{
     --roll-button-height:0px;
     --slot-frame-height:clamp(136px,15dvh,164px);
+    --multiplayer-meta-space:20px;
 }
 
 .multiplayer-game-shell .slot-machine-frame{
