@@ -104,6 +104,7 @@ describe("authoritative multiplayer match engine", () => {
     ], "king");
     const castled = applyAuthoritativeMove(castle, { row: 7, col: 4 }, { row: 7, col: 6 }, pawnRoll).state;
     expect(castled.board[7][5]?.id).toBe("wr");
+    expect(castled.moveHistory[0].whiteMoves.map((move) => move.piece)).toEqual(["king"]);
 
     const previousDouble = {
       pieceId: "bp", from: { row: 1, col: 5 }, to: { row: 3, col: 5 },
@@ -117,6 +118,7 @@ describe("authoritative multiplayer match engine", () => {
     ], "pawn", previousDouble);
     const captured = applyAuthoritativeMove(enPassant, { row: 3, col: 4 }, { row: 2, col: 5 }, pawnRoll).state;
     expect(captured.board[3][5]).toBeNull();
+    expect(captured.moveHistory[0].whiteMoves.map((move) => move.piece)).toEqual(["pawn"]);
 
     const promotion = sparseState([
       { row: 1, col: 0, value: { ...piece("wp", "pawn", "white", 6, 0), hasMoved: true } },
@@ -125,5 +127,6 @@ describe("authoritative multiplayer match engine", () => {
     ], "pawn");
     const promoted = applyAuthoritativeMove(promotion, { row: 1, col: 0 }, { row: 0, col: 0 }, pawnRoll).state;
     expect(promoted.board[0][0]?.type).toBe("queen");
+    expect(promoted.moveHistory[0].whiteMoves.map((move) => move.piece)).toEqual(["pawn"]);
   });
 });
