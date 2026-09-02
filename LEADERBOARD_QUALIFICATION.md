@@ -52,9 +52,26 @@ The existing transactional 100,000-row harness is `supabase/tests/leaderboard_01
 - Local application/unit/security guards: PASS. `validate`, 235 unit tests, 39 focused Chromium E2E tests and the 12 applicable cross-browser qualification cases passed.
 - Remote schema/security verification: PASS from Phase 2 (all 14 assertions true, aggregate mismatch count 0).
 - Transactional performance harness: PASS from Phase 2 at 100,000 synthetic rows; all temporary data was rolled back.
-- Production manual acceptance: pending.
+- Production manual acceptance: PASS.
 
-LEADERBOARD-01 is not marked complete until those remaining gates are recorded.
+## Production acceptance
+
+- Production Leaderboard: PASS
+- Top 3 podium: PASS
+- Top 100/list behavior: PASS
+- Current-player behavior: PASS
+- Explicit Refresh: PASS
+- Mobile/responsive: PASS
+- English/Turkish localization: PASS
+- Guest behavior: PASS
+- Profile regression: PASS
+- Multiplayer regression: PASS
+
+## Final status
+
+**LEADERBOARD-01: COMPLETED**
+
+The v1 architecture remains the global Ranked Top 100 with qualification after at least one completed ranked match, an own-rank result for qualified players outside the Top 100, canonical server ordering, and Guest participation. Navigation and explicit Refresh perform canonical reads through the retained two safe RPCs. Duplicate/in-flight requests are coalesced and request generations prevent stale-response overwrite. v1 intentionally has no polling, Realtime leaderboard, or shared/TTL cache. The existing partial composite index remains in use and internal PlayerId is never exposed to the browser.
 
 ## Future scope
 

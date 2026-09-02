@@ -20,6 +20,7 @@ v1.0.0
 ## Completed
 
 ### Quality
+- LEADERBOARD-01 — Complete the PlayerId-based Global Ranked Top 100, own-rank, freshness, security, performance, responsive, and production qualification
 - MULTIPLAYER-01D — Qualify and stabilize production multiplayer across real PC/mobile clients
 - DEV-DATA-CLEANUP-01 — Inventory and safely reset disposable development identity, progression, rating, migration, and multiplayer data
 - PROFILE-IDENTITY-01B-HF2 — Prevent unauthorized cross-PlayerId local bootstrap
@@ -124,9 +125,10 @@ v1.0.0
 ## Current Sprint
 
 In Progress:
-- LEADERBOARD-01 — Phase 6 production freshness, security and performance qualification
+- None.
 
 Completed:
+- LEADERBOARD-01 — Complete the Global Ranked Top 100 and production qualification
 - MULTIPLAYER-01D — Qualify and stabilize production multiplayer across real PC/mobile clients
 - MULTIPLAYER-01C-HF1 — Recover legacy multiplayer state and refine Home navigation hierarchy
 - MULTIPLAYER-01C — Integrate real two-player authoritative gameplay and multiplayer Game UI
@@ -182,7 +184,7 @@ Completed:
 - UI-01A — Game Screen Layout & Board Priority
 
 Next:
-1. LEADERBOARD-01 — Add PlayerId-based multiplayer leaderboard.
+- None scheduled.
 
 Roadmap:
 - DATA-01A — Apply Supabase player schema and validate RLS/security
@@ -190,7 +192,7 @@ Roadmap:
 - DATA-01C — Implement Guest-to-Google identity linking and profile conflict resolution
 - PROFILE-IDENTITY-01 — Add a public 5-character player discriminator
 - RATING-01 — Design authoritative multiplayer rating
-- LEADERBOARD-01 — Add PlayerId-based multiplayer leaderboard
+- LEADERBOARD-01 — Add PlayerId-based multiplayer leaderboard (completed)
 
 Backlog:
 - SOUND-01B — Add production sound assets to the preserved sound architecture
