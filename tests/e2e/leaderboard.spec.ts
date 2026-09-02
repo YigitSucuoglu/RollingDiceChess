@@ -1,6 +1,7 @@
 import { expect, test } from "./fixtures";
 
 const fixtureKey = "roulettechess.e2e-leaderboard-fixture.v1";
+const requestCountKey = "roulettechess.e2e-leaderboard-request-count.v1";
 async function useFixture(page: import("@playwright/test").Page, value: string) {
   await page.addInitScript(({ key, fixture }) => window.localStorage.setItem(key, fixture), { key: fixtureKey, fixture: value });
 }
@@ -81,4 +82,19 @@ test("long identity stays contained and Turkish copy remains usable", async ({ p
   const longIdentity = page.getByText("MaximumLengthUsernameTest"); await expect(longIdentity).toBeVisible();
   expect(await longIdentity.evaluate((node) => node.scrollWidth >= node.clientWidth)).toBe(true);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});
+
+test("uses two canonical reads per navigation and coalesces rapid Refresh input", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate((key) => localStorage.setItem(key, "0"), requestCountKey);
+  await page.getByRole("button", { name: "Leaderboard", exact: true }).click();
+  await expect.poll(() => page.evaluate((key) => Number(localStorage.getItem(key)), requestCountKey)).toBe(2);
+
+  const refresh = page.getByRole("button", { name: "Refresh", exact: true });
+  await refresh.evaluate((button: HTMLButtonElement) => { button.click(); button.click(); });
+  await expect.poll(() => page.evaluate((key) => Number(localStorage.getItem(key)), requestCountKey)).toBe(4);
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "Leaderboard", exact: true }).click();
+  await expect.poll(() => page.evaluate((key) => Number(localStorage.getItem(key)), requestCountKey)).toBe(6);
 });

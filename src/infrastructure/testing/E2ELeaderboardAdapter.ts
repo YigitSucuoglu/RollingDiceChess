@@ -2,11 +2,16 @@ import { LeaderboardReadError, type CurrentPlayerRank, type RankedLeaderboardEnt
 import type { LeaderboardPort } from "../../application/leaderboard/LeaderboardPort";
 
 const FIXTURE_KEY = "roulettechess.e2e-leaderboard-fixture.v1";
+export const E2E_LEADERBOARD_REQUEST_COUNT_KEY = "roulettechess.e2e-leaderboard-request-count.v1";
 type Fixture = "default" | "one" | "two" | "outside" | "unqualified" | "empty" | "top-error" | "rank-error" | "long";
 function fixture(): Fixture {
   const value = window.localStorage.getItem(FIXTURE_KEY);
   return value === "one" || value === "two" || value === "outside" || value === "unqualified"
     || value === "empty" || value === "top-error" || value === "rank-error" || value === "long" ? value : "default";
+}
+function recordRequest(): void {
+  const previous = Number(window.localStorage.getItem(E2E_LEADERBOARD_REQUEST_COUNT_KEY) ?? "0");
+  window.localStorage.setItem(E2E_LEADERBOARD_REQUEST_COUNT_KEY, String(previous + 1));
 }
 function entry(rank: number, isCurrentPlayer = false): RankedLeaderboardEntry {
   return { rank, username: isCurrentPlayer ? "Yigit" : `Player${String(rank).padStart(3, "0")}`,
@@ -29,11 +34,13 @@ function currentFor(selected: Fixture): CurrentPlayerRank {
 }
 export class E2ELeaderboardAdapter implements LeaderboardPort {
   public async fetchTop100(): Promise<readonly RankedLeaderboardEntry[]> {
+    recordRequest();
     const selected = fixture();
     if (selected === "top-error") throw new LeaderboardReadError("network");
     return entriesFor(selected);
   }
   public async fetchCurrentPlayerRank(): Promise<CurrentPlayerRank> {
+    recordRequest();
     const selected = fixture();
     if (selected === "rank-error") throw new LeaderboardReadError("network");
     return currentFor(selected);

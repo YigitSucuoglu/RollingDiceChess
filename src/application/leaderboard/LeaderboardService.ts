@@ -23,6 +23,7 @@ export class LeaderboardService {
   private readonly listeners = new Set<() => void>();
   private requestVersion = 0;
   private inFlight?: Promise<void>;
+  private revalidationInFlight?: Promise<void>;
 
   public constructor(port: LeaderboardPort) { this.port = port; }
 
@@ -41,7 +42,13 @@ export class LeaderboardService {
   }
 
   public revalidate(): Promise<void> {
-    return this.startRequest();
+    if (this.revalidationInFlight) return this.revalidationInFlight;
+    const request = this.startRequest();
+    this.revalidationInFlight = request;
+    void request.finally(() => {
+      if (this.revalidationInFlight === request) this.revalidationInFlight = undefined;
+    });
+    return request;
   }
 
   private startRequest(): Promise<void> {

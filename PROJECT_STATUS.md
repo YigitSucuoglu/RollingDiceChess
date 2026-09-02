@@ -124,7 +124,7 @@ v1.0.0
 ## Current Sprint
 
 In Progress:
-- None.
+- LEADERBOARD-01 — Phase 6 production freshness, security and performance qualification
 
 Completed:
 - MULTIPLAYER-01D — Qualify and stabilize production multiplayer across real PC/mobile clients

@@ -179,4 +179,75 @@ describe("LeaderboardService", () => {
       status: "success", entries: [{ username: "New" }],
     });
   });
+
+  it("coalesces rapid explicit refreshes without reusing the initial request", async () => {
+    const initial = deferred<readonly RankedLeaderboardEntry[]>();
+    const refreshed = deferred<readonly RankedLeaderboardEntry[]>();
+    const fetchTop100 = vi.fn()
+      .mockReturnValueOnce(initial.promise)
+      .mockReturnValueOnce(refreshed.promise);
+    const service = new LeaderboardService(port({ fetchTop100 }));
+    const initialRequest = service.load();
+    const refresh = service.revalidate();
+    const duplicateRefresh = service.revalidate();
+    expect(refresh).toBe(duplicateRefresh);
+    expect(fetchTop100).toHaveBeenCalledTimes(2);
+    refreshed.resolve([entry({ username: "Canonical refresh" })]);
+    await refresh;
+    initial.resolve([entry({ username: "Stale initial" })]);
+    await initialRequest;
+    expect(service.getState().top).toMatchObject({
+      status: "success", entries: [{ username: "Canonical refresh" }],
+    });
+  });
+
+  it("represents a total two-RPC failure without treating it as an empty leaderboard", async () => {
+    const service = new LeaderboardService(port({
+      fetchTop100: async () => { throw new LeaderboardReadError("network"); },
+      fetchCurrentPlayerRank: async () => { throw new LeaderboardReadError("network"); },
+    }));
+    await service.load();
+    expect(service.getState().top).toMatchObject({ status: "error" });
+    expect(service.getState().currentPlayer).toMatchObject({ status: "error" });
+  });
+
+  it("keeps remount and account-switch reads isolated without shared cached state", async () => {
+    const firstPort = port({
+      fetchTop100: vi.fn(async () => [entry({ username: "User A" })]),
+      fetchCurrentPlayerRank: vi.fn(async () => current({ username: "User A" })),
+    });
+    const secondPort = port({
+      fetchTop100: vi.fn(async () => [entry({ username: "User B" })]),
+      fetchCurrentPlayerRank: vi.fn(async () => current({ username: "User B" })),
+    });
+    const userA = new LeaderboardService(firstPort);
+    await userA.load();
+    const userB = new LeaderboardService(secondPort);
+    expect(userB.getState()).toEqual({
+      top: { status: "idle" }, currentPlayer: { status: "idle" },
+    });
+    await userB.load();
+    expect(userB.getState().top).toMatchObject({
+      status: "success", entries: [{ username: "User B" }],
+    });
+    expect(userB.getState().currentPlayer).toMatchObject({
+      status: "qualified", player: { username: "User B" },
+    });
+  });
+
+  it("fetches canonical data again after a ranked settlement or navigation remount", async () => {
+    let canonicalUsername = "Before settlement";
+    const sharedPort = port({
+      fetchTop100: vi.fn(async () => [entry({ username: canonicalUsername })]),
+    });
+    const before = new LeaderboardService(sharedPort);
+    await before.load();
+    canonicalUsername = "After settlement";
+    const after = new LeaderboardService(sharedPort);
+    await after.load();
+    expect(after.getState().top).toMatchObject({
+      status: "success", entries: [{ username: "After settlement" }],
+    });
+    expect(sharedPort.fetchTop100).toHaveBeenCalledTimes(2);
+  });
 });
