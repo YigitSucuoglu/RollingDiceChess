@@ -66,6 +66,9 @@ export function createE2ECloudSnapshot(
   multiplayerStatistics: CloudProfileSnapshot["multiplayerStatistics"] = {
     rating: 1000, rankedGames: 0, rankedWins: 0,
     rankedLosses: 0, rankedWinRate: 0, unrankedGames: 0,
+    currentRankedWinStreak: 0, bestRankedWinStreak: 0,
+    totalMultiplayerPlayTimeMs: 0, multiplayerKingsCaptured: 0,
+    multiplayerRouletteRolls: 0,
   },
 ): CloudProfileSnapshot {
   const profile = createDefaultPlayerProfile(new Date("2026-01-01T00:00:00.000Z"));
@@ -82,6 +85,14 @@ export function createE2ECloudSnapshot(
     profile,
     multiplayerRating: multiplayerStatistics.rating,
     multiplayerStatistics,
+    rouletteStatistics: {
+      mostRolledPiece: null, mostRolledPieceCount: 0,
+      mostPlayedPiece: null, mostPlayedPieceCount: 0,
+      threeRightsTurns: 0, playerTurnsCompleted: 0, threeRightsUsedRate: 0,
+      tripleRolls: ["pawn", "knight", "bishop", "rook", "queen", "king"].map(
+        (pieceType) => ({ pieceType: pieceType as keyof typeof profile.statistics.rollsByPiece, count: 0 }),
+      ),
+    },
   };
 }
 
@@ -96,6 +107,9 @@ class E2ECloudPlayerSync implements CloudPlayerSyncPort {
         ? createE2ECloudSnapshot(FIXTURE_GOOGLE_PLAYER_ID, "Yigit", 70, false, {
           rating: 1125, rankedGames: 7, rankedWins: 4,
           rankedLosses: 3, rankedWinRate: 0.571, unrankedGames: 5,
+          currentRankedWinStreak: 2, bestRankedWinStreak: 4,
+          totalMultiplayerPlayTimeMs: 125000, multiplayerKingsCaptured: 3,
+          multiplayerRouletteRolls: 19,
         })
         : result === "google"
       ? createE2ECloudSnapshot(FIXTURE_GOOGLE_PLAYER_ID, "Player", 70)

@@ -11,6 +11,23 @@ export interface MultiplayerStatisticsSnapshot {
   readonly rankedLosses: number;
   readonly rankedWinRate: number;
   readonly unrankedGames: number;
+  readonly currentRankedWinStreak: number;
+  readonly bestRankedWinStreak: number;
+  readonly totalMultiplayerPlayTimeMs: number;
+  readonly multiplayerKingsCaptured: number;
+  readonly multiplayerRouletteRolls: number;
+}
+
+export interface RankedPieceCount { readonly pieceType: keyof PieceCounters; readonly count: number }
+export interface GlobalRouletteStatisticsSnapshot {
+  readonly mostRolledPiece: keyof PieceCounters | null;
+  readonly mostRolledPieceCount: number;
+  readonly mostPlayedPiece: keyof PieceCounters | null;
+  readonly mostPlayedPieceCount: number;
+  readonly threeRightsTurns: number;
+  readonly playerTurnsCompleted: number;
+  readonly threeRightsUsedRate: number;
+  readonly tripleRolls: readonly RankedPieceCount[];
 }
 
 export interface CloudProfileSnapshot {
@@ -19,6 +36,7 @@ export interface CloudProfileSnapshot {
   readonly profile: PlayerProfile;
   readonly multiplayerRating: number;
   readonly multiplayerStatistics: MultiplayerStatisticsSnapshot;
+  readonly rouletteStatistics: GlobalRouletteStatisticsSnapshot;
 }
 
 export interface ProgressionOperation {
@@ -102,7 +120,10 @@ export function createProgressionOperation(
       threeRightsTurnsDelta: next.threeRightsTurns - previous.threeRightsTurns,
       triplePawnRollsDelta: next.triplePawnRolls - previous.triplePawnRolls,
       tripleKnightRollsDelta: next.tripleKnightRolls - previous.tripleKnightRolls,
+      tripleBishopRollsDelta: next.tripleBishopRolls - previous.tripleBishopRolls,
+      tripleRookRollsDelta: next.tripleRookRolls - previous.tripleRookRolls,
       tripleQueenRollsDelta: next.tripleQueenRolls - previous.tripleQueenRolls,
+      tripleKingRollsDelta: next.tripleKingRolls - previous.tripleKingRolls,
       rollsByPieceDelta: counterDelta(next.rollsByPiece, previous.rollsByPiece),
       movesByPieceDelta: counterDelta(next.movesByPiece, previous.movesByPiece),
       capturesByPieceDelta: counterDelta(next.capturesByPiece, previous.capturesByPiece),
@@ -123,6 +144,7 @@ export class PlayerSyncCoordinator {
   private accountAuthenticated = false;
   private canonicalMultiplayerRating: number | null = null;
   private canonicalMultiplayerStatistics: MultiplayerStatisticsSnapshot | null = null;
+  private canonicalRouletteStatistics: GlobalRouletteStatisticsSnapshot | null = null;
 
   public constructor(local: PlayerProfileRepository, remote: CloudPlayerSyncPort, storage?: SyncStorage) {
     this.local = local;
@@ -152,6 +174,10 @@ export class PlayerSyncCoordinator {
 
   public getCanonicalMultiplayerStatistics(): MultiplayerStatisticsSnapshot | null {
     return this.canonicalMultiplayerStatistics;
+  }
+
+  public getCanonicalRouletteStatistics(): GlobalRouletteStatisticsSnapshot | null {
+    return this.canonicalRouletteStatistics;
   }
 
   public suspendForAccountMigration(): void {
@@ -190,6 +216,7 @@ export class PlayerSyncCoordinator {
     this.canonicalProfileStatus = "not-applicable";
     this.canonicalMultiplayerRating = null;
     this.canonicalMultiplayerStatistics = null;
+    this.canonicalRouletteStatistics = null;
     this.initializing = undefined;
     this.flushing = undefined;
   }
@@ -235,6 +262,7 @@ export class PlayerSyncCoordinator {
     this.local.saveProfile(canonical.profile);
     this.canonicalMultiplayerRating = canonical.multiplayerRating;
     this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
+    this.canonicalRouletteStatistics = canonical.rouletteStatistics;
     this.canonicalProfileStatus = "ready";
   }
 
@@ -274,6 +302,7 @@ export class PlayerSyncCoordinator {
     this.local.saveProfile(canonical.profile);
     this.canonicalMultiplayerRating = canonical.multiplayerRating;
     this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
+    this.canonicalRouletteStatistics = canonical.rouletteStatistics;
     this.connected = true;
     this.migrationSuspended = false;
     this.canonicalProfileStatus = "ready";
@@ -295,6 +324,7 @@ export class PlayerSyncCoordinator {
     this.local.saveProfile(canonical.profile);
     this.canonicalMultiplayerRating = canonical.multiplayerRating;
     this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
+    this.canonicalRouletteStatistics = canonical.rouletteStatistics;
     return canonical;
   }
 
@@ -345,6 +375,7 @@ export class PlayerSyncCoordinator {
       });
       this.canonicalMultiplayerRating = canonical.multiplayerRating;
       this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
+      this.canonicalRouletteStatistics = canonical.rouletteStatistics;
       if (this.readState().pending.length > 0) await this.flushPending();
       else this.local.saveProfile(canonical.profile);
       this.canonicalProfileStatus = "ready";
@@ -371,6 +402,7 @@ export class PlayerSyncCoordinator {
       this.local.saveProfile(canonical.profile);
       this.canonicalMultiplayerRating = canonical.multiplayerRating;
       this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
+      this.canonicalRouletteStatistics = canonical.rouletteStatistics;
     }
   }
 

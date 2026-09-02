@@ -89,7 +89,10 @@ function migrateStatistics(
     threeRightsTurns: nonNegativeNumber(source.threeRightsTurns),
     triplePawnRolls: nonNegativeNumber(source.triplePawnRolls),
     tripleKnightRolls: nonNegativeNumber(source.tripleKnightRolls),
+    tripleBishopRolls: nonNegativeNumber(source.tripleBishopRolls),
+    tripleRookRolls: nonNegativeNumber(source.tripleRookRolls),
     tripleQueenRolls: nonNegativeNumber(source.tripleQueenRolls),
+    tripleKingRolls: nonNegativeNumber(source.tripleKingRolls),
   };
 }
 

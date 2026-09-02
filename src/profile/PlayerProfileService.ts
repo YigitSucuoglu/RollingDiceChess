@@ -53,14 +53,21 @@ export interface PlayerProfileViewModel {
   readonly rouletteStats: {
     readonly mostRolledPiece: string;
     readonly mostPlayedPiece: string;
-    readonly mostSuccessfulPiece: string;
     readonly mostRolledPieceType: PieceType | null;
     readonly mostPlayedPieceType: PieceType | null;
-    readonly mostSuccessfulPieceType: PieceType | null;
+    readonly mostRolledPieceCount: number;
+    readonly mostPlayedPieceCount: number;
+    readonly threeRightsTurns: number;
+    readonly playerTurnsCompleted: number;
+    readonly threeRightsUsedRate: number;
     readonly threeRightsUsedLabel: string;
     readonly triplePawnRolls: number;
     readonly tripleKnightRolls: number;
+    readonly tripleBishopRolls: number;
+    readonly tripleRookRolls: number;
     readonly tripleQueenRolls: number;
+    readonly tripleKingRolls: number;
+    readonly tripleRolls: readonly { readonly pieceType: PieceType; readonly count: number }[];
   };
 }
 
@@ -77,7 +84,10 @@ interface MatchSession {
   threeRightsTurns: number;
   triplePawnRolls: number;
   tripleKnightRolls: number;
+  tripleBishopRolls: number;
+  tripleRookRolls: number;
   tripleQueenRolls: number;
+  tripleKingRolls: number;
   completionResult: MatchXpProgressionResult | null;
 }
 
@@ -235,9 +245,29 @@ export class PlayerProfileService {
 
     const locale = language === "tr" ? "tr-TR" : "en-US";
     const number = (value: number) => new Intl.NumberFormat(locale).format(value);
-    const mostRolledPieceType = resolveMostFrequent(stats.rollsByPiece);
-    const mostPlayedPieceType = resolveMostFrequent(stats.movesByPiece);
-    const mostSuccessfulPieceType = resolveMostFrequent(stats.capturesByPiece);
+    const canonicalRoulette = this.sync?.getCanonicalRouletteStatistics();
+    const localMostRolled = resolveMostFrequent(stats.rollsByPiece);
+    const localMostPlayed = resolveMostFrequent(stats.movesByPiece);
+    const localTripleCounts = {
+      pawn: stats.triplePawnRolls, knight: stats.tripleKnightRolls,
+      bishop: stats.tripleBishopRolls, rook: stats.tripleRookRolls,
+      queen: stats.tripleQueenRolls, king: stats.tripleKingRolls,
+    };
+    const localTripleRolls = PROFILE_PIECE_ORDER.map((pieceType) => ({
+      pieceType, count: localTripleCounts[pieceType],
+    })).sort((left, right) => right.count - left.count
+      || PROFILE_PIECE_ORDER.indexOf(left.pieceType) - PROFILE_PIECE_ORDER.indexOf(right.pieceType));
+    const roulette = canonicalRoulette ?? {
+      mostRolledPiece: localMostRolled,
+      mostRolledPieceCount: localMostRolled ? stats.rollsByPiece[localMostRolled] : 0,
+      mostPlayedPiece: localMostPlayed,
+      mostPlayedPieceCount: localMostPlayed ? stats.movesByPiece[localMostPlayed] : 0,
+      threeRightsTurns: stats.threeRightsTurns,
+      playerTurnsCompleted: stats.playerTurnsCompleted,
+      threeRightsUsedRate: stats.playerTurnsCompleted > 0
+        ? stats.threeRightsTurns / stats.playerTurnsCompleted : 0,
+      tripleRolls: localTripleRolls,
+    };
     return {
       displayName: profile.displayName,
       publicDiscriminator: profile.publicDiscriminator,
@@ -286,26 +316,23 @@ export class PlayerProfileService {
         },
       ],
       rouletteStats: {
-        mostRolledPiece: formatPiece(
-          mostRolledPieceType
-        ),
-        mostPlayedPiece: formatPiece(
-          mostPlayedPieceType
-        ),
-        mostSuccessfulPiece: formatPiece(
-          mostSuccessfulPieceType
-        ),
-        mostRolledPieceType,
-        mostPlayedPieceType,
-        mostSuccessfulPieceType,
-        threeRightsUsedLabel: formatPercentage(
-          stats.playerTurnsCompleted > 0
-            ? stats.threeRightsTurns / stats.playerTurnsCompleted
-            : 0, locale
-        ),
-        triplePawnRolls: stats.triplePawnRolls,
-        tripleKnightRolls: stats.tripleKnightRolls,
-        tripleQueenRolls: stats.tripleQueenRolls,
+        mostRolledPiece: formatPiece(roulette.mostRolledPiece),
+        mostPlayedPiece: formatPiece(roulette.mostPlayedPiece),
+        mostRolledPieceType: roulette.mostRolledPiece,
+        mostPlayedPieceType: roulette.mostPlayedPiece,
+        mostRolledPieceCount: roulette.mostRolledPieceCount,
+        mostPlayedPieceCount: roulette.mostPlayedPieceCount,
+        threeRightsTurns: roulette.threeRightsTurns,
+        playerTurnsCompleted: roulette.playerTurnsCompleted,
+        threeRightsUsedRate: roulette.threeRightsUsedRate,
+        threeRightsUsedLabel: formatPercentage(roulette.threeRightsUsedRate, locale),
+        triplePawnRolls: roulette.tripleRolls.find((item) => item.pieceType === "pawn")?.count ?? 0,
+        tripleKnightRolls: roulette.tripleRolls.find((item) => item.pieceType === "knight")?.count ?? 0,
+        tripleBishopRolls: roulette.tripleRolls.find((item) => item.pieceType === "bishop")?.count ?? 0,
+        tripleRookRolls: roulette.tripleRolls.find((item) => item.pieceType === "rook")?.count ?? 0,
+        tripleQueenRolls: roulette.tripleRolls.find((item) => item.pieceType === "queen")?.count ?? 0,
+        tripleKingRolls: roulette.tripleRolls.find((item) => item.pieceType === "king")?.count ?? 0,
+        tripleRolls: roulette.tripleRolls,
       },
     };
   }
@@ -324,7 +351,10 @@ export class PlayerProfileService {
       threeRightsTurns: 0,
       triplePawnRolls: 0,
       tripleKnightRolls: 0,
+      tripleBishopRolls: 0,
+      tripleRookRolls: 0,
       tripleQueenRolls: 0,
+      tripleKingRolls: 0,
       completionResult: null,
     };
 
@@ -391,7 +421,10 @@ export class PlayerProfileService {
     stats.threeRightsTurns += session.threeRightsTurns;
     stats.triplePawnRolls += session.triplePawnRolls;
     stats.tripleKnightRolls += session.tripleKnightRolls;
+    stats.tripleBishopRolls += session.tripleBishopRolls;
+    stats.tripleRookRolls += session.tripleRookRolls;
     stats.tripleQueenRolls += session.tripleQueenRolls;
+    stats.tripleKingRolls += session.tripleKingRolls;
 
     for (const pieceType of PROFILE_PIECE_ORDER) {
       stats.rollsByPiece[pieceType] += session.rollsByPiece[pieceType];
@@ -430,8 +463,14 @@ export class PlayerProfileService {
       session.triplePawnRolls++;
     } else if (roll.every((pieceType) => pieceType === "knight")) {
       session.tripleKnightRolls++;
+    } else if (roll.every((pieceType) => pieceType === "bishop")) {
+      session.tripleBishopRolls++;
+    } else if (roll.every((pieceType) => pieceType === "rook")) {
+      session.tripleRookRolls++;
     } else if (roll.every((pieceType) => pieceType === "queen")) {
       session.tripleQueenRolls++;
+    } else if (roll.every((pieceType) => pieceType === "king")) {
+      session.tripleKingRolls++;
     }
   }
 

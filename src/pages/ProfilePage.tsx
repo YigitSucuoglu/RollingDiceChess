@@ -382,10 +382,6 @@ function ProfilePage() {
               value={rouletteStats.mostPlayedPieceType ? t(`common.pieces.${rouletteStats.mostPlayedPieceType}`) : "—"}
             />
             <RouletteStatCard
-              label={t("profile.stats.mostSuccessfulPiece")}
-              value={rouletteStats.mostSuccessfulPieceType ? t(`common.pieces.${rouletteStats.mostSuccessfulPieceType}`) : "—"}
-            />
-            <RouletteStatCard
               label={t("profile.stats.threeRightsUsed")}
               value={rouletteStats.threeRightsUsedLabel}
             />

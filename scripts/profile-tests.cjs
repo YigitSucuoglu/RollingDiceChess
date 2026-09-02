@@ -249,6 +249,9 @@ try {
   sink.onRoll("white", ["pawn", "pawn", "pawn"]);
   sink.onRoll("white", ["knight", "knight", "knight"]);
   sink.onRoll("white", ["queen", "queen", "queen"]);
+  sink.onRoll("white", ["bishop", "bishop", "bishop"]);
+  sink.onRoll("white", ["rook", "rook", "rook"]);
+  sink.onRoll("white", ["king", "king", "king"]);
   sink.onRoll("white", ["rook", "rook", "bishop"]);
   sink.onRoll("black", ["queen", "queen", "queen"]);
   sink.onMove({
@@ -271,11 +274,14 @@ try {
   assert.equal(completed.statistics.gamesPlayed, 1);
   assert.equal(completed.statistics.wins, 1);
   assert.equal(completed.statistics.kingsCaptured, 1);
-  assert.equal(completed.statistics.rouletteRolls, 5);
+  assert.equal(completed.statistics.rouletteRolls, 8);
   assert.equal(completed.statistics.rollsByPiece.knight, 5);
   assert.equal(completed.statistics.triplePawnRolls, 1);
   assert.equal(completed.statistics.tripleKnightRolls, 1);
   assert.equal(completed.statistics.tripleQueenRolls, 1);
+  assert.equal(completed.statistics.tripleBishopRolls, 1);
+  assert.equal(completed.statistics.tripleRookRolls, 1);
+  assert.equal(completed.statistics.tripleKingRolls, 1);
   assert.equal(completed.statistics.movesByPiece.knight, 1);
   assert.equal(completed.statistics.movesByPiece.queen, 0);
   assert.equal(completed.statistics.capturesByPiece.knight, 1);

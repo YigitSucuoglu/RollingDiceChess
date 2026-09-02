@@ -31,7 +31,10 @@ export interface PlayerStatistics {
   threeRightsTurns: number;
   triplePawnRolls: number;
   tripleKnightRolls: number;
+  tripleBishopRolls: number;
+  tripleRookRolls: number;
   tripleQueenRolls: number;
+  tripleKingRolls: number;
 }
 
 export interface PlayerProfile {
@@ -92,7 +95,10 @@ export function createDefaultPlayerProfile(
       threeRightsTurns: 0,
       triplePawnRolls: 0,
       tripleKnightRolls: 0,
+      tripleBishopRolls: 0,
+      tripleRookRolls: 0,
       tripleQueenRolls: 0,
+      tripleKingRolls: 0,
     },
     processedMatchIds: [],
   };
