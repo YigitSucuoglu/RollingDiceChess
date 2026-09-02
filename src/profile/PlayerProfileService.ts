@@ -108,8 +108,10 @@ function formatPercentage(value: number, locale: string): string {
   return new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 1 }).format(Math.max(0, value));
 }
 
-function formatPlayTime(totalSeconds: number, language: "en" | "tr"): string {
-  const minutes = Math.floor(Math.max(0, totalSeconds) / 60);
+export function formatPlayTime(totalSeconds: number, language: "en" | "tr"): string {
+  const seconds = Math.floor(Math.max(0, totalSeconds));
+  if (seconds < 60) return language === "tr" ? `${seconds} sn` : `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
 
   if (minutes < 60) return language === "tr" ? `${minutes} dk` : `${minutes}m`;
 

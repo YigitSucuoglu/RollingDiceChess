@@ -447,7 +447,7 @@
 .profile-multiplayer-ranked-grid {
   display: grid;
   gap: 0.8rem;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .profile-multiplayer-activity {
@@ -456,8 +456,10 @@
   padding-top: 1.25rem;
 }
 
-.profile-multiplayer-activity .profile-stat-card {
-  max-width: 12rem;
+.profile-multiplayer-activity-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .profile-statistics-unavailable {
@@ -503,7 +505,7 @@
 .profile-roulette-grid {
   display: grid;
   gap: 0.8rem;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .profile-roulette-stat {
@@ -523,6 +525,71 @@
   display: block;
   font-size: 0.7rem;
   margin-top: 0.5rem;
+}
+
+.profile-triple-rolls-card {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.025), transparent 58%),
+    rgba(19, 18, 16, 0.82);
+  border: 1px solid rgba(207, 164, 87, 0.2);
+  margin-top: 0.8rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.profile-triple-rolls-card h3 {
+  color: #c9b992;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.profile-triple-rolls-list {
+  display: grid;
+  gap: 0.65rem clamp(2rem, 8vw, 7rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(3, auto);
+  list-style: none;
+  margin-top: 1.15rem;
+  padding: 0;
+}
+
+.profile-triple-rolls-list li {
+  align-items: center;
+  border-bottom: 1px solid rgba(207, 164, 87, 0.12);
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: 1.5rem minmax(0, 1fr) auto;
+  min-width: 0;
+  padding: 0.65rem 0.25rem;
+}
+
+.profile-triple-rolls-list li:nth-child(-n + 3) { grid-column: 1; }
+.profile-triple-rolls-list li:nth-child(n + 4) { grid-column: 2; }
+.profile-triple-rolls-list li:nth-child(1),
+.profile-triple-rolls-list li:nth-child(4) { grid-row: 1; }
+.profile-triple-rolls-list li:nth-child(2),
+.profile-triple-rolls-list li:nth-child(5) { grid-row: 2; }
+.profile-triple-rolls-list li:nth-child(3),
+.profile-triple-rolls-list li:nth-child(6) { grid-row: 3; }
+
+.profile-triple-rank {
+  color: #756e63;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.profile-triple-piece {
+  color: #e6d8be;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.1rem;
+}
+
+.profile-triple-rolls-list strong {
+  color: var(--profile-gold);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
 }
 
 .profile-achievements-grid {
@@ -622,6 +689,10 @@
   .profile-multiplayer-ranked-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .profile-multiplayer-activity-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 560px) {
@@ -680,10 +751,6 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .profile-multiplayer-activity .profile-stat-card {
-    max-width: none;
-  }
-
   .profile-stat-card {
     padding: 1rem;
   }
@@ -691,6 +758,14 @@
   .profile-roulette-grid,
   .profile-achievements-grid {
     grid-template-columns: 1fr;
+  }
+
+  .profile-triple-rolls-list {
+    display: block;
+  }
+
+  .profile-triple-rolls-list li + li {
+    margin-top: 0.15rem;
   }
 
   .profile-footer {

@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import playerProfileService from "../profile/PlayerProfileService";
+import playerProfileService, { formatPlayTime } from "../profile/PlayerProfileService";
 import type { AppLanguage } from "../settings/AppSettings";
 import "../styles/ProfilePage.css";
 import { useAuthentication } from "../auth/authentication-context";
@@ -20,6 +20,20 @@ interface RouletteStatCardProps {
   label: string;
   value: string | number;
   note?: string;
+}
+
+interface ModeStatCardProps {
+  label: string;
+  value: string;
+}
+
+function ModeStatCard({ label, value }: ModeStatCardProps) {
+  return (
+    <article className="profile-stat-card">
+      <strong>{value}</strong>
+      <p>{label}</p>
+    </article>
+  );
 }
 
 function RouletteStatCard({
@@ -339,20 +353,21 @@ function ProfilePage() {
                         ["rankedWins", formatInteger(multiplayerStats.rankedWins)],
                         ["rankedLosses", formatInteger(multiplayerStats.rankedLosses)],
                         ["rankedWinRate", formatCanonicalRate(multiplayerStats.rankedWinRate)],
+                        ["currentRankedWinStreak", formatInteger(multiplayerStats.currentRankedWinStreak)],
+                        ["bestRankedWinStreak", formatInteger(multiplayerStats.bestRankedWinStreak)],
                       ] as const).map(([id, value]) => (
-                        <article className="profile-stat-card" key={id}>
-                          <strong>{value}</strong>
-                          <p>{t(`profile.multiplayerStats.${id}`)}</p>
-                        </article>
+                        <ModeStatCard key={id} label={t(`profile.multiplayerStats.${id}`)} value={value} />
                       ))}
                     </div>
                   </section>
                   <section aria-labelledby="multiplayer-activity-title" className="profile-multiplayer-group profile-multiplayer-activity">
                     <h3 id="multiplayer-activity-title">{t("profile.multiplayerActivity")}</h3>
-                    <article className="profile-stat-card">
-                      <strong>{formatInteger(multiplayerStats.unrankedGames)}</strong>
-                      <p>{t("profile.multiplayerStats.unrankedGames")}</p>
-                    </article>
+                    <div className="profile-multiplayer-activity-grid">
+                      <ModeStatCard label={t("profile.multiplayerStats.unrankedGames")} value={formatInteger(multiplayerStats.unrankedGames)} />
+                      <ModeStatCard label={t("profile.multiplayerStats.totalPlayTime")} value={formatPlayTime(Math.floor(multiplayerStats.totalMultiplayerPlayTimeMs / 1000), language)} />
+                      <ModeStatCard label={t("profile.multiplayerStats.kingsCaptured")} value={formatInteger(multiplayerStats.multiplayerKingsCaptured)} />
+                      <ModeStatCard label={t("profile.multiplayerStats.rouletteRolls")} value={formatInteger(multiplayerStats.multiplayerRouletteRolls)} />
+                    </div>
                   </section>
                 </>
               ) : (
@@ -362,9 +377,10 @@ function ProfilePage() {
           )}
         </section>
 
-        {statisticsView === "singleplayer" && <section
+        <section
           aria-labelledby="roulette-statistics-title"
-          className="profile-section"
+          className="profile-section profile-roulette-section"
+          data-global-statistics="true"
         >
           <header className="profile-section-heading">
             <p>{t("profile.rouletteSignature")}</p>
@@ -376,29 +392,35 @@ function ProfilePage() {
             <RouletteStatCard
               label={t("profile.stats.mostRolledPiece")}
               value={rouletteStats.mostRolledPieceType ? t(`common.pieces.${rouletteStats.mostRolledPieceType}`) : "—"}
+              note={t("profile.rollCount", { count: formatInteger(rouletteStats.mostRolledPieceCount) })}
             />
             <RouletteStatCard
               label={t("profile.stats.mostPlayedPiece")}
               value={rouletteStats.mostPlayedPieceType ? t(`common.pieces.${rouletteStats.mostPlayedPieceType}`) : "—"}
+              note={t("profile.moveCount", { count: formatInteger(rouletteStats.mostPlayedPieceCount) })}
             />
             <RouletteStatCard
               label={t("profile.stats.threeRightsUsed")}
               value={rouletteStats.threeRightsUsedLabel}
-            />
-            <RouletteStatCard
-              label={t("profile.stats.triplePawnRolls")}
-              value={rouletteStats.triplePawnRolls}
-            />
-            <RouletteStatCard
-              label={t("profile.stats.tripleKnightRolls")}
-              value={rouletteStats.tripleKnightRolls}
-            />
-            <RouletteStatCard
-              label={t("profile.stats.tripleQueenRolls")}
-              value={rouletteStats.tripleQueenRolls}
+              note={t("profile.turnCount", {
+                current: formatInteger(rouletteStats.threeRightsTurns),
+                total: formatInteger(rouletteStats.playerTurnsCompleted),
+              })}
             />
           </div>
-        </section>}
+          <article aria-labelledby="triple-rolls-title" className="profile-triple-rolls-card">
+            <h3 id="triple-rolls-title">{t("profile.tripleRolls")}</h3>
+            <ol className="profile-triple-rolls-list">
+              {rouletteStats.tripleRolls.map((entry, index) => (
+                <li data-column={index < 3 ? "left" : "right"} data-rank={index + 1} key={entry.pieceType}>
+                  <span aria-hidden="true" className="profile-triple-rank">{index + 1}</span>
+                  <span className="profile-triple-piece">{t(`common.pieces.${entry.pieceType}`)}</span>
+                  <strong>{formatInteger(entry.count)}</strong>
+                </li>
+              ))}
+            </ol>
+          </article>
+        </section>
 
         <section
           aria-labelledby="achievements-title"

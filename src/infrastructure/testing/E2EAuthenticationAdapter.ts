@@ -70,6 +70,14 @@ export function createE2ECloudSnapshot(
     totalMultiplayerPlayTimeMs: 0, multiplayerKingsCaptured: 0,
     multiplayerRouletteRolls: 0,
   },
+  rouletteStatistics: CloudProfileSnapshot["rouletteStatistics"] = {
+    mostRolledPiece: null, mostRolledPieceCount: 0,
+    mostPlayedPiece: null, mostPlayedPieceCount: 0,
+    threeRightsTurns: 0, playerTurnsCompleted: 0, threeRightsUsedRate: 0,
+    tripleRolls: ["pawn", "knight", "bishop", "rook", "queen", "king"].map(
+      (pieceType) => ({ pieceType: pieceType as keyof ReturnType<typeof createDefaultPlayerProfile>["statistics"]["rollsByPiece"], count: 0 }),
+    ),
+  },
 ): CloudProfileSnapshot {
   const profile = createDefaultPlayerProfile(new Date("2026-01-01T00:00:00.000Z"));
   profile.playerId = playerId;
@@ -85,14 +93,7 @@ export function createE2ECloudSnapshot(
     profile,
     multiplayerRating: multiplayerStatistics.rating,
     multiplayerStatistics,
-    rouletteStatistics: {
-      mostRolledPiece: null, mostRolledPieceCount: 0,
-      mostPlayedPiece: null, mostPlayedPieceCount: 0,
-      threeRightsTurns: 0, playerTurnsCompleted: 0, threeRightsUsedRate: 0,
-      tripleRolls: ["pawn", "knight", "bishop", "rook", "queen", "king"].map(
-        (pieceType) => ({ pieceType: pieceType as keyof typeof profile.statistics.rollsByPiece, count: 0 }),
-      ),
-    },
+    rouletteStatistics,
   };
 }
 
@@ -110,6 +111,15 @@ class E2ECloudPlayerSync implements CloudPlayerSyncPort {
           currentRankedWinStreak: 2, bestRankedWinStreak: 4,
           totalMultiplayerPlayTimeMs: 125000, multiplayerKingsCaptured: 3,
           multiplayerRouletteRolls: 19,
+        }, {
+          mostRolledPiece: "knight", mostRolledPieceCount: 39,
+          mostPlayedPiece: "pawn", mostPlayedPieceCount: 84,
+          threeRightsTurns: 126, playerTurnsCompleted: 155, threeRightsUsedRate: 126 / 155,
+          tripleRolls: [
+            { pieceType: "pawn", count: 12 }, { pieceType: "knight", count: 10 },
+            { pieceType: "queen", count: 8 }, { pieceType: "rook", count: 5 },
+            { pieceType: "bishop", count: 3 }, { pieceType: "king", count: 1 },
+          ],
         })
         : result === "google"
       ? createE2ECloudSnapshot(FIXTURE_GOOGLE_PLAYER_ID, "Player", 70)
