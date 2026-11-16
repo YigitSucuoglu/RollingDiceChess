@@ -1,4 +1,5 @@
 import type { AuthenticationSession } from "../application/auth/AuthenticationContracts";
+import type { SingleMatchAchievementSnapshot } from "../domain/achievements/AchievementContracts";
 import { PROFILE_PIECE_ORDER, type PieceCounters, type PlayerProfile } from "./PlayerProfile";
 import type { PlayerProfileRepository } from "./PlayerProfileRepository";
 
@@ -42,6 +43,12 @@ export interface CloudProfileSnapshot {
 export interface ProgressionOperation {
   readonly operationId: string;
   readonly payload: Record<string, unknown>;
+}
+
+export interface SingleMatchProgressionPayload {
+  readonly schemaVersion: 1;
+  readonly matchId: string;
+  readonly snapshot: SingleMatchAchievementSnapshot;
 }
 
 export interface CloudPlayerSyncPort {
@@ -99,6 +106,7 @@ export function createProgressionOperation(
   before: PlayerProfile,
   after: PlayerProfile,
   operationId: string,
+  singleMatch?: SingleMatchAchievementSnapshot,
 ): ProgressionOperation | null {
   const previous = before.statistics;
   const next = after.statistics;
@@ -106,6 +114,16 @@ export function createProgressionOperation(
   const winsDelta = next.wins - previous.wins;
   const lossesDelta = next.losses - previous.losses;
   if (gamesDelta !== 1 || winsDelta + lossesDelta !== 1) return null;
+  const versionedSingleMatch = singleMatch === undefined ? undefined : {
+    schemaVersion: 1 as const,
+    matchId: singleMatch.matchId,
+    snapshot: singleMatch,
+  } satisfies SingleMatchProgressionPayload;
+  if (singleMatch !== undefined && (
+    singleMatch.mode !== "singleplayer" || singleMatch.status !== "completed" ||
+    !singleMatch.complete || !singleMatch.valid ||
+    (singleMatch.terminationReason !== "king-captured" && singleMatch.terminationReason !== "timeout")
+  )) return null;
   return {
     operationId,
     payload: {
@@ -127,6 +145,7 @@ export function createProgressionOperation(
       rollsByPieceDelta: counterDelta(next.rollsByPiece, previous.rollsByPiece),
       movesByPieceDelta: counterDelta(next.movesByPiece, previous.movesByPiece),
       capturesByPieceDelta: counterDelta(next.capturesByPiece, previous.capturesByPiece),
+      ...(versionedSingleMatch ? { singleMatch: versionedSingleMatch } : {}),
     },
   };
 }
@@ -236,11 +255,15 @@ export class PlayerSyncCoordinator {
     await this.initializing;
   }
 
-  public recordCompletedMatch(before: PlayerProfile, after: PlayerProfile): void {
+  public recordCompletedMatch(
+    before: PlayerProfile,
+    after: PlayerProfile,
+    singleMatch?: SingleMatchAchievementSnapshot,
+  ): void {
     if (this.migrationSuspended) return;
     const state = this.readState();
     if (!state.cloudPlayerId || state.conflict) return;
-    const operation = createProgressionOperation(before, after, crypto.randomUUID());
+    const operation = createProgressionOperation(before, after, crypto.randomUUID(), singleMatch);
     if (!operation) return;
     const pending = [...state.pending.filter((item) => item.operationId !== operation.operationId), operation];
     this.writeState({ ...state, pending });

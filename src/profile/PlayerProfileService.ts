@@ -107,8 +107,7 @@ function createMatchId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
-
-  return `match-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  throw new Error("Secure match identity generation is unavailable.");
 }
 
 function formatPercentage(value: number, locale: string): string {
@@ -470,7 +469,10 @@ export class PlayerProfileService {
       session.matchId,
     ].slice(-MAX_PROCESSED_MATCH_IDS);
     this.repository.saveProfile(profile);
-    this.sync?.recordCompletedMatch(profileBeforeMatch, profile);
+    if (!session.achievementSnapshot) {
+      throw new Error("Completed match achievement snapshot is unavailable.");
+    }
+    this.sync?.recordCompletedMatch(profileBeforeMatch, profile, session.achievementSnapshot);
     session.completionResult = createMatchXpProgressionResult(
       previousTotalXp,
       reward.finalXp
