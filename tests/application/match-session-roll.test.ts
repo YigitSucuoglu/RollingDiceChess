@@ -22,7 +22,8 @@ function createRollSession() {
   const scheduler = new FakeScheduler();
   const random = vi.fn(() => 0);
   const eventSink: GameEventSink = {
-    onRoll: vi.fn(), onMove: vi.fn(), onTurnCompleted: vi.fn(), onGameCompleted: vi.fn(),
+    onRoll: vi.fn(), onMove: vi.fn(), onTurnCompleted: vi.fn(), onTurnEnded: vi.fn(),
+    onGameCompleted: vi.fn(),
   };
   const setup = createDefaultGameSetup();
   const game = new Game(setup, undefined, eventSink, {

@@ -3,6 +3,9 @@ import type {
   GameEventSink,
   GameMoveEvent,
 } from "../engine/GameEvents";
+import SingleMatchAchievementTracker from "../domain/achievements/SingleMatchAchievementTracker";
+import type { SingleMatchAchievementSnapshot } from "../domain/achievements/AchievementContracts";
+import { toPlayerId } from "../application/players/PlayerContracts";
 import type { PieceColor, PieceType } from "../types/Chess";
 import type { GameSetup } from "../types/GameSetup";
 import { LocalStoragePlayerProfileRepository } from "./LocalStoragePlayerProfileRepository";
@@ -89,11 +92,15 @@ interface MatchSession {
   tripleQueenRolls: number;
   tripleKingRolls: number;
   completionResult: MatchXpProgressionResult | null;
+  achievementTracker: SingleMatchAchievementTracker;
+  achievementSnapshot: SingleMatchAchievementSnapshot | null;
 }
 
 export interface ProfileGameSession {
   readonly eventSink: GameEventSink;
   getXpProgressionResult(): MatchXpProgressionResult | null;
+  getAchievementSnapshot(): SingleMatchAchievementSnapshot | null;
+  abandon(): void;
 }
 
 function createMatchId(): string {
@@ -340,8 +347,15 @@ export class PlayerProfileService {
   }
 
   public createGameSession(setup: GameSetup): ProfileGameSession {
+    const playerId = toPlayerId(this.repository.getProfile().playerId);
+    const matchId = createMatchId();
+    const achievementTracker = new SingleMatchAchievementTracker({
+      matchId,
+      playerId,
+      playerColor: setup.playerColor,
+    });
     const session: MatchSession = {
-      matchId: createMatchId(),
+      matchId,
       startedAtMs: Date.now(),
       setup,
       promotions: 0,
@@ -358,19 +372,33 @@ export class PlayerProfileService {
       tripleQueenRolls: 0,
       tripleKingRolls: 0,
       completionResult: null,
+      achievementTracker,
+      achievementSnapshot: null,
     };
 
     const eventSink: GameEventSink = {
-      onRoll: (color, roll) => this.recordRoll(session, color, roll),
-      onMove: (event) => this.recordMove(session, event),
+      onRoll: (color, roll, eventId) => {
+        achievementTracker.recordRoll(color, roll, eventId);
+        this.recordRoll(session, color, roll);
+      },
+      onMove: (event) => {
+        achievementTracker.recordMove(event);
+        this.recordMove(session, event);
+      },
       onTurnCompleted: (color, movesUsed) =>
         this.recordTurnCompletion(session, color, movesUsed),
-      onGameCompleted: (event) => this.completeMatch(session, event),
+      onTurnEnded: (event) => achievementTracker.recordTurnEnded(event),
+      onGameCompleted: (event) => {
+        session.achievementSnapshot = achievementTracker.complete(event);
+        this.completeMatch(session, event);
+      },
     };
 
     return {
       eventSink,
       getXpProgressionResult: () => session.completionResult,
+      getAchievementSnapshot: () => session.achievementSnapshot,
+      abandon: () => achievementTracker.abort(),
     };
   }
 

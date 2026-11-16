@@ -65,7 +65,12 @@ function createSession() {
     game,
     toLocalBotMatchConfiguration(setup),
     profileSession.getXpProgressionResult,
-    { scheduler, rollDurationMs: 1_000 },
+    {
+      scheduler,
+      rollDurationMs: 1_000,
+      getAchievementSnapshot: profileSession.getAchievementSnapshot,
+      onAbandon: profileSession.abandon,
+    },
   );
   return { game, profileSession, repository, scheduler, session };
 }
@@ -96,6 +101,7 @@ describe("match exit lifecycle", () => {
     });
     expect(game.isDisposed()).toBe(true);
     expect(profileSession.getXpProgressionResult()).toBeNull();
+    expect(profileSession.getAchievementSnapshot()).toBeNull();
     expect(repository.getProfile()).toEqual(before);
     expect(scheduler.pendingCount).toBe(0);
     expect((await session.requestAction({
@@ -131,6 +137,7 @@ describe("match exit lifecycle", () => {
     expect(game.isDisposed()).toBe(true);
     expect(game.winner).toBeNull();
     expect(profileSession.getXpProgressionResult()).toBeNull();
+    expect(profileSession.getAchievementSnapshot()).toBeNull();
     session.dispose();
   });
 
@@ -146,5 +153,50 @@ describe("match exit lifecycle", () => {
       snapshot: { lifecycle: "completed", terminationReason: "king-captured", winner: "white" },
     });
     session.dispose();
+  });
+
+  it("exposes one final-board single-match snapshot after local completion", () => {
+    const { game, profileSession, session } = createSession();
+    game.board.squares = Array.from({ length: 8 }, () => Array(8).fill(null));
+    game.board.squares[4][4] = {
+      id: "rook", type: "rook", color: "white", hasMoved: true,
+      initialPosition: { row: 4, col: 4 },
+    };
+    game.board.squares[4][7] = {
+      id: "king", type: "king", color: "black", hasMoved: true,
+      initialPosition: { row: 4, col: 7 },
+    };
+    game.turnRights.set("rook", 1);
+    const capture = game.getSelectableMoves().find((candidate) => candidate.to.col === 7)!;
+    game.makeMove(capture);
+    const snapshot = session.getSingleMatchAchievementSnapshot();
+    expect(snapshot).toBe(profileSession.getAchievementSnapshot());
+    expect(snapshot).toMatchObject({
+      status: "completed",
+      terminationReason: "king-captured",
+      winner: "white",
+      capturedEnemyPieces: 1,
+      finalOwnPieceCount: 1,
+    });
+    session.dispose();
+  });
+
+  it("treats timeout as completed for the local achievement snapshot", () => {
+    const setup = createDefaultGameSetup();
+    const profileService = new PlayerProfileService(new MemoryProfileRepository());
+    const profileSession = profileService.createGameSession(setup);
+    profileSession.eventSink.onGameCompleted({
+      eventId: 1,
+      winner: "black",
+      reason: "timeout",
+      finalPieceCounts: { white: 12, black: 10 },
+    });
+    expect(profileSession.getAchievementSnapshot()).toMatchObject({
+      status: "completed",
+      complete: true,
+      terminationReason: "timeout",
+      winner: "black",
+      finalOwnPieceCount: 12,
+    });
   });
 });

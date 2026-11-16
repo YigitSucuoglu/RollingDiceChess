@@ -34,6 +34,10 @@ export function createLocalBotMatchSession(setup: GameSetup): LocalBotMatchSessi
     game,
     toLocalBotMatchConfiguration(setup),
     profileSession.getXpProgressionResult,
-    { scheduler: systemScheduler },
+    {
+      scheduler: systemScheduler,
+      getAchievementSnapshot: profileSession.getAchievementSnapshot,
+      onAbandon: profileSession.abandon,
+    },
   );
 }

@@ -11,6 +11,7 @@ import type {
 } from "../../domain/contracts/MatchContracts";
 import type { Scheduler } from "../../domain/contracts/PlatformPorts";
 import { ROLL_TIMING } from "../../config/rollTiming";
+import type { SingleMatchAchievementSnapshot } from "../../domain/achievements/AchievementContracts";
 
 const INITIAL_VISIBLE_ROLL = ["pawn", "knight", "bishop"] as const;
 const BOT_START_DELAY_MS = 500;
@@ -24,6 +25,8 @@ interface LocalBotMatchSessionDependencies {
   readonly scheduler: Scheduler;
   readonly rollDurationMs?: number;
   readonly botStartDelayMs?: number;
+  readonly getAchievementSnapshot?: () => SingleMatchAchievementSnapshot | null;
+  readonly onAbandon?: () => void;
 }
 
 export default class LocalBotMatchSession implements MatchSession {
@@ -57,6 +60,10 @@ export default class LocalBotMatchSession implements MatchSession {
 
   private readonly botStartDelayMs: number;
 
+  private readonly getAchievementSnapshot: () => SingleMatchAchievementSnapshot | null;
+
+  private readonly onAbandon: () => void;
+
   private botStartTimeout: unknown | null = null;
 
   private botAbortController: AbortController | null = null;
@@ -89,6 +96,8 @@ export default class LocalBotMatchSession implements MatchSession {
     this.scheduler = dependencies.scheduler;
     this.rollDurationMs = dependencies.rollDurationMs ?? ROLL_TIMING.durationMs;
     this.botStartDelayMs = dependencies.botStartDelayMs ?? BOT_START_DELAY_MS;
+    this.getAchievementSnapshot = dependencies.getAchievementSnapshot ?? (() => null);
+    this.onAbandon = dependencies.onAbandon ?? (() => undefined);
     this.observedRoll = game.currentRoll;
     this.unsubscribeGame = game.subscribe(() => this.handleGameNotification());
     this.ensureBotLifecycle();
@@ -218,6 +227,10 @@ export default class LocalBotMatchSession implements MatchSession {
     return this.getXpProgression();
   }
 
+  public getSingleMatchAchievementSnapshot(): SingleMatchAchievementSnapshot | null {
+    return this.getAchievementSnapshot();
+  }
+
   public dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
@@ -286,6 +299,7 @@ export default class LocalBotMatchSession implements MatchSession {
     this.botLifecycleGeneration++;
     this.botAbortController?.abort();
     this.botAbortController = null;
+    this.onAbandon();
     this.game.dispose();
     const snapshot = this.getSnapshot();
     this.publish(snapshot);

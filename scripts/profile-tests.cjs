@@ -245,30 +245,36 @@ try {
   };
   const gameSession = service.createGameSession(setup);
   const sink = gameSession.eventSink;
-  sink.onRoll("white", ["knight", "knight", "pawn"]);
-  sink.onRoll("white", ["pawn", "pawn", "pawn"]);
-  sink.onRoll("white", ["knight", "knight", "knight"]);
-  sink.onRoll("white", ["queen", "queen", "queen"]);
-  sink.onRoll("white", ["bishop", "bishop", "bishop"]);
-  sink.onRoll("white", ["rook", "rook", "rook"]);
-  sink.onRoll("white", ["king", "king", "king"]);
-  sink.onRoll("white", ["rook", "rook", "bishop"]);
-  sink.onRoll("black", ["queen", "queen", "queen"]);
+  sink.onRoll("white", ["knight", "knight", "pawn"], 1);
+  sink.onRoll("white", ["pawn", "pawn", "pawn"], 2);
+  sink.onRoll("white", ["knight", "knight", "knight"], 3);
+  sink.onRoll("white", ["queen", "queen", "queen"], 4);
+  sink.onRoll("white", ["bishop", "bishop", "bishop"], 5);
+  sink.onRoll("white", ["rook", "rook", "rook"], 6);
+  sink.onRoll("white", ["king", "king", "king"], 7);
+  sink.onRoll("white", ["rook", "rook", "bishop"], 8);
+  sink.onRoll("black", ["queen", "queen", "queen"], 9);
   sink.onMove({
+    eventId: 1,
+    pieceId: "white-knight",
     color: "white",
     pieceType: "knight",
     isCapture: true,
     isPromotion: false,
   });
   sink.onMove({
+    eventId: 2,
+    pieceId: "black-queen",
     color: "black",
     pieceType: "queen",
     isCapture: true,
     isPromotion: false,
   });
   sink.onTurnCompleted("white", 3);
-  sink.onGameCompleted({ winner: "white", reason: "king-captured" });
-  sink.onGameCompleted({ winner: "white", reason: "king-captured" });
+  sink.onGameCompleted({ eventId: 1, winner: "white", reason: "king-captured",
+    finalPieceCounts: { white: 15, black: 14 } });
+  sink.onGameCompleted({ eventId: 1, winner: "white", reason: "king-captured",
+    finalPieceCounts: { white: 15, black: 14 } });
 
   const completed = service.getProfile();
   assert.equal(completed.statistics.gamesPlayed, 1);
@@ -300,7 +306,8 @@ try {
     isCapture: false,
     isPromotion: true,
   });
-  lossSink.onGameCompleted({ winner: "black", reason: "timeout" });
+  lossSink.onGameCompleted({ eventId: 1, winner: "black", reason: "timeout",
+    finalPieceCounts: { white: 16, black: 16 } });
   const afterLoss = service.getProfile();
   assert.equal(afterLoss.statistics.gamesPlayed, 2);
   assert.equal(afterLoss.statistics.losses, 1);

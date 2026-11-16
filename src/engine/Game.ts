@@ -69,6 +69,14 @@ export default class Game {
 
   private movesUsedThisTurn: number;
 
+  private rollEventSequence: number;
+
+  private moveEventSequence: number;
+
+  private turnEventSequence: number;
+
+  private completionEventSequence: number;
+
 
   constructor(
     setupInput: GameSetupInput = createDefaultGameSetup(),
@@ -93,6 +101,10 @@ export default class Game {
     this.disposed = false;
     this.eventSink = eventSink;
     this.movesUsedThisTurn = 0;
+    this.rollEventSequence = 0;
+    this.moveEventSequence = 0;
+    this.turnEventSequence = 0;
+    this.completionEventSequence = 0;
     this.clock = new ChessClock(
       setup.timeControl.initialMinutes,
       setup.timeControl.incrementSeconds,
@@ -175,9 +187,16 @@ export default class Game {
       return false;
     }
 
+    const skippedColor = this.currentTurn;
     this.selectedSquare = null;
     this.possibleMoves = [];
     this.clock.stop();
+    this.eventSink.onTurnEnded({
+      eventId: ++this.turnEventSequence,
+      color: skippedColor,
+      movesUsed: 0,
+      reason: "skipped",
+    });
     this.startNextTurn();
 
     return true;
@@ -317,6 +336,8 @@ export default class Game {
     this.moveHistory.recordMove(move, piece.color, movedPieceType);
     this.movesUsedThisTurn++;
     this.eventSink.onMove({
+      eventId: ++this.moveEventSequence,
+      pieceId: piece.id,
       color: piece.color,
       pieceType: movedPieceType,
       isCapture: move.isCapture,
@@ -328,8 +349,10 @@ export default class Game {
       this.resultReason = "king-captured";
       this.clock.stop();
       this.eventSink.onGameCompleted({
+        eventId: ++this.completionEventSequence,
         winner: this.winner,
         reason: this.resultReason,
+        finalPieceCounts: this.getFinalPieceCounts(),
       });
     }
 
@@ -347,6 +370,12 @@ export default class Game {
         this.currentTurn,
         this.movesUsedThisTurn
       );
+      this.eventSink.onTurnEnded({
+        eventId: ++this.turnEventSequence,
+        color: this.currentTurn,
+        movesUsed: this.movesUsedThisTurn,
+        reason: "moves-exhausted",
+      });
       this.clock.completeTurn(this.currentTurn);
 
       if (this.winner) {
@@ -367,7 +396,7 @@ export default class Game {
 
     this.currentRoll = roll;
     this.turnRights = rights;
-    this.eventSink.onRoll(this.currentTurn, roll);
+    this.eventSink.onRoll(this.currentTurn, roll, ++this.rollEventSequence);
   }
 
   private getTurnResolution(): TurnResolution {
@@ -396,8 +425,10 @@ export default class Game {
     this.selectedSquare = null;
     this.possibleMoves = [];
     this.eventSink.onGameCompleted({
+      eventId: ++this.completionEventSequence,
       winner: this.winner,
       reason: this.resultReason,
+      finalPieceCounts: this.getFinalPieceCounts(),
     });
     this.notifyListeners();
   }
@@ -406,6 +437,16 @@ export default class Game {
     for (const listener of this.listeners) {
       listener();
     }
+  }
+
+  private getFinalPieceCounts(): Readonly<Record<PieceColor, number>> {
+    let white = 0;
+    let black = 0;
+    for (const piece of this.board.squares.flat()) {
+      if (piece?.color === "white") white++;
+      else if (piece?.color === "black") black++;
+    }
+    return Object.freeze({ white, black });
   }
 
 }
