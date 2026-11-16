@@ -79,6 +79,16 @@ interface DeferredProgressionOperations {
   readonly operations: readonly ProgressionOperation[];
 }
 
+interface SyncContext {
+  readonly generation: number;
+  readonly playerId: string;
+}
+
+interface ActiveFlush {
+  readonly context: SyncContext;
+  promise: Promise<void>;
+}
+
 const EMPTY_STATE: PlayerSyncState = { schemaVersion: 1, pending: [], conflict: false };
 
 function hasCounters(counters: PieceCounters): boolean {
@@ -156,7 +166,9 @@ export class PlayerSyncCoordinator {
   private readonly storage?: SyncStorage;
   private connected = false;
   private initializing?: Promise<void>;
-  private flushing?: Promise<void>;
+  private flushing?: ActiveFlush;
+  private authenticationScope?: string;
+  private authGeneration = 0;
   private memoryState: PlayerSyncState = EMPTY_STATE;
   private migrationSuspended = false;
   private canonicalProfileStatus: CanonicalProfileStatus = "not-applicable";
@@ -208,6 +220,7 @@ export class PlayerSyncCoordinator {
   }
 
   public resetAfterAuthenticationSignOut(): void {
+    this.invalidateAuthenticationScope();
     const state = this.readState();
     const deferredPending = [...(state.deferredPending ?? [])];
     if (state.cloudPlayerId && state.pending.length > 0) {
@@ -236,11 +249,13 @@ export class PlayerSyncCoordinator {
     this.canonicalMultiplayerRating = null;
     this.canonicalMultiplayerStatistics = null;
     this.canonicalRouletteStatistics = null;
-    this.initializing = undefined;
-    this.flushing = undefined;
   }
 
   public async handleAuthentication(session: AuthenticationSession): Promise<void> {
+    const nextScope = this.resolveAuthenticationScope(session);
+    if (nextScope !== this.authenticationScope) {
+      this.invalidateAuthenticationScope(nextScope);
+    }
     this.accountAuthenticated = session.state.status === "authenticated";
     this.connected = session.state.status === "authenticated"
       || (session.state.status === "guest" && session.state.persistence === "cloud");
@@ -250,7 +265,11 @@ export class PlayerSyncCoordinator {
     }
     this.canonicalProfileStatus = "loading";
     if (!this.initializing) {
-      this.initializing = this.initialize().finally(() => { this.initializing = undefined; });
+      const generation = this.authGeneration;
+      const initialization = this.initialize(generation).finally(() => {
+        if (this.initializing === initialization) this.initializing = undefined;
+      });
+      this.initializing = initialization;
     }
     await this.initializing;
   }
@@ -272,12 +291,16 @@ export class PlayerSyncCoordinator {
 
   public async reconnect(): Promise<void> {
     if (!this.connected) return;
-    const activeFlush = this.flushing;
+    const generation = this.authGeneration;
+    const activeFlush = this.flushing?.promise;
     if (activeFlush) await activeFlush;
+    if (!this.isGenerationCurrent(generation)) return;
     await this.flushPending();
+    if (!this.isGenerationCurrent(generation)) return;
     const state = this.readState();
     if (!state.cloudPlayerId || state.conflict || state.pending.length > 0) return;
     const canonical = await this.remote.loadCurrent();
+    if (!this.isContextCurrent({ generation, playerId: state.cloudPlayerId })) return;
     if (canonical.playerId !== state.cloudPlayerId) {
       this.canonicalProfileStatus = "unavailable";
       return;
@@ -290,10 +313,20 @@ export class PlayerSyncCoordinator {
   }
 
   public async flushPending(): Promise<void> {
-    if (!this.flushing) {
-      this.flushing = this.flush().finally(() => { this.flushing = undefined; });
+    const state = this.readState();
+    if (!state.cloudPlayerId || state.conflict || !this.connected) return;
+    const context = { generation: this.authGeneration, playerId: state.cloudPlayerId };
+    if (!this.flushing || !this.sameContext(this.flushing.context, context)) {
+      const active: ActiveFlush = {
+        context,
+        promise: Promise.resolve(),
+      };
+      active.promise = this.flush(context).finally(() => {
+        if (this.flushing === active) this.flushing = undefined;
+      });
+      this.flushing = active;
     }
-    await this.flushing;
+    await this.flushing.promise;
   }
 
   public async prepareForAccountMigration(): Promise<boolean> {
@@ -310,8 +343,12 @@ export class PlayerSyncCoordinator {
     if (state.pending.length > 0) {
       throw new Error("Pending progression must be synchronized before account migration.");
     }
-    this.initializing = undefined;
+    this.invalidateAuthenticationScope(this.authenticationScope);
+    const generation = this.authGeneration;
     const canonical = await this.remote.loadCurrent();
+    if (!this.isGenerationCurrent(generation)) {
+      throw new Error("Authentication changed during canonical profile adoption.");
+    }
     if (expectedPlayerId && canonical.playerId !== expectedPlayerId) {
       throw new Error("Cloud canonical profile does not match the migration survivor.");
     }
@@ -351,9 +388,10 @@ export class PlayerSyncCoordinator {
     return canonical;
   }
 
-  private async initialize(): Promise<void> {
+  private async initialize(generation: number): Promise<void> {
     try {
       const cloud = await this.remote.loadCurrent();
+      if (!this.isGenerationCurrent(generation)) return;
       const local = this.local.getProfile();
       let state = this.readState();
       const deferred = state.deferredPending?.find((entry) => entry.playerId === cloud.playerId);
@@ -387,6 +425,7 @@ export class PlayerSyncCoordinator {
       if (!knownCloud && !isMeaningfulCloudProfile(cloud) && isMeaningfulLocalProfile(local)
           && bootstrapOwnsCanonicalIdentity) {
         canonical = await this.remote.bootstrap(local);
+        if (!this.isGenerationCurrent(generation)) return;
       }
       this.writeState({
         ...state,
@@ -399,34 +438,72 @@ export class PlayerSyncCoordinator {
       this.canonicalMultiplayerRating = canonical.multiplayerRating;
       this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
       this.canonicalRouletteStatistics = canonical.rouletteStatistics;
-      if (this.readState().pending.length > 0) await this.flushPending();
-      else this.local.saveProfile(canonical.profile);
+      if (this.readState().pending.length > 0) {
+        await this.flushPending();
+        if (!this.isGenerationCurrent(generation)) return;
+      } else {
+        this.local.saveProfile(canonical.profile);
+      }
       this.canonicalProfileStatus = "ready";
     } catch {
+      if (!this.isGenerationCurrent(generation)) return;
       this.canonicalProfileStatus = "unavailable";
       // Local profile remains usable; reconnect or the next match retries safely.
     }
   }
 
-  private async flush(): Promise<void> {
+  private async flush(context: SyncContext): Promise<void> {
     let state = this.readState();
-    if (!state.cloudPlayerId || state.conflict) return;
+    if (!this.isContextCurrent(context) || state.conflict) return;
     let canonical: CloudProfileSnapshot | undefined;
     for (const operation of state.pending) {
       try {
+        if (!this.isContextCurrent(context)) return;
         canonical = await this.remote.applyOperation(operation);
+        if (!this.isContextCurrent(context)) return;
         state = this.readState();
         this.writeState({ ...state, pending: state.pending.filter((item) => item.operationId !== operation.operationId) });
       } catch {
         return;
       }
     }
-    if (canonical) {
+    if (canonical && this.isContextCurrent(context)) {
       this.local.saveProfile(canonical.profile);
       this.canonicalMultiplayerRating = canonical.multiplayerRating;
       this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
       this.canonicalRouletteStatistics = canonical.rouletteStatistics;
     }
+  }
+
+  private resolveAuthenticationScope(session: AuthenticationSession): string | undefined {
+    if (session.state.status === "authenticated") {
+      return `account:${session.state.account.accountId}`;
+    }
+    if (session.state.status === "guest" && session.state.persistence === "cloud") {
+      return `guest:${session.state.guestSessionId}`;
+    }
+    return undefined;
+  }
+
+  private invalidateAuthenticationScope(nextScope?: string): void {
+    this.authGeneration += 1;
+    this.authenticationScope = nextScope;
+    this.initializing = undefined;
+    this.flushing = undefined;
+  }
+
+  private isGenerationCurrent(generation: number): boolean {
+    return this.connected && generation === this.authGeneration;
+  }
+
+  private isContextCurrent(context: SyncContext): boolean {
+    const state = this.readState();
+    return this.isGenerationCurrent(context.generation)
+      && state.cloudPlayerId === context.playerId;
+  }
+
+  private sameContext(left: SyncContext, right: SyncContext): boolean {
+    return left.generation === right.generation && left.playerId === right.playerId;
   }
 
   private readState(): PlayerSyncState {

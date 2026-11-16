@@ -46,6 +46,28 @@ function accountSession() {
   } };
 }
 
+function accountSessionFor(accountId: string) {
+  return { schemaVersion: AUTH_SESSION_SCHEMA_VERSION, state: {
+    status: "authenticated" as const,
+    account: { accountId: toAccountId(accountId), provider: "google" as const },
+  } };
+}
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+  return { promise, resolve };
+}
+
+function canonicalFor(playerId: string, totalXp = 0): CloudProfileSnapshot {
+  const profile = createDefaultPlayerProfile();
+  profile.playerId = playerId;
+  profile.totalXp = totalXp;
+  return { ...cloud(profile), playerId };
+}
+
 describe("PlayerSyncCoordinator", () => {
   it("exposes only the latest canonical server-backed multiplayer rating", async () => {
     const localStorage = storage();
@@ -271,6 +293,153 @@ describe("PlayerSyncCoordinator", () => {
       playerId: oldCanonical.playerId,
       operations: [expect.objectContaining({ operationId: expect.any(String) })],
     }]);
+  });
+
+  it("invalidates an in-flight legacy flush on account switch without dispatching later operations", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const accountA = canonicalFor("player-a", 100);
+    const accountB = canonicalFor("player-b", 20);
+    let current = accountA;
+    const firstResponse = deferred<CloudProfileSnapshot>();
+    const first = { operationId: "legacy-a-1", payload: { xpDelta: 10 } };
+    const second = { operationId: "legacy-a-2", payload: { xpDelta: 20 } };
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => structuredClone(current)), bootstrap: vi.fn(),
+      applyOperation: vi.fn(() => firstResponse.promise), renameCurrentPlayer: vi.fn(),
+    };
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+    await sync.handleAuthentication(accountSessionFor("account-a"));
+    localStorage.setItem(PLAYER_SYNC_STORAGE_KEY, JSON.stringify({
+      schemaVersion: 1, cloudPlayerId: "player-a", pending: [first, second], conflict: false,
+    }));
+
+    const staleFlush = sync.flushPending();
+    await vi.waitFor(() => expect(remote.applyOperation).toHaveBeenCalledOnce());
+    sync.resetAfterAuthenticationSignOut();
+    current = accountB;
+    await sync.handleAuthentication(accountSessionFor("account-b"));
+    const profileBeforeStaleResponse = structuredClone(repository.getProfile());
+    firstResponse.resolve(canonicalFor("player-a", 110));
+    await staleFlush;
+
+    expect(remote.applyOperation).toHaveBeenCalledTimes(1);
+    expect(repository.getProfile()).toEqual(profileBeforeStaleResponse);
+    expect(JSON.parse(localStorage.getItem(PLAYER_SYNC_STORAGE_KEY)!)).toMatchObject({
+      cloudPlayerId: "player-b",
+      pending: [],
+      deferredPending: [{ playerId: "player-a", operations: [first, second] }],
+    });
+  });
+
+  it("does not let a stale finally clear or duplicate the new generation flush", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const accountA = canonicalFor("player-a", 100);
+    const accountB = canonicalFor("player-b", 200);
+    let current = accountA;
+    const responseA = deferred<CloudProfileSnapshot>();
+    const responseB = deferred<CloudProfileSnapshot>();
+    const operationA = { operationId: "operation-a", payload: { xpDelta: 10 } };
+    const operationB = { operationId: "operation-b", payload: { xpDelta: 15 } };
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => structuredClone(current)), bootstrap: vi.fn(),
+      applyOperation: vi.fn((operation) => operation.operationId === operationA.operationId
+        ? responseA.promise : responseB.promise),
+      renameCurrentPlayer: vi.fn(),
+    };
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+    await sync.handleAuthentication(accountSessionFor("account-a"));
+    localStorage.setItem(PLAYER_SYNC_STORAGE_KEY, JSON.stringify({
+      schemaVersion: 1, cloudPlayerId: "player-a", pending: [operationA], conflict: false,
+    }));
+    const staleFlush = sync.flushPending();
+    await vi.waitFor(() => expect(remote.applyOperation).toHaveBeenCalledTimes(1));
+
+    sync.resetAfterAuthenticationSignOut();
+    current = accountB;
+    await sync.handleAuthentication(accountSessionFor("account-b"));
+    const switched = JSON.parse(localStorage.getItem(PLAYER_SYNC_STORAGE_KEY)!);
+    localStorage.setItem(PLAYER_SYNC_STORAGE_KEY, JSON.stringify({
+      ...switched, cloudPlayerId: "player-b", pending: [operationB],
+    }));
+    const currentFlush = sync.flushPending();
+    await vi.waitFor(() => expect(remote.applyOperation).toHaveBeenCalledTimes(2));
+    responseA.resolve(canonicalFor("player-a", 110));
+    await staleFlush;
+
+    const deduplicatedFlush = sync.flushPending();
+    expect(remote.applyOperation).toHaveBeenCalledTimes(2);
+    responseB.resolve(canonicalFor("player-b", 215));
+    await Promise.all([currentFlush, deduplicatedFlush]);
+    expect(remote.applyOperation).toHaveBeenCalledTimes(2);
+    expect(repository.getProfile()).toMatchObject({ playerId: "player-b", totalXp: 215 });
+    expect(JSON.parse(localStorage.getItem(PLAYER_SYNC_STORAGE_KEY)!).pending).toEqual([]);
+  });
+
+  it("preserves a response-lost operation for an idempotent retry by the same owner", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const canonical = canonicalFor("player-a", 100);
+    const operation = { operationId: "committed-response-lost", payload: { xpDelta: 25 } };
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => structuredClone(canonical)), bootstrap: vi.fn(),
+      applyOperation: vi.fn()
+        .mockRejectedValueOnce(new Error("response lost after commit"))
+        .mockResolvedValue(canonicalFor("player-a", 125)),
+      renameCurrentPlayer: vi.fn(),
+    };
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+    await sync.handleAuthentication(accountSessionFor("account-a"));
+    localStorage.setItem(PLAYER_SYNC_STORAGE_KEY, JSON.stringify({
+      schemaVersion: 1, cloudPlayerId: "player-a", pending: [operation], conflict: false,
+    }));
+    await sync.flushPending();
+    expect(JSON.parse(localStorage.getItem(PLAYER_SYNC_STORAGE_KEY)!).pending).toEqual([operation]);
+
+    sync.resetAfterAuthenticationSignOut();
+    await sync.handleAuthentication(accountSessionFor("account-a"));
+    expect(remote.applyOperation).toHaveBeenCalledTimes(2);
+    expect(remote.applyOperation).toHaveBeenNthCalledWith(1, operation);
+    expect(remote.applyOperation).toHaveBeenNthCalledWith(2, operation);
+    expect(JSON.parse(localStorage.getItem(PLAYER_SYNC_STORAGE_KEY)!).pending).toEqual([]);
+  });
+
+  it("treats an old A response as stale after an A to B to A generation cycle", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const playerA = canonicalFor("player-a", 100);
+    const playerB = canonicalFor("player-b", 200);
+    let current = playerA;
+    const oldResponse = deferred<CloudProfileSnapshot>();
+    const operation = { operationId: "old-a-operation", payload: { xpDelta: 25 } };
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => structuredClone(current)), bootstrap: vi.fn(),
+      applyOperation: vi.fn()
+        .mockImplementationOnce(() => oldResponse.promise)
+        .mockResolvedValue(canonicalFor("player-a", 130)),
+      renameCurrentPlayer: vi.fn(),
+    };
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+    await sync.handleAuthentication(accountSessionFor("account-a"));
+    localStorage.setItem(PLAYER_SYNC_STORAGE_KEY, JSON.stringify({
+      schemaVersion: 1, cloudPlayerId: "player-a", pending: [operation], conflict: false,
+    }));
+    const staleFlush = sync.flushPending();
+    await vi.waitFor(() => expect(remote.applyOperation).toHaveBeenCalledOnce());
+    sync.resetAfterAuthenticationSignOut();
+    current = playerB;
+    await sync.handleAuthentication(accountSessionFor("account-b"));
+    sync.resetAfterAuthenticationSignOut();
+    current = playerA;
+    await sync.handleAuthentication(accountSessionFor("account-a"));
+    const currentProfile = structuredClone(repository.getProfile());
+
+    oldResponse.resolve(canonicalFor("player-a", 125));
+    await staleFlush;
+    expect(repository.getProfile()).toEqual(currentProfile);
+    expect(repository.getProfile()).toMatchObject({ playerId: "player-a", totalXp: 130 });
+    expect(JSON.parse(localStorage.getItem(PLAYER_SYNC_STORAGE_KEY)!).pending).toEqual([]);
   });
 
   it("keeps a failed operation pending and removes it after a successful replay", async () => {
