@@ -346,7 +346,7 @@ export class PlayerSyncCoordinator {
     this.invalidateAuthenticationScope(this.authenticationScope);
     const generation = this.authGeneration;
     const canonical = await this.remote.loadCurrent();
-    if (!this.isGenerationCurrent(generation)) {
+    if (generation !== this.authGeneration) {
       throw new Error("Authentication changed during canonical profile adoption.");
     }
     if (expectedPlayerId && canonical.playerId !== expectedPlayerId) {

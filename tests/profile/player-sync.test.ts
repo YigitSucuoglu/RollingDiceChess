@@ -500,6 +500,22 @@ describe("PlayerSyncCoordinator", () => {
     expect(sync.isCloudCanonical()).toBe(true);
   });
 
+  it("adopts a resolved migration survivor before normal auth initialization", async () => {
+    const localStorage = storage();
+    const repository = new LocalStoragePlayerProfileRepository(localStorage);
+    const canonical = canonicalFor("google-player", 70);
+    const remote: CloudPlayerSyncPort = {
+      loadCurrent: vi.fn(async () => structuredClone(canonical)),
+      bootstrap: vi.fn(), applyOperation: vi.fn(), renameCurrentPlayer: vi.fn(),
+    };
+    const sync = new PlayerSyncCoordinator(repository, remote, localStorage);
+
+    await expect(sync.adoptCanonicalAfterAccountMigration(canonical.playerId))
+      .resolves.toMatchObject({ playerId: canonical.playerId });
+    expect(repository.getProfile()).toMatchObject({ playerId: "google-player", totalXp: 70 });
+    expect(sync.getCanonicalProfileStatus()).toBe("ready");
+  });
+
   for (const scenario of [
     { name: "Keep Google", survivorId: "google-b", survivorXp: 70, discriminator: "7K2M9" },
     { name: "Keep Guest", survivorId: "guest-a", survivorXp: 50, discriminator: "19F1P" },
