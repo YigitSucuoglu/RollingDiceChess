@@ -105,6 +105,14 @@ export class LocalStoragePlayerProfileRepository
     this.storage = storage;
   }
 
+  public getStorage(): StorageAdapter {
+    return this.storage;
+  }
+
+  public saveProfileDurably(profile: PlayerProfile): void {
+    this.storage.setItem(PLAYER_PROFILE_STORAGE_KEY, JSON.stringify(profile));
+  }
+
   public getProfile(): PlayerProfile {
     const fallback = createDefaultPlayerProfile();
 

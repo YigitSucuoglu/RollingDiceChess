@@ -2,6 +2,8 @@ import type { AuthenticationSession } from "../application/auth/AuthenticationCo
 import type { SingleMatchAchievementSnapshot } from "../domain/achievements/AchievementContracts";
 import { PROFILE_PIECE_ORDER, type PieceCounters, type PlayerProfile } from "./PlayerProfile";
 import type { PlayerProfileRepository } from "./PlayerProfileRepository";
+import { CompletionJournal, type CompletionEntry } from "./CompletionJournal";
+import { LocalStoragePlayerProfileRepository } from "./LocalStoragePlayerProfileRepository";
 
 export const PLAYER_SYNC_STORAGE_KEY = "roulettechess.player-sync.v1";
 
@@ -164,11 +166,13 @@ export class PlayerSyncCoordinator {
   private readonly local: PlayerProfileRepository;
   private readonly remote: CloudPlayerSyncPort;
   private readonly storage?: SyncStorage;
+  private readonly journal?: CompletionJournal;
   private connected = false;
   private initializing?: Promise<void>;
   private flushing?: ActiveFlush;
   private authenticationScope?: string;
   private authGeneration = 0;
+  private verifiedPlayerId?: string;
   private memoryState: PlayerSyncState = EMPTY_STATE;
   private migrationSuspended = false;
   private canonicalProfileStatus: CanonicalProfileStatus = "not-applicable";
@@ -181,6 +185,9 @@ export class PlayerSyncCoordinator {
     this.local = local;
     this.remote = remote;
     this.storage = storage;
+    const durableStorage = storage ?? (local instanceof LocalStoragePlayerProfileRepository
+      ? local.getStorage() : undefined);
+    if (durableStorage) this.journal = new CompletionJournal(durableStorage);
   }
 
   public isCloudCanonical(): boolean {
@@ -289,6 +296,46 @@ export class PlayerSyncCoordinator {
     if (this.connected) void this.flushPending();
   }
 
+  public recordDurableCompletedMatch(
+    before: PlayerProfile,
+    after: PlayerProfile,
+    matchId: string,
+    singleMatch: SingleMatchAchievementSnapshot,
+  ): boolean {
+    const state = this.readState();
+    if (this.migrationSuspended) return false;
+    if (this.connected && (!state.cloudPlayerId || state.conflict)) {
+      throw new Error("Canonical completion owner is not available yet.");
+    }
+    if (!state.cloudPlayerId || state.conflict) return false;
+    if (this.verifiedPlayerId !== state.cloudPlayerId) {
+      throw new Error("Completion owner has not been verified for this authentication session.");
+    }
+    if (!this.journal || !(this.local instanceof LocalStoragePlayerProfileRepository)) {
+      throw new Error("Durable completion storage is unavailable.");
+    }
+    if (after.playerId !== state.cloudPlayerId || before.playerId !== state.cloudPlayerId
+        || singleMatch.playerId !== state.cloudPlayerId || singleMatch.matchId !== matchId) {
+      throw new Error("Completion owner or match identity does not match the canonical player.");
+    }
+    const operation = createProgressionOperation(before, after, crypto.randomUUID(), singleMatch);
+    if (!operation) throw new Error("Completed match cannot produce a valid cloud operation.");
+    const entry: CompletionEntry = {
+      schemaVersion: 1, matchId, ownerPlayerId: state.cloudPlayerId,
+      operation, profile: structuredClone(after), acknowledged: false,
+      result: { won: singleMatch.winner === singleMatch.playerColor,
+        terminationReason: singleMatch.terminationReason as "king-captured" | "timeout",
+        xpAwarded: after.totalXp - before.totalXp },
+    };
+    const durableEntry = this.journal.append(entry);
+    this.local.saveProfileDurably(after);
+    this.writeStateDurably({ ...state, pending: state.pending.some((item) =>
+      item.operationId === durableEntry.operation.operationId)
+      ? state.pending : [...state.pending, durableEntry.operation] });
+    if (this.connected) void this.flushPending();
+    return true;
+  }
+
   public async reconnect(): Promise<void> {
     if (!this.connected) return;
     const generation = this.authGeneration;
@@ -314,7 +361,8 @@ export class PlayerSyncCoordinator {
 
   public async flushPending(): Promise<void> {
     const state = this.readState();
-    if (!state.cloudPlayerId || state.conflict || !this.connected) return;
+    if (!state.cloudPlayerId || state.conflict || !this.connected
+        || this.verifiedPlayerId !== state.cloudPlayerId) return;
     const context = { generation: this.authGeneration, playerId: state.cloudPlayerId };
     if (!this.flushing || !this.sameContext(this.flushing.context, context)) {
       const active: ActiveFlush = {
@@ -364,6 +412,7 @@ export class PlayerSyncCoordinator {
     this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
     this.canonicalRouletteStatistics = canonical.rouletteStatistics;
     this.connected = true;
+    this.verifiedPlayerId = canonical.playerId;
     this.migrationSuspended = false;
     this.canonicalProfileStatus = "ready";
     return canonical;
@@ -422,8 +471,10 @@ export class PlayerSyncCoordinator {
       let canonical = cloud;
       const bootstrapOwnsCanonicalIdentity = !this.accountAuthenticated
         || local.playerId === cloud.playerId;
+      const hasUnacknowledgedCompletion = this.journal?.read().some((entry) =>
+        entry.ownerPlayerId === cloud.playerId && !entry.acknowledged) ?? false;
       if (!knownCloud && !isMeaningfulCloudProfile(cloud) && isMeaningfulLocalProfile(local)
-          && bootstrapOwnsCanonicalIdentity) {
+          && bootstrapOwnsCanonicalIdentity && !hasUnacknowledgedCompletion) {
         canonical = await this.remote.bootstrap(local);
         if (!this.isGenerationCurrent(generation)) return;
       }
@@ -436,8 +487,10 @@ export class PlayerSyncCoordinator {
         conflict: false,
       });
       this.canonicalMultiplayerRating = canonical.multiplayerRating;
+      this.verifiedPlayerId = canonical.playerId;
       this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
       this.canonicalRouletteStatistics = canonical.rouletteStatistics;
+      this.recoverCompletions(canonical);
       if (this.readState().pending.length > 0) {
         await this.flushPending();
         if (!this.isGenerationCurrent(generation)) return;
@@ -461,14 +514,17 @@ export class PlayerSyncCoordinator {
         if (!this.isContextCurrent(context)) return;
         canonical = await this.remote.applyOperation(operation);
         if (!this.isContextCurrent(context)) return;
+        if (canonical.playerId !== context.playerId) return;
+        this.journal?.acknowledge(operation.operationId, context.playerId);
         state = this.readState();
-        this.writeState({ ...state, pending: state.pending.filter((item) => item.operationId !== operation.operationId) });
+        this.writeStateDurably({ ...state, pending: state.pending.filter((item) => item.operationId !== operation.operationId) });
+        this.journal?.pruneAcknowledged(context.playerId);
       } catch {
         return;
       }
     }
     if (canonical && this.isContextCurrent(context)) {
-      this.local.saveProfile(canonical.profile);
+      if (this.readState().pending.length === 0) this.local.saveProfile(canonical.profile);
       this.canonicalMultiplayerRating = canonical.multiplayerRating;
       this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
       this.canonicalRouletteStatistics = canonical.rouletteStatistics;
@@ -490,6 +546,7 @@ export class PlayerSyncCoordinator {
     this.authenticationScope = nextScope;
     this.initializing = undefined;
     this.flushing = undefined;
+    this.verifiedPlayerId = undefined;
   }
 
   private isGenerationCurrent(generation: number): boolean {
@@ -504,6 +561,34 @@ export class PlayerSyncCoordinator {
 
   private sameContext(left: SyncContext, right: SyncContext): boolean {
     return left.generation === right.generation && left.playerId === right.playerId;
+  }
+
+  private recoverCompletions(cloud: CloudProfileSnapshot): void {
+    if (!this.journal) return;
+    const entries = this.journal.read().filter((entry) =>
+      entry.ownerPlayerId === cloud.playerId && !entry.acknowledged);
+    if (entries.length === 0) return;
+    const state = this.readState();
+    if (state.cloudPlayerId !== cloud.playerId || state.conflict) return;
+    const pending = [...state.pending];
+    for (const entry of entries) {
+      if (!pending.some((operation) => operation.operationId === entry.operation.operationId)) {
+        pending.push(entry.operation);
+      }
+    }
+    this.writeStateDurably({ ...state, pending });
+    const current = this.local.getProfile();
+    if (current.playerId !== cloud.playerId) return;
+    for (const entry of entries) {
+      const profile = this.local.getProfile();
+      if (profile.statistics.gamesPlayed < entry.profile.statistics.gamesPlayed
+          && cloud.profile.statistics.gamesPlayed < entry.profile.statistics.gamesPlayed) {
+        if (!(this.local instanceof LocalStoragePlayerProfileRepository)) {
+          throw new Error("Durable profile recovery is unavailable.");
+        }
+        this.local.saveProfileDurably(entry.profile);
+      }
+    }
   }
 
   private readState(): PlayerSyncState {
@@ -526,5 +611,11 @@ export class PlayerSyncCoordinator {
   private writeState(state: PlayerSyncState): void {
     this.memoryState = state;
     try { this.storage?.setItem(PLAYER_SYNC_STORAGE_KEY, JSON.stringify(state)); } catch { /* The in-memory queue still preserves this runtime. */ }
+  }
+
+  private writeStateDurably(state: PlayerSyncState): void {
+    if (!this.storage) throw new Error("Durable sync storage is unavailable.");
+    this.storage.setItem(PLAYER_SYNC_STORAGE_KEY, JSON.stringify(state));
+    this.memoryState = state;
   }
 }

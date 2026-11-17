@@ -468,11 +468,19 @@ export class PlayerProfileService {
       ...profile.processedMatchIds,
       session.matchId,
     ].slice(-MAX_PROCESSED_MATCH_IDS);
-    this.repository.saveProfile(profile);
     if (!session.achievementSnapshot) {
       throw new Error("Completed match achievement snapshot is unavailable.");
     }
-    this.sync?.recordCompletedMatch(profileBeforeMatch, profile, session.achievementSnapshot);
+    const durableCloudCompletion = this.sync?.recordDurableCompletedMatch(
+      profileBeforeMatch, profile, session.matchId, session.achievementSnapshot,
+    ) ?? false;
+    if (!durableCloudCompletion) {
+      if (this.repository instanceof LocalStoragePlayerProfileRepository) {
+        this.repository.saveProfileDurably(profile);
+      } else {
+        this.repository.saveProfile(profile);
+      }
+    }
     session.completionResult = createMatchXpProgressionResult(
       previousTotalXp,
       reward.finalXp
