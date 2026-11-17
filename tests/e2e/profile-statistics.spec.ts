@@ -55,6 +55,26 @@ test("Profile defaults to Singleplayer and exposes canonical Multiplayer statist
   assertNoErrors();
 });
 
+test("desktop statistics views use the same available width", async ({ page, assertNoErrors }) => {
+  await useAuthenticationFixture(page, "account");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/profile");
+  const single = page.locator('[data-statistics-view="singleplayer"]');
+  const singleWidth = (await single.boundingBox())!.width;
+  const singleCardWidth = (await single.locator(".profile-stat-card").first().boundingBox())!.width;
+  await page.getByRole("button", { name: "Multiplayer", exact: true }).click();
+  const multi = page.locator('[data-statistics-view="multiplayer"]');
+  const multiWidth = (await multi.boundingBox())!.width;
+  const rankedCardWidth = (await multi.locator(".profile-multiplayer-ranked-grid .profile-stat-card").first().boundingBox())!.width;
+  const activity = multi.locator(".profile-multiplayer-activity-grid");
+  const activityBox = (await activity.boundingBox())!;
+  expect(Math.abs(singleWidth - multiWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs(singleCardWidth - rankedCardWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs(activityBox.width - multiWidth)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  assertNoErrors();
+});
+
 test("zero-state Multiplayer statistics remain explicit and finite", async ({ page, assertNoErrors }) => {
   await useCloudGuestFixture(page);
   await page.goto("/profile");

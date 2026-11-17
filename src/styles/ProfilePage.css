@@ -432,8 +432,9 @@
   margin-bottom: 1rem;
 }
 
-.profile-multiplayer-statistics {
-  max-width: 60rem;
+.profile-statistics-view {
+  min-width: 0;
+  width: 100%;
 }
 
 .profile-multiplayer-group > h3 {

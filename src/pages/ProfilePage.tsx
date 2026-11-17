@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore, type CSSProperties, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import playerProfileService, { formatPlayTime } from "../profile/PlayerProfileService";
@@ -9,6 +9,7 @@ import accountMigrationService from "../application/accounts/AccountMigrationSer
 import type { AccountMigrationState, ProfileConflictResolution } from "../application/accounts/AccountMigration";
 import GoogleMark from "../components/GoogleMark/GoogleMark";
 import { UsernameValidationError } from "../application/players/PlayerContracts";
+import { createAchievementReadService } from "../bootstrap/Achievements";
 
 const ACHIEVEMENT_PLACEHOLDERS = [
   "firstVictory", "hundredGames", "captureHundredKings", "tripleQueenRoll",
@@ -53,7 +54,17 @@ function RouletteStatCard({
 function ProfilePage() {
   const { t, i18n } = useTranslation();
   const language: AppLanguage = i18n.resolvedLanguage === "tr" ? "tr" : "en";
-  const { authentication, session } = useAuthentication();
+  const { authentication, initialized, session } = useAuthentication();
+  const achievementReader = useMemo(() => createAchievementReadService(), []);
+  const achievementState = useSyncExternalStore(
+    (listener) => achievementReader.subscribe(listener),
+    () => achievementReader.getState(),
+  );
+  const achievementOwner = initialized && session.state.status === "authenticated"
+    ? `account:${session.state.account.accountId}`
+    : initialized && session.state.status === "guest" && session.state.persistence === "cloud"
+      ? `guest:${session.state.guestSessionId}` : null;
+  const localOnlyAchievements = initialized && session.state.status === "guest" && session.state.persistence === "local";
   const [, setProfileRevision] = useState(0);
   const profile = playerProfileService.getViewModel(language);
   const [authPending, setAuthPending] = useState(false);
@@ -102,6 +113,12 @@ function ProfilePage() {
   };
 
   useEffect(() => accountMigrationService.subscribe(setMigration), []);
+
+  useEffect(() => {
+    achievementReader.setOwner(achievementOwner, localOnlyAchievements);
+    if (achievementOwner) void achievementReader.load();
+    return () => achievementReader.setOwner(null);
+  }, [achievementReader, achievementOwner, localOnlyAchievements]);
 
   useEffect(() => {
     const unsubscribe = playerProfileService.subscribe(() => setProfileRevision((value) => value + 1));
@@ -425,6 +442,7 @@ function ProfilePage() {
         <section
           aria-labelledby="achievements-title"
           className="profile-section"
+          data-achievement-read-state={achievementState.status}
         >
           <header className="profile-section-heading">
             <p>{t("profile.futureMilestones")}</p>
