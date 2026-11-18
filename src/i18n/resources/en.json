@@ -32,7 +32,7 @@
     "connecting": "Connecting…",
     "failure": "Sign-in could not be completed. Try again or continue as Guest.",
     "guestNote": "Guest progress stays on this device.",
-    "account": "Account",
+    "account": "Account", "accountInfo": "Account information",
     "guest": "Guest",
     "signedInWithGoogle": "Signed in with Google",
     "guestProfile": "Progress and statistics are stored locally on this device.",

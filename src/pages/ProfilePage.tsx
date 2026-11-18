@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useSyncExternalStore, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import playerProfileService, { formatPlayTime } from "../profile/PlayerProfileService";
@@ -67,6 +67,9 @@ function ProfilePage() {
   const achievementSnapshot = achievementOwner && playerProfileService.getCanonicalProfileStatus() === "ready"
     ? playerProfileService.getCanonicalAchievementSnapshot() : null;
   const [authPending, setAuthPending] = useState(false);
+  const [accountInfoMode, setAccountInfoMode] = useState<"closed" | "hover" | "pinned">("closed");
+  const accountInfoRef = useRef<HTMLDivElement>(null);
+  const accountInfoButtonRef = useRef<HTMLButtonElement>(null);
   const [statisticsView, setStatisticsView] = useState<StatisticsView>("singleplayer");
   const [renaming, setRenaming] = useState(false);
   const [renamePending, setRenamePending] = useState(false);
@@ -112,6 +115,24 @@ function ProfilePage() {
   };
 
   useEffect(() => accountMigrationService.subscribe(setMigration), []);
+
+  useEffect(() => {
+    if (accountInfoMode === "closed") return;
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (!accountInfoRef.current?.contains(event.target as Node)) setAccountInfoMode("closed");
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setAccountInfoMode("closed");
+      accountInfoButtonRef.current?.focus();
+    };
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePointer);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [accountInfoMode]);
 
   useEffect(() => {
     achievementReader.setOwner(achievementOwner, localOnlyAchievements);
@@ -165,42 +186,6 @@ function ProfilePage() {
           <h1>{t("profile.title")}</h1>
         </header>
 
-        <section aria-labelledby="profile-account-title" className="profile-account">
-          <div>
-            <p className="profile-overline">{t("auth.account")}</p>
-            <h2 id="profile-account-title">
-              {migrationUnresolved
-                ? t("auth.googleSignInSuccessful")
-                : authenticated ? t("auth.signedInWithGoogle") : t("auth.guest")}
-            </h2>
-            <p>{migrationUnresolved
-              ? t("auth.migrationPendingDescription")
-              : authenticated ? t("auth.cloudProfile")
-              : session.state.status === "guest" && session.state.persistence === "cloud"
-                ? t("auth.cloudGuestWarning")
-                : t("auth.localGuestWarning")}</p>
-            {playerProfileService.hasProfileSyncConflict() && (
-              <p role="status">{t("auth.profileSyncConflict")}</p>
-            )}
-          </div>
-          {!migrationUnresolved && (authenticated || authentication.isAuthenticationAvailable()) && (
-            <button
-              aria-busy={authPending}
-              disabled={authPending}
-              onClick={() => void handleAuthentication()}
-              type="button"
-            >
-              {!authenticated && <GoogleMark />}
-              <span>{authPending
-                ? t("auth.connecting")
-                : authenticated
-                  ? t("auth.signOut")
-                  : session.state.status === "guest" && session.state.persistence === "cloud"
-                    ? t("auth.connectGoogle")
-                    : t("auth.continueWithGoogle")}</span>
-            </button>
-          )}
-        </section>
 
         {migration.status === "profile-conflict" && (
           <section aria-labelledby="profile-conflict-title" className="profile-conflict">
@@ -240,47 +225,89 @@ function ProfilePage() {
           aria-labelledby="player-identity-title"
           className="profile-identity"
         >
-          <div className="profile-identity-top">
-            <div aria-hidden="true" className="profile-monogram">
-              <span>{profile.monogram}</span>
+          <div className="profile-hero-top">
+            <div className="profile-identity-top">
+              <div aria-hidden="true" className="profile-monogram">
+                <span>{profile.monogram}</span>
+              </div>
+              <div className="profile-identity-copy">
+                <p className="profile-overline">{t("profile.player")}</p>
+                <h2 id="player-identity-title">{profile.displayName}</h2>
+                {profile.publicDiscriminator && (
+                  <p className="profile-public-discriminator">#{profile.publicDiscriminator}</p>
+                )}
+                {authenticated && !migrationUnresolved && (renaming ? (
+                  <form className="profile-rename-form" onSubmit={(event) => void submitRename(event)}>
+                    <label htmlFor="profile-username">{t("username.label")}</label>
+                    <input
+                      aria-describedby={renameError ? "profile-rename-error" : undefined}
+                      aria-invalid={Boolean(renameError)}
+                      autoComplete="nickname"
+                      disabled={renamePending}
+                      id="profile-username"
+                      maxLength={24}
+                      onChange={(event) => setRenameValue(event.target.value)}
+                      value={renameValue}
+                    />
+                    {renameError && <p id="profile-rename-error" role="alert">{t(`username.errors.${renameError}`)}</p>}
+                    <div>
+                      <button disabled={renamePending} type="submit">{renamePending ? t("username.saving") : t("username.save")}</button>
+                      <button disabled={renamePending} onClick={() => {
+                        setRenaming(false);
+                        setRenameError(null);
+                        setRenameValue(profile.displayName);
+                      }} type="button">{t("username.cancel")}</button>
+                    </div>
+                  </form>
+                ) : (
+                  <button className="profile-rename-trigger" onClick={() => {
+                    setRenameValue(profile.displayName);
+                    setRenaming(true);
+                  }} type="button">{t("username.change")}</button>
+                ))}
+                {!authenticated && (
+                  <p className="profile-rename-hint">{t("username.guestHint")}</p>
+                )}
+              </div>
             </div>
-            <div className="profile-identity-copy">
-              <p className="profile-overline">{t("profile.player")}</p>
-              <h2 id="player-identity-title">{profile.displayName}</h2>
-              {profile.publicDiscriminator && (
-                <p className="profile-public-discriminator">#{profile.publicDiscriminator}</p>
-              )}
-              {authenticated && !migrationUnresolved && (renaming ? (
-                <form className="profile-rename-form" onSubmit={(event) => void submitRename(event)}>
-                  <label htmlFor="profile-username">{t("username.label")}</label>
-                  <input
-                    aria-describedby={renameError ? "profile-rename-error" : undefined}
-                    aria-invalid={Boolean(renameError)}
-                    autoComplete="nickname"
-                    disabled={renamePending}
-                    id="profile-username"
-                    maxLength={24}
-                    onChange={(event) => setRenameValue(event.target.value)}
-                    value={renameValue}
-                  />
-                  {renameError && <p id="profile-rename-error" role="alert">{t(`username.errors.${renameError}`)}</p>}
-                  <div>
-                    <button disabled={renamePending} type="submit">{renamePending ? t("username.saving") : t("username.save")}</button>
-                    <button disabled={renamePending} onClick={() => {
-                      setRenaming(false);
-                      setRenameError(null);
-                      setRenameValue(profile.displayName);
-                    }} type="button">{t("username.cancel")}</button>
+            <div className="profile-account">
+              <div className="profile-account-status">
+                <p className="profile-overline">{t("auth.account")}</p>
+                <div className="profile-account-title-row">
+                  <h2 id="profile-account-title">
+                    {migrationUnresolved
+                      ? t("auth.googleSignInSuccessful")
+                      : authenticated ? t("auth.signedInWithGoogle") : t("auth.guest")}
+                  </h2>
+                  <div className="profile-account-info" ref={accountInfoRef}
+                    onMouseEnter={() => setAccountInfoMode((mode) => mode === "closed" ? "hover" : mode)}
+                    onMouseLeave={() => setAccountInfoMode((mode) => mode === "hover" ? "closed" : mode)}>
+                    <button aria-controls="profile-account-info-panel" aria-describedby={accountInfoMode !== "closed" ? "profile-account-info-panel" : undefined}
+                      aria-expanded={accountInfoMode !== "closed"} aria-label={t("auth.accountInfo")}
+                      className="profile-account-info-trigger" onClick={() => setAccountInfoMode((mode) => mode === "pinned" ? "closed" : "pinned")}
+                      ref={accountInfoButtonRef} type="button">i</button>
+                    {accountInfoMode !== "closed" && <p className="profile-account-info-panel" id="profile-account-info-panel" role="tooltip">
+                      {migrationUnresolved
+                        ? t("auth.migrationPendingDescription")
+                        : authenticated ? t("auth.cloudProfile")
+                        : session.state.status === "guest" && session.state.persistence === "cloud"
+                          ? t("auth.cloudGuestWarning") : t("auth.localGuestWarning")}
+                    </p>}
                   </div>
-                </form>
-              ) : (
-                <button className="profile-rename-trigger" onClick={() => {
-                  setRenameValue(profile.displayName);
-                  setRenaming(true);
-                }} type="button">{t("username.change")}</button>
-              ))}
-              {!authenticated && (
-                <p className="profile-rename-hint">{t("username.guestHint")}</p>
+                </div>
+                {playerProfileService.hasProfileSyncConflict() &&
+                  <p className="profile-account-sync-status" role="status">{t("auth.profileSyncConflict")}</p>}
+              </div>
+              {!migrationUnresolved && (authenticated || authentication.isAuthenticationAvailable()) && (
+                <button aria-busy={authPending} className="profile-account-action" disabled={authPending}
+                  onClick={() => void handleAuthentication()} type="button">
+                  {!authenticated && <GoogleMark />}
+                  <span>{authPending
+                    ? t("auth.connecting")
+                    : authenticated ? t("auth.signOut")
+                    : session.state.status === "guest" && session.state.persistence === "cloud"
+                      ? t("auth.connectGoogle") : t("auth.continueWithGoogle")}</span>
+                </button>
               )}
             </div>
           </div>

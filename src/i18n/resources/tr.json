@@ -32,7 +32,7 @@
     "connecting": "Bağlanıyor…",
     "failure": "Giriş tamamlanamadı. Tekrar dene veya Misafir olarak devam et.",
     "guestNote": "Misafir ilerlemesi bu cihazda kalır.",
-    "account": "Hesap",
+    "account": "Hesap", "accountInfo": "Hesap bilgisi",
     "guest": "Misafir",
     "signedInWithGoogle": "Google ile giriş yapıldı",
     "guestProfile": "İlerleme ve istatistikler bu cihazda yerel olarak saklanır.",

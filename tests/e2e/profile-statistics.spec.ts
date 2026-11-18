@@ -88,13 +88,19 @@ test("Profile Hero keeps identity, balanced career metrics and full-width XP acr
     await expect(hero.getByText("Multiplayer rating", { exact: true })).toBeVisible();
     await expect(hero.getByRole("progressbar")).toBeVisible();
     await expect(hero.getByText(/70\s*\/\s*100 XP/)).toBeVisible();
+    await expect(hero.getByRole("heading", { name: "Signed in with Google" })).toBeVisible();
+    await expect(hero.getByRole("button", { name: "Sign Out" })).toBeVisible();
     const geometry = await hero.evaluate((element) => {
       const bounds = element.getBoundingClientRect();
       const top = element.querySelector(".profile-identity-top")!.getBoundingClientRect();
+      const account = element.querySelector(".profile-account")!.getBoundingClientRect();
+      const avatar = element.querySelector(".profile-monogram")!.getBoundingClientRect();
       const columns = [...element.querySelectorAll(".profile-career-metric")].map((node) => node.getBoundingClientRect());
       const track = element.querySelector(".profile-progress-track")!.getBoundingClientRect();
       const joined = element.querySelector(".profile-joined")!.getBoundingClientRect();
       return { bounds: { left: bounds.left, right: bounds.right }, topBottom: top.bottom,
+        account: { left: account.left, right: account.right, top: account.top, bottom: account.bottom },
+        avatarWidth: avatar.width,
         columns: columns.map((box) => ({ x: box.x, width: box.width, top: box.top })),
         track: { left: track.left, right: track.right, width: track.width },
         joined: { left: joined.left, right: joined.right, top: joined.top } };
@@ -106,11 +112,58 @@ test("Profile Hero keeps identity, balanced career metrics and full-width XP acr
     expect(geometry.joined.right).toBeLessThanOrEqual(geometry.bounds.right);
     expect(geometry.track.left).toBeGreaterThanOrEqual(geometry.bounds.left);
     expect(geometry.track.right).toBeLessThanOrEqual(geometry.bounds.right);
+    expect(geometry.account.right).toBeLessThanOrEqual(geometry.bounds.right);
+    expect(geometry.avatarWidth).toBe(width <= 560 ? 68 : 112);
+    if (width > 700) expect(geometry.account.left).toBeGreaterThanOrEqual(geometry.bounds.left + 200);
+    else expect(geometry.account.top).toBeGreaterThanOrEqual(geometry.topBottom);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     if (width === 1440 || width === 390) {
       await hero.screenshot({ path: `test-results/profile-hero-${width}x${height}.png` });
     }
   }
+  assertNoErrors();
+});
+
+test("Account information popover supports pointer, keyboard, outside dismissal and localization", async ({ page, assertNoErrors }) => {
+  await useAuthenticationFixture(page, "account");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/profile");
+  const trigger = page.getByRole("button", { name: "Account information" });
+  const panel = page.getByRole("tooltip");
+  await trigger.hover();
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText("offline progress will synchronize");
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  await trigger.click();
+  await page.mouse.move(0, 0);
+  await expect(panel).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(panel).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await expect(panel).toBeVisible();
+  const panelBounds = (await panel.boundingBox())!;
+  expect(panelBounds.x).toBeGreaterThanOrEqual(0);
+  expect(panelBounds.x + panelBounds.width).toBeLessThanOrEqual(391);
+  await page.locator("#player-identity-title").click();
+  await expect(panel).toHaveCount(0);
+  assertNoErrors();
+});
+
+test("Guest account information keeps the existing warning in English and Turkish", async ({ page, assertNoErrors }) => {
+  await useCloudGuestFixture(page);
+  await page.goto("/profile");
+  await expect(page.locator(".profile-identity").getByRole("heading", { name: "Guest", exact: true })).toBeVisible();
+  await expect(page.locator(".profile-identity").getByRole("button", { name: "Connect Google" })).toBeVisible();
+  await page.getByRole("button", { name: "Account information" }).click();
+  await expect(page.getByRole("tooltip")).toContainText("Guest progress may become inaccessible");
+
+  await page.addInitScript(() => {
+    localStorage.setItem("roulettechess.settings.v1", JSON.stringify({ schemaVersion: 1, language: "tr" }));
+  });
+  await page.reload();
+  await page.getByRole("button", { name: "Hesap bilgisi" }).click();
+  await expect(page.getByRole("tooltip")).toContainText("Misafir ilerlemesine erişilemeyebilir");
   assertNoErrors();
 });
 
