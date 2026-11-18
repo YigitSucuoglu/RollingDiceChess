@@ -5,7 +5,7 @@ import type { AchievementDefinition, AchievementId } from "../../domain/achievem
 import type { AchievementReadService, AchievementReadState } from "../../application/achievements/AchievementRead";
 import type { AppLanguage } from "../../settings/AppSettings";
 import { COLLECTION_FILTERS, collectionItems, type CollectionFilter } from "../../application/achievements/AchievementCollectionFilter";
-import { selectAchievementProgress, type AchievementProgress } from "../../application/achievements/AchievementProgress";
+import { selectAchievementCardProgress, type AchievementCardProgress } from "../../application/achievements/AchievementProgress";
 import type { CloudProfileSnapshot } from "../../profile/PlayerSync";
 
 function visibleCount(width: number): number {
@@ -15,11 +15,18 @@ function visibleCount(width: number): number {
   return 4;
 }
 
+function ArrowIcon({ direction }: { readonly direction: "left" | "right" }) {
+  return <svg aria-hidden="true" className="achievement-collection-arrow" fill="none" viewBox="0 0 24 24">
+    <path d="M15 5 8 12l7 7" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
+      strokeWidth="1.8" transform={direction === "right" ? "rotate(180 12 12)" : undefined} />
+  </svg>;
+}
+
 function AchievementCard({ achievement, language, unlockedAt, progress }: {
   readonly achievement: AchievementDefinition;
   readonly language: AppLanguage;
   readonly unlockedAt?: string;
-  readonly progress: AchievementProgress | null;
+  readonly progress: AchievementCardProgress | null;
 }) {
   const { t } = useTranslation();
   const unlocked = unlockedAt !== undefined;
@@ -33,13 +40,16 @@ function AchievementCard({ achievement, language, unlockedAt, progress }: {
     <span aria-hidden="true" className="achievement-collection-mark">{unlocked ? "✦" : "◇"}</span>
     <h3>{secret ? t("profile.collection.secretChallenge") : presentation.title[language]}</h3>
     <p className="achievement-collection-description">{secret ? presentation.hint?.[language] : presentation.description?.[language]}</p>
-    <p className="achievement-collection-state">{unlocked ? t("profile.collection.unlocked") : t("profile.collection.locked")}</p>
+    {!unlocked && <p className="achievement-collection-state">{t("profile.collection.locked")}</p>}
     {date && <time dateTime={unlockedAt}>{t("profile.collection.unlockedOn", { date })}</time>}
     {progress && <div className="achievement-collection-progress">
       <div className="achievement-collection-progress-line"><span>{t("profile.collection.progress")}</span>
         <strong>{progress.current}/{progress.target}</strong></div>
       <div aria-hidden="true" className="achievement-collection-progress-track"><span style={{ width: `${progress.percent}%` }} /></div>
-      {progress.recordedOnly && <small>{t("profile.collection.recordedProgress")}</small>}
+      {!unlocked && progress.recordedOnly && <small>{t("profile.collection.recordedProgress")}</small>}
+      {unlocked && progress.lifetimeTotal !== null && progress.totalLabel &&
+        <div className="achievement-collection-total"><span>{t(`profile.collection.totals.${progress.totalLabel}`)}</span>
+          <strong>{progress.lifetimeTotal}</strong></div>}
     </div>}
   </li>;
 }
@@ -56,7 +66,7 @@ export default function AchievementCollection({ reader, state, owner, language, 
   const [count, setCount] = useState(() => visibleCount(window.innerWidth));
   const [firstIndex, setFirstIndex] = useState(0);
   const viewport = useRef<HTMLDivElement>(null);
-  const programmaticTarget = useRef<number | null>(null);
+  const navigationTarget = useRef<number | null>(null);
   const items = useMemo(() => collectionItems(filter), [filter]);
   const safeState = useMemo<AchievementReadState>(() => reader.getOwner() === owner ? state : { status: "loading" }, [reader, owner, state]);
   const authoritative = safeState.status === "success" || safeState.status === "empty";
@@ -75,12 +85,12 @@ export default function AchievementCollection({ reader, state, owner, language, 
   useEffect(() => {
     const element = viewport.current;
     if (!element) return;
-    programmaticTarget.current = 0;
+    navigationTarget.current = null;
     element.scrollTo({ left: 0, behavior: "instant" });
   }, [filter, count]);
 
   const selectFilter = (next: CollectionFilter) => {
-    programmaticTarget.current = 0;
+    navigationTarget.current = null;
     setFilter(next);
     setFirstIndex(0);
   };
@@ -89,31 +99,30 @@ export default function AchievementCollection({ reader, state, owner, language, 
     const element = viewport.current;
     if (!element) return;
     const target = Math.max(0, Math.min(pageCount - 1, next));
-    setFirstIndex(target * count);
+    navigationTarget.current = target;
     const card = element.querySelector<HTMLElement>(`.achievement-collection-card:nth-child(${target * count + 1})`);
     if (card) {
       const left = card.offsetLeft;
-      programmaticTarget.current = left;
-      element.scrollTo({ left, behavior: "instant" });
+      element.scrollTo({ left, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
     }
   };
 
   const syncScroll = () => {
     const element = viewport.current;
     if (!element || element.scrollWidth <= element.clientWidth) { setFirstIndex(0); return; }
-    if (programmaticTarget.current !== null) {
-      if (Math.abs(element.scrollLeft - programmaticTarget.current) <= 2) programmaticTarget.current = null;
-      return;
-    }
     const card = element.querySelector<HTMLElement>(".achievement-collection-card");
     if (!card) return;
     const gap = Number.parseFloat(window.getComputedStyle(card.parentElement!).columnGap) || 0;
-    setFirstIndex(Math.min(items.length - 1, Math.round(element.scrollLeft / (card.offsetWidth + gap))));
+    const visibleIndex = Math.min(items.length - 1, Math.round(element.scrollLeft / (card.offsetWidth + gap)));
+    setFirstIndex(visibleIndex);
+    if (navigationTarget.current !== null && Math.floor(visibleIndex / count) === navigationTarget.current) {
+      navigationTarget.current = null;
+    }
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "ArrowRight") { event.preventDefault(); moveTo(currentPage + 1); }
-    if (event.key === "ArrowLeft") { event.preventDefault(); moveTo(currentPage - 1); }
+    if (event.key === "ArrowRight") { event.preventDefault(); moveTo((navigationTarget.current ?? currentPage) + 1); }
+    if (event.key === "ArrowLeft") { event.preventDefault(); moveTo((navigationTarget.current ?? currentPage) - 1); }
   };
 
   const start = Math.min(items.length, firstIndex + 1);
@@ -133,18 +142,18 @@ export default function AchievementCollection({ reader, state, owner, language, 
     {safeState.status === "local-only" && <p className="achievement-collection-notice" role="status">{t("profile.collection.localOnly")}</p>}
     {authoritative && <>
       <div aria-label={t("profile.collection.carouselLabel")} className="achievement-collection-viewport"
-        onKeyDown={handleKeyDown} onPointerDown={() => { programmaticTarget.current = null; }}
-        onScroll={syncScroll} onWheel={() => { programmaticTarget.current = null; }} ref={viewport} role="region" tabIndex={0}>
+        onKeyDown={handleKeyDown} onPointerDown={() => { navigationTarget.current = null; }}
+        onScroll={syncScroll} onWheel={() => { navigationTarget.current = null; }} ref={viewport} role="region" tabIndex={0}>
         <ol className="achievement-collection-track">{items.map((achievement) => <AchievementCard
           achievement={achievement} key={achievement.id} language={language} unlockedAt={unlocked.get(achievement.id)}
-          progress={selectAchievementProgress(achievement.id, authoritative ? progressSnapshot : null)}
+          progress={selectAchievementCardProgress(achievement.id, authoritative ? progressSnapshot : null, unlocked.has(achievement.id))}
         />)}{Array.from({ length: pageCount * count - items.length }, (_, index) =>
           <li aria-hidden="true" className="achievement-collection-placeholder" key={`blank-${index}`} />)}</ol>
       </div>
       <div className="achievement-collection-controls">
-        <button aria-label={t("profile.collection.previous")} disabled={firstIndex === 0} onClick={() => moveTo(currentPage - 1)} type="button">←</button>
+        <button aria-label={t("profile.collection.previous")} disabled={firstIndex === 0} onClick={() => moveTo((navigationTarget.current ?? currentPage) - 1)} type="button"><ArrowIcon direction="left" /></button>
         <span aria-live="polite">{t("profile.collection.position", { start, end, total: items.length })}</span>
-        <button aria-label={t("profile.collection.next")} disabled={firstIndex >= (pageCount - 1) * count} onClick={() => moveTo(currentPage + 1)} type="button">→</button>
+        <button aria-label={t("profile.collection.next")} disabled={firstIndex >= (pageCount - 1) * count} onClick={() => moveTo((navigationTarget.current ?? currentPage) + 1)} type="button"><ArrowIcon direction="right" /></button>
       </div>
     </>}
   </div>;

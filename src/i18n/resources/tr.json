@@ -133,6 +133,7 @@
       "filtersLabel": "Başarım kategorileri", "filters": { "all": "Tümü", "singleplayer": "Tek Oyunculu", "ranked": "Dereceli", "roulette": "Rulet", "pieceMastery": "Taş Ustalığı", "challenges": "Görevler" },
       "category": { "singleplayer-career": "Tek Oyunculu", "singleplayer-progression": "Tek Oyunculu", "ranked-multiplayer": "Dereceli", "global-roulette": "Rulet", "global-piece-mastery": "Taş Ustalığı", "single-match": "Görev" },
       "secretChallenge": "Gizli Görev", "locked": "Kilitli", "unlocked": "Açıldı", "unlockedOn": "Açılma tarihi: {{date}}", "progressUnavailable": "İlerleme bilgisi mevcut değil", "progress": "İlerleme", "recordedProgress": "Kaydedilen ilerleme",
+      "totals": { "singleplayerGames": "Toplam tek oyunculu maç", "singleplayerKings": "Toplam tek oyunculu şah yakalama", "rankedWins": "Toplam dereceli galibiyet", "rankedGames": "Toplam dereceli maç", "rouletteRolls": "Kaydedilen rulet çevirmesi", "tripleRolls": "Kaydedilen üçlü rulet", "pawnMoves": "Kaydedilen piyon hamlesi", "knightMoves": "Kaydedilen at hamlesi", "kingMoves": "Kaydedilen şah hamlesi" },
       "loading": "Başarımlar yükleniyor…", "error": "Başarımlar yüklenemedi.", "catalogMismatch": "Başarımlar geçici olarak kullanılamıyor. Lütfen uygulamayı güncelle.", "retry": "Tekrar dene", "localOnly": "Yalnızca yerel Guest modunda bulut başarımları kullanılamaz.",
       "carouselLabel": "Başarım kartları", "previous": "Önceki başarımlar", "next": "Sonraki başarımlar", "position": "{{start}}–{{end}} / {{total}}"
     },

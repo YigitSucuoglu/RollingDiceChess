@@ -133,6 +133,7 @@
       "filtersLabel": "Achievement categories", "filters": { "all": "All", "singleplayer": "Singleplayer", "ranked": "Ranked", "roulette": "Roulette", "pieceMastery": "Piece Mastery", "challenges": "Challenges" },
       "category": { "singleplayer-career": "Singleplayer", "singleplayer-progression": "Singleplayer", "ranked-multiplayer": "Ranked", "global-roulette": "Roulette", "global-piece-mastery": "Piece Mastery", "single-match": "Challenge" },
       "secretChallenge": "Secret Challenge", "locked": "Locked", "unlocked": "Unlocked", "unlockedOn": "Unlocked {{date}}", "progressUnavailable": "Progress unavailable", "progress": "Progress", "recordedProgress": "Recorded progress",
+      "totals": { "singleplayerGames": "Total SP games", "singleplayerKings": "Total SP kings captured", "rankedWins": "Total ranked wins", "rankedGames": "Total ranked games", "rouletteRolls": "Recorded roulette rolls", "tripleRolls": "Recorded triple rolls", "pawnMoves": "Recorded pawn moves", "knightMoves": "Recorded knight moves", "kingMoves": "Recorded king moves" },
       "loading": "Loading achievements…", "error": "Achievements could not be loaded.", "catalogMismatch": "Achievements are temporarily unavailable. Please update the app.", "retry": "Retry", "localOnly": "Cloud achievements are unavailable in local-only Guest mode.",
       "carouselLabel": "Achievement cards", "previous": "Previous achievements", "next": "Next achievements", "position": "{{start}}–{{end}} / {{total}}"
     },

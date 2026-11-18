@@ -11,6 +11,15 @@ export class E2EAchievementReadAdapter implements AchievementReadPort {
     const fixture = window.localStorage.getItem(FIXTURE_KEY);
     if (fixture === "error" || (fixture === "retry" && count === 1)) throw new AchievementReadError("unavailable");
     if (fixture === "mismatch") throw new AchievementReadError("catalog-mismatch");
+    if (fixture === "completed") return {
+      catalogVersion: ACHIEVEMENT_CATALOG_VERSION,
+      unlockedCount: 3,
+      unlocks: [
+        { achievementId: "ranked_victor", unlockedAt: "2026-11-17T12:00:00+00:00" },
+        { achievementId: "pawn_commander", unlockedAt: "2026-11-17T12:30:00+00:00" },
+        { achievementId: "untouchable", unlockedAt: "2026-11-17T13:00:00+00:00" },
+      ],
+    };
     if (fixture === "unlocked") return {
       catalogVersion: ACHIEVEMENT_CATALOG_VERSION,
       unlockedCount: 2,

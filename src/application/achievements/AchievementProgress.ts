@@ -15,6 +15,39 @@ export interface AchievementProgress {
   readonly recordedOnly: boolean;
 }
 
+export type AchievementTotalLabel = "singleplayerGames" | "singleplayerKings" | "rankedWins"
+  | "rankedGames" | "rouletteRolls" | "tripleRolls" | "pawnMoves" | "knightMoves" | "kingMoves";
+
+export interface AchievementCardProgress extends AchievementProgress {
+  readonly lifetimeTotal: number | null;
+  readonly totalLabel: AchievementTotalLabel | null;
+}
+
+const TOTAL_LABELS: Readonly<Partial<Record<AchievementId, AchievementTotalLabel>>> = {
+  rookie_campaign: "singleplayerGames", hundred_games: "singleplayerGames", dedicated_player: "singleplayerGames",
+  king_hunter: "singleplayerKings", capture_hundred_kings: "singleplayerKings",
+  ranked_victor: "rankedWins", ranked_regular: "rankedGames", ranked_veteran: "rankedGames",
+  wheel_spinner: "rouletteRolls", roulette_master: "rouletteRolls", roll_collector: "rouletteRolls",
+  triple_collector: "tripleRolls", pawn_commander: "pawnMoves",
+  knight_specialist: "knightMoves", royal_maneuvers: "kingMoves",
+};
+
+export function selectAchievementCardProgress(
+  id: AchievementId, snapshot: CloudProfileSnapshot | null, unlocked: boolean,
+): AchievementCardProgress | null {
+  if (!PROGRESS_ACHIEVEMENT_IDS.includes(id as typeof PROGRESS_ACHIEVEMENT_IDS[number])) return null;
+  const progress = selectAchievementProgress(id, snapshot);
+  if (!unlocked) return progress ? { ...progress, lifetimeTotal: null, totalLabel: null } : null;
+  const target = counter(ACHIEVEMENT_DEFINITIONS[id].target);
+  if (target === null || target === 0) return null;
+  return { current: target, target, percent: 100,
+    recordedOnly: progress?.recordedOnly ?? Boolean(TOTAL_LABELS[id] && [
+      "rouletteRolls", "tripleRolls", "pawnMoves", "knightMoves", "kingMoves",
+    ].includes(TOTAL_LABELS[id])),
+    lifetimeTotal: progress?.current ?? null,
+    totalLabel: progress ? TOTAL_LABELS[id] ?? null : null };
+}
+
 function counter(value: unknown): number | null {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null;
 }

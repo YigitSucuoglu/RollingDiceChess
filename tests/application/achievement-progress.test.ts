@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ACHIEVEMENT_DEFINITIONS } from "../../src/domain/achievements/AchievementCatalog";
-import { PROGRESS_ACHIEVEMENT_IDS, selectAchievementProgress } from "../../src/application/achievements/AchievementProgress";
+import { PROGRESS_ACHIEVEMENT_IDS, selectAchievementCardProgress, selectAchievementProgress } from "../../src/application/achievements/AchievementProgress";
 import { createDefaultPlayerProfile } from "../../src/profile/PlayerProfile";
 import type { CloudProfileSnapshot } from "../../src/profile/PlayerSync";
 
@@ -50,5 +50,31 @@ describe("selected canonical achievement progress", () => {
     expect(selectAchievementProgress("pawn_commander", { ...source,
       rouletteStatistics: { ...source.rouletteStatistics, movesByPiece: undefined } })).toBeNull();
     expect(selectAchievementProgress("rookie_campaign", null)).toBeNull();
+  });
+
+  it("separates server unlock completion from canonical lifetime totals", () => {
+    const source = snapshot();
+    const fourGames = { ...source, profile: { ...source.profile,
+      statistics: { ...source.profile.statistics, gamesPlayed: 4 } } };
+    expect(selectAchievementCardProgress("rookie_campaign", fourGames, false)).toMatchObject({
+      current: 4, target: 10, percent: 40, lifetimeTotal: null,
+    });
+    expect(selectAchievementCardProgress("ranked_victor", source, false)).toMatchObject({
+      current: 2, target: 1, percent: 100, lifetimeTotal: null,
+    });
+    expect(selectAchievementCardProgress("ranked_victor", source, true)).toMatchObject({
+      current: 1, target: 1, percent: 100, lifetimeTotal: 2, totalLabel: "rankedWins",
+    });
+    const larger = { ...source, rouletteStatistics: { ...source.rouletteStatistics,
+      movesByPiece: { ...source.rouletteStatistics.movesByPiece!, pawn: 1300 } } };
+    expect(selectAchievementCardProgress("pawn_commander", larger, true)).toMatchObject({
+      current: 500, target: 500, lifetimeTotal: 1300, recordedOnly: true,
+    });
+    expect(selectAchievementCardProgress("pawn_commander", { ...source,
+      rouletteStatistics: { ...source.rouletteStatistics, movesByPiece: undefined } }, true)).toMatchObject({
+      current: 500, target: 500, lifetimeTotal: null,
+    });
+    expect(selectAchievementCardProgress("untouchable", source, true)).toBeNull();
+    expect(selectAchievementCardProgress("rookie_campaign", null, false)).toBeNull();
   });
 });
