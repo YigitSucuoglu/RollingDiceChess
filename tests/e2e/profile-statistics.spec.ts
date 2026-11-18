@@ -75,6 +75,75 @@ test("desktop statistics views use the same available width", async ({ page, ass
   assertNoErrors();
 });
 
+test("Profile Hero keeps identity, balanced career metrics and full-width XP across viewports", async ({ page, assertNoErrors }) => {
+  await useAuthenticationFixture(page, "account");
+  for (const [width, height] of [[1440, 900], [1024, 768], [768, 1024], [390, 844], [360, 800]] as const) {
+    await page.setViewportSize({ width, height });
+    await page.goto("/profile");
+    const hero = page.locator(".profile-identity");
+    await expect(hero.getByRole("heading", { name: "Yigit" })).toBeVisible();
+    await expect(hero.getByText("#7K2M9")).toBeVisible();
+    await expect(hero.getByRole("button", { name: "Change Username" })).toBeVisible();
+    await expect(hero.getByText("Singleplayer level")).toBeVisible();
+    await expect(hero.getByText("Multiplayer rating", { exact: true })).toBeVisible();
+    await expect(hero.getByRole("progressbar")).toBeVisible();
+    await expect(hero.getByText(/70\s*\/\s*100 XP/)).toBeVisible();
+    const geometry = await hero.evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      const top = element.querySelector(".profile-identity-top")!.getBoundingClientRect();
+      const columns = [...element.querySelectorAll(".profile-career-metric")].map((node) => node.getBoundingClientRect());
+      const track = element.querySelector(".profile-progress-track")!.getBoundingClientRect();
+      const joined = element.querySelector(".profile-joined")!.getBoundingClientRect();
+      return { bounds: { left: bounds.left, right: bounds.right }, topBottom: top.bottom,
+        columns: columns.map((box) => ({ x: box.x, width: box.width, top: box.top })),
+        track: { left: track.left, right: track.right, width: track.width },
+        joined: { left: joined.left, right: joined.right, top: joined.top } };
+    });
+    expect(Math.abs(geometry.columns[0].width - geometry.columns[1].width)).toBeLessThanOrEqual(2);
+    expect(geometry.columns[0].top).toBeGreaterThanOrEqual(geometry.topBottom);
+    expect(geometry.track.width).toBeGreaterThan(geometry.columns[0].width + geometry.columns[1].width - 24);
+    expect(geometry.joined.top).toBeGreaterThan(geometry.columns[0].top);
+    expect(geometry.joined.right).toBeLessThanOrEqual(geometry.bounds.right);
+    expect(geometry.track.left).toBeGreaterThanOrEqual(geometry.bounds.left);
+    expect(geometry.track.right).toBeLessThanOrEqual(geometry.bounds.right);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+    if (width === 1440 || width === 390) {
+      await hero.screenshot({ path: `test-results/profile-hero-${width}x${height}.png` });
+    }
+  }
+  assertNoErrors();
+});
+
+test("Profile Hero contains a long renamed account identity on narrow mobile", async ({ page, assertNoErrors }) => {
+  await useAuthenticationFixture(page, "account");
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/profile");
+  await page.getByRole("button", { name: "Change Username" }).click();
+  await page.getByRole("textbox", { name: "Username" }).fill("VeryLongRouletteChampion");
+  await page.getByRole("button", { name: "Save" }).click();
+  const title = page.locator("#player-identity-title");
+  await expect(title).toHaveText("VeryLongRouletteChampion");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  const contained = await title.evaluate((element) => {
+    const titleBounds = element.getBoundingClientRect();
+    const heroBounds = element.closest(".profile-identity")!.getBoundingClientRect();
+    return titleBounds.left >= heroBounds.left && titleBounds.right <= heroBounds.right;
+  });
+  expect(contained).toBe(true);
+  assertNoErrors();
+});
+
+test("local Guest Hero keeps unavailable multiplayer rating distinct from zero", async ({ page, assertNoErrors }) => {
+  await page.addInitScript(() => localStorage.setItem("roulettechess.e2e-auth-fixture.v1", "local"));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/profile");
+  const hero = page.locator(".profile-identity");
+  await expect(hero.getByLabel("Multiplayer rating unavailable")).toBeVisible();
+  await expect(hero.getByRole("progressbar")).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  assertNoErrors();
+});
+
 test("zero-state Multiplayer statistics remain explicit and finite", async ({ page, assertNoErrors }) => {
   await useCloudGuestFixture(page);
   await page.goto("/profile");

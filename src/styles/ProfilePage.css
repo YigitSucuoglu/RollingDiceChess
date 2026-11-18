@@ -155,7 +155,6 @@
 @media (max-width: 600px) { .profile-conflict-grid { grid-template-columns: 1fr; } }
 
 .profile-identity {
-  align-items: center;
   background:
     linear-gradient(120deg, rgba(255, 255, 255, 0.035), transparent 55%),
     rgba(19, 18, 16, 0.86);
@@ -164,11 +163,21 @@
     inset 0 1px 0 rgba(255, 239, 202, 0.05),
     0 24px 60px rgba(0, 0, 0, 0.22);
   display: grid;
-  gap: clamp(1.5rem, 4vw, 3rem);
-  grid-template-columns: auto minmax(13rem, 1fr) minmax(18rem, 1.1fr);
-  padding: clamp(1.5rem, 4vw, 3rem);
+  gap: .5rem;
+  grid-template-columns: minmax(0, 1fr);
+  padding: clamp(1rem, 2vw, 1.5rem);
   position: relative;
 }
+
+.profile-identity-top {
+  align-items: center;
+  display: grid;
+  gap: clamp(.9rem, 2vw, 1.5rem);
+  grid-template-columns: auto minmax(0, 1fr);
+  min-width: 0;
+}
+
+.profile-identity-copy { min-width: 0; }
 
 .profile-identity::after {
   border: 1px solid rgba(207, 164, 87, 0.1);
@@ -188,23 +197,24 @@
     inset 0 0 0 0.4rem #0e0d0b,
     inset 0 0 0 0.45rem rgba(235, 190, 105, 0.28);
   display: grid;
-  height: clamp(7rem, 12vw, 9rem);
+  height: 7rem;
   place-items: center;
-  width: clamp(7rem, 12vw, 9rem);
+  width: 7rem;
 }
 
 .profile-monogram span {
   color: var(--profile-gold);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-size: 2.6rem;
 }
 
 .profile-identity-copy h2 {
   color: #f2e6d1;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.7rem, 3vw, 2.25rem);
   font-weight: 400;
   margin-top: 0.35rem;
+  overflow-wrap: anywhere;
 }
 
 .profile-public-discriminator {
@@ -223,8 +233,9 @@
   cursor: pointer;
   font: inherit;
   font-size: .72rem;
-  margin-top: .85rem;
-  padding: .2rem 0;
+  margin-top: .15rem;
+  min-height: 2.1rem;
+  padding: .25rem 0;
 }
 
 .profile-rename-trigger:focus-visible,
@@ -244,64 +255,53 @@
 .profile-rename-form button:first-child { background: #c99745; color: #15100a; }
 .profile-rename-form button:disabled { cursor: wait; opacity: .65; }
 
+.profile-career-summary {
+  border-top: 1px solid rgba(207, 164, 87, .18);
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-top: .65rem;
+}
+
+.profile-career-metric { min-width: 0; }
+.profile-career-metric + .profile-career-metric { border-left: 1px solid rgba(207, 164, 87, .12); padding-left: clamp(1rem, 3vw, 2rem); }
+.profile-career-metric > p { color: #8f8678; font-size: .65rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+
 .profile-rank {
   align-items: center;
-  color: #b9ad99;
+  color: var(--profile-gold);
   display: flex;
-  font-size: 0.78rem;
-  gap: 0.6rem;
-  letter-spacing: 0.08em;
-  margin-top: 0.7rem;
+  gap: .65rem;
+  margin-top: .2rem;
+  min-height: 2rem;
   text-transform: uppercase;
 }
 
-.profile-rank span[aria-hidden] {
-  color: var(--profile-brass);
-  font-size: 0.5rem;
-}
+.profile-rank span, .profile-rating strong, .profile-rating-unavailable { font-family: Georgia,"Times New Roman",serif; font-size: clamp(1.45rem, 2.5vw, 1.8rem); font-variant-numeric: tabular-nums; font-weight: 400; line-height: 1.15; }
 
 .profile-rank strong {
   color: #e3c889;
+  font-size: .8rem;
+  font-weight: 500;
+  letter-spacing: .08em;
 }
 
 .profile-rating {
-  align-items: center;
   color: var(--profile-brass);
-  display: inline-flex;
-  gap: .65rem;
-  margin-top: 1rem;
-}
-
-.profile-rating > span {
-  font-size: .7rem;
-}
-
-.profile-rating div {
-  display: flex;
-  flex-direction: column;
-  gap: .12rem;
-}
-
-.profile-rating small {
-  color: #8f8678;
-  font-size: .6rem;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  margin-top: .2rem;
+  min-height: 2rem;
 }
 
 .profile-rating strong {
   color: var(--profile-gold);
-  font-family: Georgia,"Times New Roman",serif;
-  font-size: 1.35rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 400;
 }
+
+.profile-rating-unavailable { color: #777064; display: block; margin-top: .45rem; }
 
 .profile-joined {
   color: #777064;
   font-size: 0.72rem;
-  margin-top: 1.35rem;
+  text-align: right;
   text-transform: uppercase;
 }
 
@@ -327,7 +327,7 @@
   background: #080807;
   border: 1px solid rgba(207, 164, 87, 0.24);
   height: 0.72rem;
-  margin-top: 0.8rem;
+  margin-top: 0.5rem;
   overflow: hidden;
   padding: 2px;
 }
@@ -346,7 +346,7 @@
 .profile-progression > p {
   color: #9a9081;
   font-size: 0.78rem;
-  margin-top: 0.7rem;
+  margin-top: 0.4rem;
   text-align: right;
 }
 
@@ -677,14 +677,6 @@
 }
 
 @media (max-width: 900px) {
-  .profile-identity {
-    grid-template-columns: auto 1fr;
-  }
-
-  .profile-progression {
-    grid-column: 1 / -1;
-  }
-
   .profile-general-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -722,16 +714,13 @@
   }
 
   .profile-identity {
-    justify-items: center;
-    grid-template-columns: 1fr;
-    text-align: center;
+    padding: 1rem;
   }
 
-  .profile-progression {
-    grid-column: auto;
-    text-align: left;
-    width: 100%;
-  }
+  .profile-identity-top { gap: 1rem; }
+  .profile-identity-copy h2 { font-size: clamp(1.55rem, 6vw, 2.25rem); }
+  .profile-rename-trigger { min-height: 2.75rem; }
+  .profile-career-metric + .profile-career-metric { padding-left: 1rem; }
 
   .profile-general-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

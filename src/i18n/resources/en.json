@@ -120,7 +120,7 @@
     "fatal": { "title": "Something went wrong", "message": "RouletteChess encountered an unexpected error.", "tryAgain": "Try Again", "backHome": "Back to Home" }
   },
   "profile": {
-    "browserTitle": "Profile | RouletteChess", "eyebrow": "Offline player hub", "title": "Profile", "player": "Player", "joined": "Joined {{date}}", "levelProgress": "Level progress", "progressLabel": "Level {{level}} experience progress", "multiplayerRating": "Multiplayer rating", "multiplayerRatingValue": "Multiplayer rating {{rating}}",
+    "browserTitle": "Profile | RouletteChess", "eyebrow": "Offline player hub", "title": "Profile", "player": "Player", "joined": "Joined {{date}}", "singleplayerLevel": "Singleplayer level", "levelProgress": "Level progress", "progressLabel": "Level {{level}} experience progress", "multiplayerRating": "Multiplayer rating", "multiplayerRatingValue": "Multiplayer rating {{rating}}", "ratingUnavailable": "Multiplayer rating unavailable",
     "careerOverview": "Career overview", "generalStatistics": "Statistics", "rouletteSignature": "Your roulette signature", "rouletteStatistics": "RouletteChess Statistics",
     "statisticsViewLabel": "Statistics view", "statisticsViews": { "singleplayer": "Singleplayer", "multiplayer": "Multiplayer" },
     "singleplayerScope": "Singleplayer statistics reflect games played against bots.", "multiplayerScope": "Ranked statistics include ranked matches only. Unranked matches count only toward games played.",

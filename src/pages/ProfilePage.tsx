@@ -240,63 +240,67 @@ function ProfilePage() {
           aria-labelledby="player-identity-title"
           className="profile-identity"
         >
-          <div aria-hidden="true" className="profile-monogram">
-            <span>{profile.monogram}</span>
+          <div className="profile-identity-top">
+            <div aria-hidden="true" className="profile-monogram">
+              <span>{profile.monogram}</span>
+            </div>
+            <div className="profile-identity-copy">
+              <p className="profile-overline">{t("profile.player")}</p>
+              <h2 id="player-identity-title">{profile.displayName}</h2>
+              {profile.publicDiscriminator && (
+                <p className="profile-public-discriminator">#{profile.publicDiscriminator}</p>
+              )}
+              {authenticated && !migrationUnresolved && (renaming ? (
+                <form className="profile-rename-form" onSubmit={(event) => void submitRename(event)}>
+                  <label htmlFor="profile-username">{t("username.label")}</label>
+                  <input
+                    aria-describedby={renameError ? "profile-rename-error" : undefined}
+                    aria-invalid={Boolean(renameError)}
+                    autoComplete="nickname"
+                    disabled={renamePending}
+                    id="profile-username"
+                    maxLength={24}
+                    onChange={(event) => setRenameValue(event.target.value)}
+                    value={renameValue}
+                  />
+                  {renameError && <p id="profile-rename-error" role="alert">{t(`username.errors.${renameError}`)}</p>}
+                  <div>
+                    <button disabled={renamePending} type="submit">{renamePending ? t("username.saving") : t("username.save")}</button>
+                    <button disabled={renamePending} onClick={() => {
+                      setRenaming(false);
+                      setRenameError(null);
+                      setRenameValue(profile.displayName);
+                    }} type="button">{t("username.cancel")}</button>
+                  </div>
+                </form>
+              ) : (
+                <button className="profile-rename-trigger" onClick={() => {
+                  setRenameValue(profile.displayName);
+                  setRenaming(true);
+                }} type="button">{t("username.change")}</button>
+              ))}
+              {!authenticated && (
+                <p className="profile-rename-hint">{t("username.guestHint")}</p>
+              )}
+            </div>
           </div>
 
-          <div className="profile-identity-copy">
-            <p className="profile-overline">{t("profile.player")}</p>
-            <h2 id="player-identity-title">{profile.displayName}</h2>
-            {profile.publicDiscriminator && (
-              <p className="profile-public-discriminator">#{profile.publicDiscriminator}</p>
-            )}
-            {authenticated && !migrationUnresolved && (renaming ? (
-              <form className="profile-rename-form" onSubmit={(event) => void submitRename(event)}>
-                <label htmlFor="profile-username">{t("username.label")}</label>
-                <input
-                  aria-describedby={renameError ? "profile-rename-error" : undefined}
-                  aria-invalid={Boolean(renameError)}
-                  autoComplete="nickname"
-                  disabled={renamePending}
-                  id="profile-username"
-                  maxLength={24}
-                  onChange={(event) => setRenameValue(event.target.value)}
-                  value={renameValue}
-                />
-                {renameError && <p id="profile-rename-error" role="alert">{t(`username.errors.${renameError}`)}</p>}
-                <div>
-                  <button disabled={renamePending} type="submit">{renamePending ? t("username.saving") : t("username.save")}</button>
-                  <button disabled={renamePending} onClick={() => {
-                    setRenaming(false);
-                    setRenameError(null);
-                    setRenameValue(profile.displayName);
-                  }} type="button">{t("username.cancel")}</button>
-                </div>
-              </form>
-            ) : (
-              <button className="profile-rename-trigger" onClick={() => {
-                setRenameValue(profile.displayName);
-                setRenaming(true);
-              }} type="button">{t("username.change")}</button>
-            ))}
-            {!authenticated && (
-              <p className="profile-rename-hint">{t("username.guestHint")}</p>
-            )}
-            <div className="profile-rank">
-              <span>{t("common.level", { level: progression.level })}</span>
-              <span aria-hidden="true">◆</span>
-              <strong>{t(`titles.${progression.titleId}`)}</strong>
+          <div className="profile-career-summary">
+            <div className="profile-career-metric">
+              <p>{t("profile.singleplayerLevel")}</p>
+              <div className="profile-rank">
+                <span>{progression.level}</span>
+                <strong>{t(`titles.${progression.titleId}`)}</strong>
+              </div>
             </div>
-            {profile.multiplayerRating !== null && (
-              <div className="profile-rating" aria-label={t("profile.multiplayerRatingValue", { rating: profile.multiplayerRating })}>
-                <span aria-hidden="true">◆</span>
-                <div>
-                  <small>{t("profile.multiplayerRating")}</small>
+            <div className="profile-career-metric">
+              <p>{t("profile.multiplayerRating")}</p>
+              {profile.multiplayerRating !== null ? (
+                <div className="profile-rating" aria-label={t("profile.multiplayerRatingValue", { rating: profile.multiplayerRating })}>
                   <strong>{profile.multiplayerRating}</strong>
                 </div>
-              </div>
-            )}
-            <p className="profile-joined">{t("profile.joined", { date: profile.joinedLabel })}</p>
+              ) : <span className="profile-rating-unavailable" aria-label={t("profile.ratingUnavailable")}>—</span>}
+            </div>
           </div>
 
           <div className="profile-progression">
@@ -323,6 +327,7 @@ function ProfilePage() {
               {t("common.xpValue", { current: progression.currentLevelXp, required: progression.requiredXp })}
             </p>
           </div>
+          <p className="profile-joined">{t("profile.joined", { date: profile.joinedLabel })}</p>
         </section>
 
         <section
