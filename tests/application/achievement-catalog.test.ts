@@ -39,7 +39,7 @@ describe("achievement catalog", () => {
       winning_streak: 5, rating_climber: 1200, elite_player: 1500,
       wheel_spinner: 100, roulette_master: 1000, roll_collector: 5000,
       triple_crown: 6, triple_collector: 100, full_rights: 25,
-      pawn_commander: 500, knight_specialist: 250, royal_maneuvers: 100,
+      pawn_commander: 500, knight_specialist: 500, royal_maneuvers: 500,
       roulette_legend: 50,
       the_long_march: 75, royal_ascension: 3, last_one_standing: 12,
       wheels_favor: 4, against_all_odds: 3, untouchable: 0,

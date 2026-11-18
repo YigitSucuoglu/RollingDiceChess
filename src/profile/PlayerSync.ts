@@ -23,6 +23,7 @@ export interface MultiplayerStatisticsSnapshot {
 
 export interface RankedPieceCount { readonly pieceType: keyof PieceCounters; readonly count: number }
 export interface GlobalRouletteStatisticsSnapshot {
+  readonly movesByPiece?: Readonly<PieceCounters>;
   readonly mostRolledPiece: keyof PieceCounters | null;
   readonly mostRolledPieceCount: number;
   readonly mostPlayedPiece: keyof PieceCounters | null;
@@ -180,6 +181,7 @@ export class PlayerSyncCoordinator {
   private canonicalMultiplayerRating: number | null = null;
   private canonicalMultiplayerStatistics: MultiplayerStatisticsSnapshot | null = null;
   private canonicalRouletteStatistics: GlobalRouletteStatisticsSnapshot | null = null;
+  private canonicalAchievementSnapshot: CloudProfileSnapshot | null = null;
 
   public constructor(local: PlayerProfileRepository, remote: CloudPlayerSyncPort, storage?: SyncStorage) {
     this.local = local;
@@ -216,6 +218,10 @@ export class PlayerSyncCoordinator {
 
   public getCanonicalRouletteStatistics(): GlobalRouletteStatisticsSnapshot | null {
     return this.canonicalRouletteStatistics;
+  }
+
+  public getCanonicalAchievementSnapshot(): CloudProfileSnapshot | null {
+    return this.canonicalProfileStatus === "ready" ? this.canonicalAchievementSnapshot : null;
   }
 
   public suspendForAccountMigration(): void {
@@ -256,6 +262,7 @@ export class PlayerSyncCoordinator {
     this.canonicalMultiplayerRating = null;
     this.canonicalMultiplayerStatistics = null;
     this.canonicalRouletteStatistics = null;
+    this.canonicalAchievementSnapshot = null;
   }
 
   public async handleAuthentication(session: AuthenticationSession): Promise<void> {
@@ -357,6 +364,7 @@ export class PlayerSyncCoordinator {
     this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
     this.canonicalRouletteStatistics = canonical.rouletteStatistics;
     this.canonicalProfileStatus = "ready";
+    this.canonicalAchievementSnapshot = canonical;
   }
 
   public async flushPending(): Promise<void> {
@@ -412,6 +420,7 @@ export class PlayerSyncCoordinator {
     this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
     this.canonicalRouletteStatistics = canonical.rouletteStatistics;
     this.connected = true;
+    this.canonicalAchievementSnapshot = canonical;
     this.verifiedPlayerId = canonical.playerId;
     this.migrationSuspended = false;
     this.canonicalProfileStatus = "ready";
@@ -421,12 +430,13 @@ export class PlayerSyncCoordinator {
   public async renameCurrentPlayer(displayName: string): Promise<CloudProfileSnapshot> {
     const before = this.local.getProfile();
     const state = this.readState();
+    const context = state.cloudPlayerId ? { generation: this.authGeneration, playerId: state.cloudPlayerId } : null;
     if (!this.accountAuthenticated || !this.connected || this.canonicalProfileStatus !== "ready"
         || !state.cloudPlayerId || state.conflict || this.migrationSuspended) {
       throw new Error("Canonical account profile is unavailable.");
     }
     const canonical = await this.remote.renameCurrentPlayer(displayName);
-    if (canonical.playerId !== before.playerId
+    if (!context || !this.isContextCurrent(context) || canonical.playerId !== before.playerId
         || canonical.profile.publicDiscriminator !== before.publicDiscriminator) {
       throw new Error("Identity changed during username update.");
     }
@@ -434,6 +444,7 @@ export class PlayerSyncCoordinator {
     this.canonicalMultiplayerRating = canonical.multiplayerRating;
     this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
     this.canonicalRouletteStatistics = canonical.rouletteStatistics;
+    this.canonicalAchievementSnapshot = canonical;
     return canonical;
   }
 
@@ -491,6 +502,7 @@ export class PlayerSyncCoordinator {
       this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
       this.canonicalRouletteStatistics = canonical.rouletteStatistics;
       this.recoverCompletions(canonical);
+      this.canonicalAchievementSnapshot = canonical;
       if (this.readState().pending.length > 0) {
         await this.flushPending();
         if (!this.isGenerationCurrent(generation)) return;
@@ -529,6 +541,7 @@ export class PlayerSyncCoordinator {
       this.canonicalMultiplayerStatistics = canonical.multiplayerStatistics;
       this.canonicalRouletteStatistics = canonical.rouletteStatistics;
     }
+    if (canonical) this.canonicalAchievementSnapshot = canonical;
   }
 
   private resolveAuthenticationScope(session: AuthenticationSession): string | undefined {
@@ -547,6 +560,7 @@ export class PlayerSyncCoordinator {
     this.initializing = undefined;
     this.flushing = undefined;
     this.verifiedPlayerId = undefined;
+    this.canonicalAchievementSnapshot = null;
   }
 
   private isGenerationCurrent(generation: number): boolean {

@@ -20,6 +20,7 @@ interface CloudRow {
     totalMultiplayerPlayTimeMs: number; multiplayerKingsCaptured: number;
     multiplayerRouletteRolls: number };
   rouletteStatistics: {
+    movesByPiece?: Partial<Record<keyof PieceCounters, number>>;
     mostRolledPiece: keyof PieceCounters | null; mostRolledPieceCount: number;
     mostPlayedPiece: keyof PieceCounters | null; mostPlayedPieceCount: number;
     threeRightsTurns: number; playerTurnsCompleted: number; threeRightsUsedRate: number;
@@ -58,6 +59,11 @@ function normalizeRoulette(row: CloudRow) {
   });
   return {
     mostRolledPiece: piece(value.mostRolledPiece),
+    movesByPiece: value.movesByPiece && ((): PieceCounters => {
+      const result = createPieceCounters();
+      for (const pieceType of PROFILE_PIECE_ORDER) result[pieceType] = safeCounter(value.movesByPiece?.[pieceType]);
+      return result;
+    })(),
     mostRolledPieceCount: safeCounter(value.mostRolledPieceCount),
     mostPlayedPiece: piece(value.mostPlayedPiece),
     mostPlayedPieceCount: safeCounter(value.mostPlayedPieceCount),

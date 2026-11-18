@@ -65,6 +65,7 @@ export class AchievementReadService {
 
   public constructor(port: AchievementReadPort) { this.port = port; }
   public getState(): AchievementReadState { return this.state; }
+  public getOwner(): string | null { return this.owner; }
   public subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);

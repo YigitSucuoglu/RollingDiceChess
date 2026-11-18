@@ -113,6 +113,7 @@ class E2ECloudPlayerSync implements CloudPlayerSyncPort {
           multiplayerRouletteRolls: 19,
         }, {
           mostRolledPiece: "knight", mostRolledPieceCount: 39,
+          movesByPiece: { pawn: 84, knight: 42, king: 12, queen: 0, bishop: 0, rook: 0 },
           mostPlayedPiece: "pawn", mostPlayedPieceCount: 84,
           threeRightsTurns: 126, playerTurnsCompleted: 155, threeRightsUsedRate: 126 / 155,
           tripleRolls: [

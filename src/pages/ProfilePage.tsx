@@ -10,10 +10,7 @@ import type { AccountMigrationState, ProfileConflictResolution } from "../applic
 import GoogleMark from "../components/GoogleMark/GoogleMark";
 import { UsernameValidationError } from "../application/players/PlayerContracts";
 import { createAchievementReadService } from "../bootstrap/Achievements";
-
-const ACHIEVEMENT_PLACEHOLDERS = [
-  "firstVictory", "hundredGames", "captureHundredKings", "tripleQueenRoll",
-] as const;
+import AchievementCollection from "../components/AchievementCollection/AchievementCollection";
 
 type StatisticsView = "singleplayer" | "multiplayer";
 
@@ -67,6 +64,8 @@ function ProfilePage() {
   const localOnlyAchievements = initialized && session.state.status === "guest" && session.state.persistence === "local";
   const [, setProfileRevision] = useState(0);
   const profile = playerProfileService.getViewModel(language);
+  const achievementSnapshot = achievementOwner && playerProfileService.getCanonicalProfileStatus() === "ready"
+    ? playerProfileService.getCanonicalAchievementSnapshot() : null;
   const [authPending, setAuthPending] = useState(false);
   const [statisticsView, setStatisticsView] = useState<StatisticsView>("singleplayer");
   const [renaming, setRenaming] = useState(false);
@@ -448,15 +447,8 @@ function ProfilePage() {
             <p>{t("profile.futureMilestones")}</p>
             <h2 id="achievements-title">{t("profile.achievements")}</h2>
           </header>
-          <div className="profile-achievements-grid">
-            {ACHIEVEMENT_PLACEHOLDERS.map((achievement) => (
-              <article className="profile-achievement" key={achievement}>
-                <span aria-hidden="true" className="profile-lock">◇</span>
-                <h3>{t(`profile.achievementNames.${achievement}`)}</h3>
-                <p>{t("common.status.comingSoon")}</p>
-              </article>
-            ))}
-          </div>
+          <AchievementCollection language={language} owner={achievementOwner} progressSnapshot={achievementSnapshot}
+            reader={achievementReader} state={achievementState} />
         </section>
 
         <footer className="profile-footer">

@@ -113,7 +113,7 @@ test("Turkish mobile Profile statistics fit without horizontal overflow", async 
 test("missing canonical Multiplayer data does not break the Profile", async ({ page, assertNoErrors }) => {
   await page.goto("/profile");
   await page.getByRole("button", { name: "Multiplayer", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText(/temporarily unavailable/i);
+  await expect(page.locator('[data-statistics-view="multiplayer"]').getByRole("status")).toContainText(/temporarily unavailable/i);
   await expect(page.getByRole("heading", { name: "Player", exact: true })).toBeVisible();
   assertNoErrors();
 });

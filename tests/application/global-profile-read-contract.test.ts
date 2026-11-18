@@ -28,6 +28,7 @@ function payload() {
       totalMultiplayerPlayTimeMs: 0, multiplayerKingsCaptured: 0,
       multiplayerRouletteRolls: 0 },
     rouletteStatistics: { mostRolledPiece: null, mostRolledPieceCount: 0,
+      movesByPiece: { pawn: 0, knight: 0, bishop: 0, rook: 0, queen: 0, king: 0 },
       mostPlayedPiece: null, mostPlayedPieceCount: 0, threeRightsTurns: 0,
       playerTurnsCompleted: 0, threeRightsUsedRate: 0,
       tripleRolls: ["pawn", "knight", "bishop", "rook", "queen", "king"]
@@ -42,6 +43,7 @@ describe("Phase 5D-C global Profile read contract", () => {
     expect(result.rouletteStatistics.mostRolledPieceCount).toBe(0);
     expect(result.rouletteStatistics.mostPlayedPiece).toBeNull();
     expect(result.rouletteStatistics.threeRightsUsedRate).toBe(0);
+    expect(result.rouletteStatistics.movesByPiece?.pawn).toBe(0);
     expect(result.rouletteStatistics.tripleRolls.map((item) => item.pieceType))
       .toEqual(["pawn", "knight", "bishop", "rook", "queen", "king"]);
     expect(result.multiplayerStatistics.totalMultiplayerPlayTimeMs).toBe(0);

@@ -128,7 +128,14 @@
     "multiplayerStats": { "rating": "Rating", "rankedGames": "Ranked Games", "rankedWins": "Ranked Wins", "rankedLosses": "Ranked Losses", "rankedWinRate": "Ranked Win Rate", "currentRankedWinStreak": "Current Ranked Win Streak", "bestRankedWinStreak": "Best Ranked Win Streak", "unrankedGames": "Unranked Games", "totalPlayTime": "Total Multiplayer Play Time", "kingsCaptured": "Multiplayer Kings Captured", "rouletteRolls": "Multiplayer Roulette Rolls" },
     "stats": { "gamesPlayed": "Games Played", "wins": "Wins", "losses": "Losses", "winRate": "Win Rate", "currentWinStreak": "Current Win Streak", "bestWinStreak": "Best Win Streak", "totalPlayTime": "Total Play Time", "kingsCaptured": "Kings Captured", "rouletteRolls": "Roulette Rolls", "mostRolledPiece": "Most Rolled Piece", "mostPlayedPiece": "Most Played Piece", "threeRightsUsed": "Three Rights Used" },
     "rollCount": "{{count}} rolls", "moveCount": "{{count}} moves", "turnCount": "{{current}} / {{total}} turns", "tripleRolls": "Triple Rolls",
-    "futureMilestones": "Future milestones", "achievements": "Achievements", "achievementNames": { "firstVictory": "First Victory", "hundredGames": "100 Games", "captureHundredKings": "Capture 100 Kings", "tripleQueenRoll": "Triple Queen Roll" },
+    "futureMilestones": "Achievement collection", "achievements": "Achievements",
+    "collection": {
+      "filtersLabel": "Achievement categories", "filters": { "all": "All", "singleplayer": "Singleplayer", "ranked": "Ranked", "roulette": "Roulette", "pieceMastery": "Piece Mastery", "challenges": "Challenges" },
+      "category": { "singleplayer-career": "Singleplayer", "singleplayer-progression": "Singleplayer", "ranked-multiplayer": "Ranked", "global-roulette": "Roulette", "global-piece-mastery": "Piece Mastery", "single-match": "Challenge" },
+      "secretChallenge": "Secret Challenge", "locked": "Locked", "unlocked": "Unlocked", "unlockedOn": "Unlocked {{date}}", "progressUnavailable": "Progress unavailable", "progress": "Progress", "recordedProgress": "Recorded progress",
+      "loading": "Loading achievements…", "error": "Achievements could not be loaded.", "catalogMismatch": "Achievements are temporarily unavailable. Please update the app.", "retry": "Retry", "localOnly": "Cloud achievements are unavailable in local-only Guest mode.",
+      "carouselLabel": "Achievement cards", "previous": "Previous achievements", "next": "Next achievements", "position": "{{start}}–{{end}} / {{total}}"
+    },
     "localDataNote": "Offline profile data stays on this device."
   },
   "settings": {

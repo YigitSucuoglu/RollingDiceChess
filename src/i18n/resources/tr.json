@@ -128,7 +128,14 @@
     "multiplayerStats": { "rating": "Puan", "rankedGames": "Dereceli Maçlar", "rankedWins": "Dereceli Galibiyetler", "rankedLosses": "Dereceli Mağlubiyetler", "rankedWinRate": "Dereceli Galibiyet Oranı", "currentRankedWinStreak": "Mevcut Dereceli Galibiyet Serisi", "bestRankedWinStreak": "En İyi Dereceli Galibiyet Serisi", "unrankedGames": "Derecesiz Maçlar", "totalPlayTime": "Toplam Çok Oyunculu Oynama Süresi", "kingsCaptured": "Çok Oyunculuda Ele Geçirilen Şahlar", "rouletteRolls": "Çok Oyunculu Rulet Çevirmeleri" },
     "stats": { "gamesPlayed": "Oynanan Maç", "wins": "Galibiyet", "losses": "Mağlubiyet", "winRate": "Galibiyet Oranı", "currentWinStreak": "Mevcut Galibiyet Serisi", "bestWinStreak": "En İyi Galibiyet Serisi", "totalPlayTime": "Toplam Oyun Süresi", "kingsCaptured": "Yakalanan Şahlar", "rouletteRolls": "Rulet Çevirmeleri", "mostRolledPiece": "En Çok Gelen Taş", "mostPlayedPiece": "En Çok Oynanan Taş", "threeRightsUsed": "Üç Hakkın Kullanımı" },
     "rollCount": "{{count}} geliş", "moveCount": "{{count}} hamle", "turnCount": "{{current}} / {{total}} tur", "tripleRolls": "Üçlü Ruletler",
-    "futureMilestones": "Gelecek hedefler", "achievements": "Başarımlar", "achievementNames": { "firstVictory": "İlk Zafer", "hundredGames": "100 Maç", "captureHundredKings": "100 Şah Yakala", "tripleQueenRoll": "Üçlü Vezir" },
+    "futureMilestones": "Başarım koleksiyonu", "achievements": "Başarımlar",
+    "collection": {
+      "filtersLabel": "Başarım kategorileri", "filters": { "all": "Tümü", "singleplayer": "Tek Oyunculu", "ranked": "Dereceli", "roulette": "Rulet", "pieceMastery": "Taş Ustalığı", "challenges": "Görevler" },
+      "category": { "singleplayer-career": "Tek Oyunculu", "singleplayer-progression": "Tek Oyunculu", "ranked-multiplayer": "Dereceli", "global-roulette": "Rulet", "global-piece-mastery": "Taş Ustalığı", "single-match": "Görev" },
+      "secretChallenge": "Gizli Görev", "locked": "Kilitli", "unlocked": "Açıldı", "unlockedOn": "Açılma tarihi: {{date}}", "progressUnavailable": "İlerleme bilgisi mevcut değil", "progress": "İlerleme", "recordedProgress": "Kaydedilen ilerleme",
+      "loading": "Başarımlar yükleniyor…", "error": "Başarımlar yüklenemedi.", "catalogMismatch": "Başarımlar geçici olarak kullanılamıyor. Lütfen uygulamayı güncelle.", "retry": "Tekrar dene", "localOnly": "Yalnızca yerel Guest modunda bulut başarımları kullanılamaz.",
+      "carouselLabel": "Başarım kartları", "previous": "Önceki başarımlar", "next": "Sonraki başarımlar", "position": "{{start}}–{{end}} / {{total}}"
+    },
     "localDataNote": "Çevrimdışı profil verileri bu cihazda saklanır."
   },
   "settings": {

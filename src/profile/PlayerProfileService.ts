@@ -18,7 +18,7 @@ import {
 import type { PlayerProfileRepository } from "./PlayerProfileRepository";
 import type { AuthenticationSession } from "../application/auth/AuthenticationContracts";
 import { normalizeAccountDisplayName } from "../application/players/PlayerContracts";
-import { PlayerSyncCoordinator, type CanonicalProfileStatus, type CloudPlayerSyncPort, type MultiplayerStatisticsSnapshot } from "./PlayerSync";
+import { PlayerSyncCoordinator, type CanonicalProfileStatus, type CloudPlayerSyncPort, type CloudProfileSnapshot, type MultiplayerStatisticsSnapshot } from "./PlayerSync";
 import {
   calculateLevelProgression,
   createMatchXpProgressionResult,
@@ -182,6 +182,10 @@ export class PlayerProfileService {
 
   public getCanonicalProfileStatus(): CanonicalProfileStatus {
     return this.sync?.getCanonicalProfileStatus() ?? "not-applicable";
+  }
+
+  public getCanonicalAchievementSnapshot(): CloudProfileSnapshot | null {
+    return this.sync?.getCanonicalAchievementSnapshot() ?? null;
   }
 
   public async renameCurrentAccount(requestedName: string): Promise<PlayerProfileViewModel> {

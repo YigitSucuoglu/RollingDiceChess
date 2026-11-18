@@ -35,7 +35,8 @@ describe("ACHIEVEMENTS-01 Phase 3B-2C-1 backfill dry-run", () => {
       .filter((definition) => definition.category !== "single-match")
       .map(({ id, target }) => ({
         id,
-        threshold: id === "roulette_legend" ? 40180 : target,
+        threshold: id === "roulette_legend" ? 40180
+          : id === "knight_specialist" ? 250 : id === "royal_maneuvers" ? 100 : target,
       }));
     const actual = catalogRows();
     expect(actual).toHaveLength(22);
@@ -83,7 +84,7 @@ describe("ACHIEVEMENTS-01 Phase 3B-2C-1 backfill dry-run", () => {
     expect(lowerDryRun).toContain("coalesce(multiplayer.roulette_rolls,0)");
   });
 
-  it("matches every runtime SQL threshold and the level-50 XP boundary", () => {
+  it("preserves the historical dry-run thresholds and level-50 XP boundary", () => {
     const fragments: Readonly<Record<string, string>> = {
       rookie_campaign: "progression.games_played>=10",
       hundred_games: "progression.games_played>=100",
