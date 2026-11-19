@@ -209,6 +209,28 @@ test("late authoritative ranked settlement reaches an already mounted Game Over 
   await expect(page.locator(".game-result-rating")).toContainText("1223");
 });
 
+test("new canonical unlocks appear only after terminal and OK advances to Game Over", async ({ page }) => {
+  await useCloudGuestFixture(page);
+  await page.addInitScript(() => {
+    localStorage.setItem("roulettechess.e2e-multiplayer-match-state", "terminal-after-load");
+    localStorage.setItem("roulettechess.e2e-achievement-fixture.v1", "notification-sequence");
+  });
+  await page.goto("/game/33333333-3333-4333-8333-333333333333");
+  const notification = page.getByRole("dialog", { name: "Achievement Unlocked" });
+  await expect(notification.getByRole("heading", { name: "Ranked Victor" })).toBeVisible();
+  await expect(page.locator(".game-result-rating")).toHaveCount(0);
+  await expect(notification.getByRole("button", { name: "OK" })).toBeVisible();
+  await notification.getByRole("button", { name: "OK" }).click();
+  await expect(notification.getByRole("heading", { name: "Pawn Commander" })).toBeVisible();
+  await expect(page.locator(".game-result-rating")).toHaveCount(0);
+  await notification.getByRole("button", { name: "OK" }).click();
+  await expect(notification).toHaveCount(0);
+  await expect(page.locator(".game-result-rating")).toContainText("1223");
+  await page.reload();
+  await expect(page.locator(".game-result-rating")).toContainText("1223");
+  await expect(notification).toHaveCount(0);
+});
+
 for (const [fixture, reason] of [["terminal-timeout", /ran out of time/i], ["terminal-forfeit", /forfeit/i], ["terminal-disconnect-forfeit", /forfeit/i]] as const) {
   test(`ranked ${fixture} renders authoritative feedback`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" }); await useCloudGuestFixture(page);
