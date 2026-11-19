@@ -11,6 +11,7 @@ import type { PieceType } from "../../types/Chess";
 import { SLOT_MACHINE_ASSETS } from "../../assets/slot-machine";
 import SlotReel from "../SlotReel/SlotReel";
 import GameResultModal from "../GameResultModal/GameResultModal";
+import MatchAchievementNotifications from "../AchievementNotification/MatchAchievementNotifications";
 import MoveHistoryPanel from "../MoveHistory/MoveHistoryPanel";
 import ChessClockPanel from "../ChessClock/ChessClockPanel";
 import type { MatchConfiguration, MatchSession, MatchSnapshot } from "../../domain/contracts/MatchContracts";
@@ -632,8 +633,9 @@ function Board({ onlinePresentation, sessionOverride }: BoardProps) {
         </div>
       )}
 
-      {matchSnapshot.winner && (
-        <GameResultModal
+      <MatchAchievementNotifications session={session} snapshot={matchSnapshot}>
+        {matchSnapshot.winner && (
+          <GameResultModal
           endReason={matchSnapshot.terminationReason ?? matchSnapshot.resultReason ?? "king-captured"}
           onMainMenu={returnToMainMenu}
           onPlayAgain={startNewGame}
@@ -644,8 +646,9 @@ function Board({ onlinePresentation, sessionOverride }: BoardProps) {
             : null}
           winner={matchSnapshot.winner}
           showPlayAgain={!isOnline}
-        />
-      )}
+          />
+        )}
+      </MatchAchievementNotifications>
       {isOnline && matchSnapshot.lifecycle === "completed" && !matchSnapshot.winner && (
         <div className="match-exit-overlay">
           <div aria-modal="true" className="match-exit-dialog" role="dialog">

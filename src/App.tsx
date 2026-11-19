@@ -20,6 +20,9 @@ const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
 const ObservabilityVerificationPage = __OBSERVABILITY_TEST_MODE__
   ? lazy(() => import("./observability/ObservabilityVerificationPage"))
   : null;
+const AchievementAnimationLab = import.meta.env.DEV
+  ? lazy(() => import("./dev/AchievementAnimationLab"))
+  : null;
 
 function ApplicationRoutes() {
   const { initialized, session } = useAuthentication();
@@ -85,6 +88,13 @@ function ApplicationRoutes() {
 }
 
 function App() {
+  if (AchievementAnimationLab && window.location.pathname === "/__dev/achievement-animations") {
+    return (
+      <Suspense fallback={<div aria-label="Loading" className="route-loading" role="status" />}>
+        <AchievementAnimationLab />
+      </Suspense>
+    );
+  }
   return (
     <AuthenticationProvider>
       <ApplicationRoutes />

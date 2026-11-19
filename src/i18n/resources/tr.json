@@ -1,4 +1,18 @@
 {
+  "achievementNotification": {
+    "progress": "İlerleme", "unlocked": "Başarım Kazanıldı", "pending": "Başarım eşitleme bekliyor", "ok": "Tamam",
+    "categories": { "singleplayer-career": "Tek Oyunculu", "singleplayer-progression": "İlerleme", "ranked-multiplayer": "Dereceli", "global-roulette": "Rulet", "global-piece-mastery": "Taş Ustalığı", "single-match": "Meydan Okumalar" }
+  },
+  "achievementLab": {
+    "prototype": "Geliştirme prototipi", "title": "Başarım Animasyonu Laboratuvarı", "intro": "Maç oynamadan veya sunucuya bağlanmadan iki örnek kazanım animasyonunu karşılaştır.",
+    "concept": "Konsept", "concepts": { "progress": "Altın İlerleme Gösterimi", "seal": "Altın Mühür" },
+    "sample": "Örnek başarım", "notificationState": "Bildirim durumu", "confirmed": "Çevrimiçi doğrulandı", "pending": "Çevrimdışı bekliyor", "multiple": "Çoklu başarım dizisi", "play": "Animasyonu Oynat", "replay": "Tekrar Oynat", "reset": "Sıfırla", "ok": "Tamam", "stage": "Başarım animasyonu önizlemesi", "gameOver": "OYUN BİTTİ", "progress": "İlerleme", "unlocked": "Başarım Kazanıldı", "announcement": "Başarım kazanıldı: {{name}}", "mockNotice": "Yalnız geliştirme önizlemesi · Örnek veri · Gerçek başarım verilmez.",
+    "samples": {
+      "ranked": { "title": "Dereceli Galip", "category": "Dereceli", "description": "İlk Dereceli Çok Oyunculu maçını kazan." },
+      "pawn": { "title": "Piyon Komutanı", "category": "Taş Ustalığı", "description": "Tüm modlarda piyonlarla 500 başarılı hamle yap." },
+      "untouchable": { "title": "Dokunulmaz", "category": "Meydan Okumalar", "description": "Tek bir taşını bile kaybetmeden rakip şahı ele geçirerek kazan." }
+    }
+  },
   "common": {
     "actions": { "play": "Oyna", "playAgain": "Tekrar oyna", "mainMenu": "Ana menü", "back": "Geri", "backToHome": "Ana Menüye Dön", "cancel": "İptal", "retry": "Tekrar Dene", "reset": "Sıfırla", "resetProfile": "Profili Sıfırla", "startGame": "Oyunu Başlat", "roll": "ÇEVİR" },
     "colors": { "white": "Beyaz", "black": "Siyah" },

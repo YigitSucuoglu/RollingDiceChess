@@ -1,4 +1,18 @@
 {
+  "achievementNotification": {
+    "progress": "Progress", "unlocked": "Achievement Unlocked", "pending": "Achievement pending sync", "ok": "OK",
+    "categories": { "singleplayer-career": "Singleplayer", "singleplayer-progression": "Progression", "ranked-multiplayer": "Ranked", "global-roulette": "Roulette", "global-piece-mastery": "Piece Mastery", "single-match": "Challenges" }
+  },
+  "achievementLab": {
+    "prototype": "Development prototype", "title": "Achievement Animation Lab", "intro": "Compare two mock unlock moments without playing a match or connecting to a server.",
+    "concept": "Concept", "concepts": { "progress": "Golden Progress Reveal", "seal": "Golden Seal" },
+    "sample": "Sample achievement", "notificationState": "Notification state", "confirmed": "Online confirmed", "pending": "Offline pending", "multiple": "Multiple unlock sequence", "play": "Play Animation", "replay": "Replay", "reset": "Reset", "ok": "OK", "stage": "Achievement animation preview", "gameOver": "GAME OVER", "progress": "Progress", "unlocked": "Achievement Unlocked", "announcement": "Achievement unlocked: {{name}}", "mockNotice": "Development preview only · Sample data · No achievement is awarded.",
+    "samples": {
+      "ranked": { "title": "Ranked Victor", "category": "Ranked", "description": "Win your first Ranked Multiplayer game." },
+      "pawn": { "title": "Pawn Commander", "category": "Piece Mastery", "description": "Complete 500 successful pawn moves across all modes." },
+      "untouchable": { "title": "Untouchable", "category": "Challenges", "description": "Win by king capture without losing a single piece." }
+    }
+  },
   "common": {
     "actions": { "play": "Play", "playAgain": "Play again", "mainMenu": "Main menu", "back": "Back", "backToHome": "Back to Home", "cancel": "Cancel", "retry": "Retry", "reset": "Reset", "resetProfile": "Reset Profile", "startGame": "Start Game", "roll": "ROLL" },
     "colors": { "white": "White", "black": "Black" },

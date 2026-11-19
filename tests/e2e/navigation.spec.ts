@@ -28,6 +28,9 @@ test("critical routes and back navigation render without browser errors", async 
   await page.goto("/unknown-route");
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Roulette");
+  await page.goto("/__dev/achievement-animations");
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("heading", { name: "Achievement Animation Lab" })).toHaveCount(0);
   await page.goto("/__observability-test");
   if (process.env.VITE_OBSERVABILITY_TEST_MODE === "true") {
     await expect(page.getByRole("heading", { name: "OBS-01B live verification" })).toBeVisible();

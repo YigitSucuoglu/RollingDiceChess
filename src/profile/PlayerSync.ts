@@ -385,6 +385,15 @@ export class PlayerSyncCoordinator {
     await this.flushing.promise;
   }
 
+  public async hasSettledCurrentCompletions(): Promise<boolean> {
+    const state = this.readState();
+    if (!state.cloudPlayerId || state.conflict || !this.connected
+        || this.verifiedPlayerId !== state.cloudPlayerId) return false;
+    const context = { generation: this.authGeneration, playerId: state.cloudPlayerId };
+    await this.flushPending();
+    return this.isContextCurrent(context) && this.readState().pending.length === 0;
+  }
+
   public async prepareForAccountMigration(): Promise<boolean> {
     const state = this.readState();
     if (!this.connected || !state.cloudPlayerId || state.conflict) return false;

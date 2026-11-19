@@ -1,0 +1,28 @@
+.golden-reveal { animation: golden-reveal-lifecycle 3.1s both; inset-block-start: max(1rem, env(safe-area-inset-top)); inset-inline-end: max(1rem, env(safe-area-inset-right)); max-width: calc(100vw - 2rem); position: fixed; width: 23rem; z-index: 30; }
+.golden-reveal-manual { animation-name: golden-reveal-hold; }
+.golden-reveal-modal { align-items: center; background: #080706d9; display: flex; inset: 0; justify-content: center; max-width: none; padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left)); width: auto; z-index: 40; }
+.golden-reveal-modal .golden-reveal-card { max-height: 100%; overflow-y: auto; width: min(26rem, 100%); }
+.golden-reveal-embedded { inset: auto; margin: auto; position: relative; z-index: 1; }
+.golden-reveal[data-complete="true"] { animation: none; opacity: 1; transform: none; }
+.golden-reveal-card { background: linear-gradient(145deg, #272016, #12110f 68%); border: 1px solid #bd9050; box-shadow: 0 1.2rem 3rem #0009; color: #eee0c4; overflow: hidden; padding: 1.25rem; position: relative; }
+.golden-reveal-card::after { animation: golden-reveal-flash .45s 1.15s both; background: linear-gradient(110deg, transparent 30%, #f6d69555 50%, transparent 70%); content: ""; inset: 0; opacity: 0; pointer-events: none; position: absolute; transform: translateX(-100%); }
+.golden-reveal-category, .golden-reveal-unlocked { color: #e7be73; font-size: .67rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+.golden-reveal-icon { animation: golden-reveal-pulse .45s 1.15s both; color: #e7be73; display: block; font-size: 2.3rem; line-height: 1; margin: .75rem 0 .5rem; }
+.golden-reveal-card h2 { color: #f0dfbd; font-family: Georgia, serif; font-size: 1.55rem; font-weight: 400; line-height: 1.15; margin: .25rem 0; }
+.golden-reveal-description { color: #c5b9a5; font-size: .78rem; line-height: 1.5; margin: .35rem 0 0; }
+.golden-reveal-progress { margin-top: 1rem; }
+.golden-reveal-progress > div:first-child { color: #b9a586; display: flex; font-size: .68rem; justify-content: space-between; letter-spacing: .08em; text-transform: uppercase; }
+.golden-reveal-progress strong { font-variant-numeric: tabular-nums; }
+.golden-reveal-track { background: #5e492b; height: 4px; margin-top: .5rem; overflow: hidden; }
+.golden-reveal-track span { animation: golden-reveal-fill .8s .35s ease-out both; background: #ebc677; display: block; height: 100%; transform-origin: left; width: 100%; }
+.golden-reveal-unlocked { margin: .6rem 0 0; }
+.golden-reveal-ok { animation: golden-reveal-ok-in .4s ease-out both; background: linear-gradient(135deg, #d4a759, #9d6c28); border: 1px solid #edcb82; color: #1b1308; cursor: pointer; display: block; font: inherit; font-size: .76rem; font-weight: 800; margin: 1rem 0 0 auto; min-height: 2.75rem; min-width: 5.5rem; }
+.golden-reveal-ok:focus-visible { outline: 3px solid #fff1c6; outline-offset: 3px; }
+@keyframes golden-reveal-lifecycle { 0% { opacity: 0; transform: translateY(24px) scale(.97); } 11% { opacity: 1; transform: translateY(0) scale(1); } 83% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-12px) scale(1); } }
+@keyframes golden-reveal-hold { 0% { opacity: 0; transform: translateY(24px) scale(.97); } 11%, 100% { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes golden-reveal-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes golden-reveal-flash { 0% { opacity: 0; transform: translateX(-100%); } 30% { opacity: .6; } 100% { opacity: 0; transform: translateX(100%); } }
+@keyframes golden-reveal-pulse { 50% { transform: scale(1.1); } }
+@keyframes golden-reveal-ok-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 560px) { .golden-reveal { inset-inline-start: 1rem; width: auto; } .golden-reveal-modal { inset-inline-start: 0; } .golden-reveal-embedded { inset-inline-start: auto; width: min(23rem, 100%); } }
+@media (prefers-reduced-motion: reduce) { .golden-reveal, .golden-reveal-card::after, .golden-reveal-icon, .golden-reveal-track span, .golden-reveal-ok { animation: none; } .golden-reveal { opacity: 1; transform: none; } .golden-reveal-track span { transform: scaleX(1); } }

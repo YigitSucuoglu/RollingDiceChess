@@ -213,6 +213,10 @@ export class PlayerProfileService {
     return this.sync?.prepareForAccountMigration() ?? false;
   }
 
+  public async hasSettledCurrentCompletions(): Promise<boolean> {
+    return this.sync?.hasSettledCurrentCompletions() ?? false;
+  }
+
   public suspendForAccountMigration(): void {
     this.sync?.suspendForAccountMigration();
   }
